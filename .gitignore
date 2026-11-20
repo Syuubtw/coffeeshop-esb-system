@@ -39,3 +39,7 @@ backend-laravel/storage/logs/*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Private documents
+*.docx
+DAFTAR_AKUN_DASHBOARD.md
