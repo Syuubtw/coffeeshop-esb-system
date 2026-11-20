@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('chart_of_accounts', function (Blueprint $table) {
+            $table->id();
+            $table->string('account_code', 20)->unique();
+            $table->string('account_name', 150);
+            $table->enum('type', ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE']);
+            $table->string('category', 50); // CASH_BANK, INVENTORY, CURRENT_LIABILITY, SALES, COGS, OPERATING_EXPENSE
+            $table->enum('normal_balance', ['DEBIT', 'CREDIT']);
+            $table->decimal('initial_balance', 15, 2)->default(0);
+            $table->decimal('current_balance', 15, 2)->default(0);
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('chart_of_accounts');
+    }
+};

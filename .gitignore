@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+**/node_modules/
+vendor/
+**/vendor/
+
+# Environment files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Build & Cache
+dist/
+**/dist/
+dist-ssr/
+**/dist-ssr/
+backend-laravel/public/build
+backend-laravel/public/hot
+backend-laravel/public/storage
+backend-laravel/storage/*.key
+backend-laravel/storage/framework/cache/*
+backend-laravel/storage/framework/sessions/*
+backend-laravel/storage/framework/views/*
+backend-laravel/storage/logs/*
+!backend-laravel/storage/framework/cache/.gitignore
+!backend-laravel/storage/framework/sessions/.gitignore
+!backend-laravel/storage/framework/views/.gitignore
+!backend-laravel/storage/logs/.gitignore
+
+# Logs
+*.log
+**/*.log
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
