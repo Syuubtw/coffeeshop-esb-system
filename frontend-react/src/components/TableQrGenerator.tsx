@@ -73,39 +73,13 @@ export const TableQrGenerator: React.FC = () => {
     fetchTables();
   }, []);
 
-  const getTableArea = (tableNumber: string): 'INDOOR' | 'VIP' | 'BAR' | 'OUTDOOR' => {
-    const num = tableNumber.toUpperCase();
-    if (num.includes('VIP')) return 'VIP';
-    if (num.includes('BAR')) return 'BAR';
-    if (num.includes('OUT')) return 'OUTDOOR';
-    return 'INDOOR';
-  };
+  // Semua meja = Area Indoor (hanya 5 meja: Meja 01–05)
+  const getTableArea = (_tableNumber: string): 'INDOOR' => 'INDOOR';
 
-  const getAreaBadgeColor = (area: 'INDOOR' | 'VIP' | 'BAR' | 'OUTDOOR') => {
-    switch (area) {
-      case 'VIP':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'BAR':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'OUTDOOR':
-        return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      default:
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-    }
-  };
+  const getAreaBadgeColor = (_area: 'INDOOR') =>
+    'bg-amber-100 text-amber-800 border-amber-200';
 
-  const getAreaLabel = (area: 'INDOOR' | 'VIP' | 'BAR' | 'OUTDOOR') => {
-    switch (area) {
-      case 'VIP':
-        return 'Ruang VIP';
-      case 'BAR':
-        return 'Meja Bar';
-      case 'OUTDOOR':
-        return 'Area Outdoor';
-      default:
-        return 'Area Indoor';
-    }
-  };
+  const getAreaLabel = (_area: 'INDOOR') => 'Area Indoor';
 
   const filteredTables = tables.filter((t) => {
     if (search.trim()) {
@@ -358,15 +332,7 @@ export const TableQrGenerator: React.FC = () => {
               >
                 {/* Visual Top Accent Bar */}
                 <div
-                  className={`h-2 w-full ${
-                    tableArea === 'VIP'
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500'
-                      : tableArea === 'BAR'
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
-                      : tableArea === 'OUTDOOR'
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                      : 'bg-gradient-to-r from-amber-500 to-amber-600'
-                  }`}
+                  className={`h-2 w-full bg-gradient-to-r from-amber-500 to-amber-600`}
                 />
 
                 {/* Card Top Information */}

@@ -259,7 +259,9 @@ export const CashierPos: React.FC = () => {
     const chosenPayment = paymentType === 'QRIS' ? 'QRIS' : 'CASH';
 
     const payload = {
-      dining_table_id: orderType === 'DINE_IN' ? 1 : null,
+      dining_table_id: orderType === 'DINE_IN'
+        ? parseInt(selectedTable.replace('TB-0', ''), 10) || 1
+        : null,
       order_type: orderType,
       customer_name: customerName || 'Pelanggan Kasir',
       payment_method: chosenPayment,
