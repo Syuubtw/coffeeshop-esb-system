@@ -26,9 +26,12 @@
   <!-- Title Banner -->
   <rect x="40" y="25" width="1620" height="70" rx="12" fill="#1E293B" filter="url(#shadow)"/>
   <text x="70" y="68" fill="#F8FAFC" font-size="24" font-weight="bold">STRUKTUR BASIS DATA RELASIONAL (PHYSICAL DATA MODEL)</text>
-  <text x="1330" y="67" fill="#38BDF8" font-size="14" font-weight="600">Sistem Pemesanan CoffeeShop • MySQL 8.0</text>
+  <text x="1310" y="67" fill="#38BDF8" font-size="14" font-weight="600">Sistem Pemesanan CoffeeShop &#8226; MySQL 8.0</text>
 
-  <!-- Group 1: Modul Pemesanan &amp; Meja (Blue) -->
+  <!-- ========================================== -->
+  <!-- GROUP 1: MODUL PEMESANAN & MEJA (Blue)     -->
+  <!-- ========================================== -->
+
   <!-- dining_tables -->
   <g transform="translate(60, 130)" filter="url(#shadow)">
     <rect width="250" height="190" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
@@ -38,246 +41,299 @@
     <text x="15" y="80" fill="#E2E8F0" font-size="12">table_number</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(20)</text>
     <text x="15" y="102" fill="#E2E8F0" font-size="12">qr_token</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(64)</text>
     <text x="15" y="124" fill="#E2E8F0" font-size="12">capacity</text><text x="140" y="124" fill="#94A3B8" font-size="12">integer</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">status</text><text x="140" y="146" fill="#94A3B8" font-size="12">varchar(20)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">created_at</text><text x="140" y="168" fill="#94A3B8" font-size="12">timestamp</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">status</text><text x="140" y="146" fill="#94A3B8" font-size="12">enum(available..)</text>
+    <text x="15" y="168" fill="#64748B" font-size="11">timestamps</text>
   </g>
 
   <!-- orders -->
-  <g transform="translate(370, 130)" filter="url(#shadow)">
-    <rect width="290" height="340" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
-    <rect width="290" height="36" rx="8" fill="url(#hdr-blue)"/>
+  <g transform="translate(60, 360)" filter="url(#shadow)">
+    <rect width="250" height="290" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-blue)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">orders</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="85" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#E2E8F0" font-size="12">order_number</text><text x="160" y="80" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="102" fill="#38BDF8" font-size="12" font-weight="bold">FK dining_table_id</text><text x="160" y="102" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="124" fill="#38BDF8" font-size="12" font-weight="bold">FK cashier_shift_id</text><text x="160" y="124" fill="#94A3B8" font-size="12">bigint (null)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">customer_name</text><text x="160" y="146" fill="#94A3B8" font-size="12">varchar(100)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">order_source</text><text x="160" y="168" fill="#94A3B8" font-size="12">enum(qr,pos)</text>
-    <text x="15" y="190" fill="#E2E8F0" font-size="12">status</text><text x="160" y="190" fill="#94A3B8" font-size="12">varchar(20)</text>
-    <text x="15" y="212" fill="#E2E8F0" font-size="12">payment_status</text><text x="160" y="212" fill="#94A3B8" font-size="12">varchar(20)</text>
-    <text x="15" y="234" fill="#E2E8F0" font-size="12">payment_method</text><text x="160" y="234" fill="#94A3B8" font-size="12">varchar(30)</text>
-    <text x="15" y="256" fill="#E2E8F0" font-size="12">subtotal</text><text x="160" y="256" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="278" fill="#E2E8F0" font-size="12">tax_amount</text><text x="160" y="278" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="300" fill="#E2E8F0" font-size="12">total_amount</text><text x="160" y="300" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="322" fill="#E2E8F0" font-size="12">created_at</text><text x="160" y="322" fill="#94A3B8" font-size="12">timestamp</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK dining_table_id</text><text x="160" y="80" fill="#94A3B8" font-size="12">bigint (null)</text>
+    <text x="15" y="102" fill="#60A5FA" font-size="12" font-weight="bold">FK cashier_shift_id</text><text x="160" y="102" fill="#94A3B8" font-size="12">bigint (null)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">order_number</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">customer_name</text><text x="140" y="146" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">subtotal</text><text x="140" y="168" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="190" fill="#E2E8F0" font-size="12">tax_amount (PB1)</text><text x="140" y="190" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="212" fill="#E2E8F0" font-size="12">grand_total</text><text x="140" y="212" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="234" fill="#E2E8F0" font-size="12">status</text><text x="140" y="234" fill="#94A3B8" font-size="12">enum(pending..)</text>
+    <text x="15" y="256" fill="#E2E8F0" font-size="12">payment_status</text><text x="140" y="256" fill="#94A3B8" font-size="12">enum(unpaid..)</text>
+    <text x="15" y="278" fill="#64748B" font-size="11">payment_method, timestamps</text>
   </g>
 
   <!-- order_items -->
-  <g transform="translate(720, 130)" filter="url(#shadow)">
-    <rect width="270" height="235" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
-    <rect width="270" height="36" rx="8" fill="url(#hdr-blue)"/>
+  <g transform="translate(60, 690)" filter="url(#shadow)">
+    <rect width="250" height="210" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-blue)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">order_items</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK order_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#38BDF8" font-size="12" font-weight="bold">FK product_id</text><text x="140" y="102" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">qty</text><text x="140" y="124" fill="#94A3B8" font-size="12">integer</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK order_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#60A5FA" font-size="12" font-weight="bold">FK product_id</text><text x="140" y="102" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">quantity</text><text x="140" y="124" fill="#94A3B8" font-size="12">integer</text>
     <text x="15" y="146" fill="#E2E8F0" font-size="12">unit_price</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">unit_cogs</text><text x="140" y="168" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="190" fill="#E2E8F0" font-size="12">subtotal</text><text x="140" y="190" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="212" fill="#E2E8F0" font-size="12">notes</text><text x="140" y="212" fill="#94A3B8" font-size="12">varchar(255)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">subtotal</text><text x="140" y="168" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="190" fill="#E2E8F0" font-size="12">notes</text><text x="140" y="190" fill="#94A3B8" font-size="12">text (null)</text>
   </g>
 
   <!-- order_item_modifiers -->
-  <g transform="translate(720, 395)" filter="url(#shadow)">
-    <rect width="270" height="170" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
-    <rect width="270" height="36" rx="8" fill="url(#hdr-blue)"/>
+  <g transform="translate(60, 940)" filter="url(#shadow)">
+    <rect width="250" height="180" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-blue)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">order_item_modifiers</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK order_item_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#38BDF8" font-size="12" font-weight="bold">FK modifier_id</text><text x="140" y="102" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK order_item_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#60A5FA" font-size="12" font-weight="bold">FK modifier_id</text><text x="140" y="102" fill="#94A3B8" font-size="12">bigint</text>
     <text x="15" y="124" fill="#E2E8F0" font-size="12">modifier_name</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(100)</text>
     <text x="15" y="146" fill="#E2E8F0" font-size="12">additional_price</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="168" fill="#64748B" font-size="11">timestamps</text>
   </g>
 
-  <!-- Group 2: Modul Menu, Varian &amp; Resep (Emerald) -->
+
+  <!-- ========================================== -->
+  <!-- GROUP 2: MODUL MENU & RESEP (Emerald)      -->
+  <!-- ========================================== -->
+
   <!-- categories -->
-  <g transform="translate(1050, 130)" filter="url(#shadow)">
-    <rect width="260" height="150" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
-    <rect width="260" height="36" rx="8" fill="url(#hdr-emerald)"/>
+  <g transform="translate(470, 130)" filter="url(#shadow)">
+    <rect width="250" height="150" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-emerald)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">categories</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="130" y="80" fill="#94A3B8" font-size="12">varchar(100)</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">slug</text><text x="130" y="102" fill="#94A3B8" font-size="12">varchar(100)</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">sort_order</text><text x="130" y="124" fill="#94A3B8" font-size="12">integer</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">slug</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(120)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">sort_order</text><text x="140" y="124" fill="#94A3B8" font-size="12">integer</text>
   </g>
 
   <!-- products -->
-  <g transform="translate(1050, 310)" filter="url(#shadow)">
-    <rect width="260" height="210" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
-    <rect width="260" height="36" rx="8" fill="url(#hdr-emerald)"/>
+  <g transform="translate(470, 320)" filter="url(#shadow)">
+    <rect width="250" height="230" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-emerald)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">products</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK category_id</text><text x="135" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">name</text><text x="135" y="102" fill="#94A3B8" font-size="12">varchar(150)</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">sku</text><text x="135" y="124" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">base_price</text><text x="135" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">is_active</text><text x="135" y="168" fill="#94A3B8" font-size="12">boolean</text>
-    <text x="15" y="190" fill="#E2E8F0" font-size="12">image_url</text><text x="135" y="190" fill="#94A3B8" font-size="12">varchar(255)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK category_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">name</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(150)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">sku</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">base_price</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">is_active</text><text x="140" y="168" fill="#94A3B8" font-size="12">boolean</text>
+    <text x="15" y="190" fill="#E2E8F0" font-size="12">image_url</text><text x="140" y="190" fill="#94A3B8" font-size="12">varchar(255)</text>
+    <text x="15" y="212" fill="#64748B" font-size="11">timestamps</text>
   </g>
 
   <!-- recipes -->
-  <g transform="translate(1360, 310)" filter="url(#shadow)">
-    <rect width="280" height="170" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
-    <rect width="280" height="36" rx="8" fill="url(#hdr-emerald)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">recipes (Resep Menu)</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK product_id</text><text x="160" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#38BDF8" font-size="12" font-weight="bold">FK raw_material_id</text><text x="160" y="102" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">qty_needed</text><text x="160" y="124" fill="#94A3B8" font-size="12">decimal(10,3)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">created_at</text><text x="160" y="146" fill="#94A3B8" font-size="12">timestamp</text>
+  <g transform="translate(470, 590)" filter="url(#shadow)">
+    <rect width="250" height="190" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-emerald)"/>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">recipes (Formula Resep)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK product_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#60A5FA" font-size="12" font-weight="bold">FK raw_material_id</text><text x="150" y="102" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">quantity_needed</text><text x="140" y="124" fill="#94A3B8" font-size="12">decimal(10,2)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">unit</text><text x="140" y="146" fill="#94A3B8" font-size="12">varchar(20)</text>
+    <text x="15" y="168" fill="#64748B" font-size="11">timestamps</text>
   </g>
 
-  <!-- modifiers &amp; modifier_groups -->
-  <g transform="translate(1050, 550)" filter="url(#shadow)">
-    <rect width="260" height="150" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
-    <rect width="260" height="36" rx="8" fill="url(#hdr-emerald)"/>
+  <!-- modifiers -->
+  <g transform="translate(470, 820)" filter="url(#shadow)">
+    <rect width="250" height="170" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="250" height="36" rx="8" fill="url(#hdr-emerald)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">modifiers</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK modifier_group_id</text><text x="160" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">name</text><text x="160" y="102" fill="#94A3B8" font-size="12">varchar(100)</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">additional_price</text><text x="160" y="124" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK modifier_group_id</text><text x="160" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">name</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">additional_price</text><text x="140" y="124" fill="#94A3B8" font-size="12">decimal(10,2)</text>
+    <text x="15" y="146" fill="#64748B" font-size="11">timestamps</text>
   </g>
 
-  <!-- Group 3: Modul Bahan Baku, Gudang &amp; Pengadaan (Amber) -->
+
+  <!-- ========================================== -->
+  <!-- GROUP 3: MODUL INVENTORI & GUDANG (Amber)  -->
+  <!-- ========================================== -->
+
   <!-- raw_materials -->
-  <g transform="translate(1360, 520)" filter="url(#shadow)">
-    <rect width="280" height="210" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
-    <rect width="280" height="36" rx="8" fill="url(#hdr-amber)"/>
+  <g transform="translate(880, 130)" filter="url(#shadow)">
+    <rect width="260" height="230" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
+    <rect width="260" height="36" rx="8" fill="url(#hdr-amber)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">raw_materials</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="150" y="80" fill="#94A3B8" font-size="12">varchar(150)</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">sku</text><text x="150" y="102" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">unit</text><text x="150" y="124" fill="#94A3B8" font-size="12">varchar(20)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">current_stock</text><text x="150" y="146" fill="#94A3B8" font-size="12">decimal(12,3)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">min_stock_alert</text><text x="150" y="168" fill="#94A3B8" font-size="12">decimal(12,3)</text>
-    <text x="15" y="190" fill="#E2E8F0" font-size="12">cost_per_unit</text><text x="150" y="190" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(150)</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">sku</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">unit</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(20)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">current_stock</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">min_stock_alert</text><text x="140" y="168" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="190" fill="#E2E8F0" font-size="12">unit_cost</text><text x="140" y="190" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="212" fill="#64748B" font-size="11">timestamps</text>
   </g>
 
   <!-- stock_movements -->
-  <g transform="translate(1360, 760)" filter="url(#shadow)">
-    <rect width="280" height="190" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
-    <rect width="280" height="36" rx="8" fill="url(#hdr-amber)"/>
+  <g transform="translate(880, 400)" filter="url(#shadow)">
+    <rect width="260" height="210" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
+    <rect width="260" height="36" rx="8" fill="url(#hdr-amber)"/>
     <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">stock_movements (Mutasi)</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK raw_material_id</text><text x="160" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">type</text><text x="160" y="102" fill="#94A3B8" font-size="12">enum(in,out,waste)</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">qty</text><text x="160" y="124" fill="#94A3B8" font-size="12">decimal(12,3)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">balance_after</text><text x="160" y="146" fill="#94A3B8" font-size="12">decimal(12,3)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">reference_type</text><text x="160" y="168" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK raw_material_id</text><text x="150" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">type</text><text x="140" y="102" fill="#94A3B8" font-size="12">enum(in,out..)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">quantity</text><text x="140" y="124" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">balance_after</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">reference_type</text><text x="140" y="168" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="190" fill="#64748B" font-size="11">reference_id, timestamps</text>
   </g>
 
-  <!-- suppliers &amp; purchase_orders -->
-  <g transform="translate(1050, 730)" filter="url(#shadow)">
+  <!-- purchase_orders -->
+  <g transform="translate(880, 650)" filter="url(#shadow)">
+    <rect width="260" height="210" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
+    <rect width="260" height="36" rx="8" fill="url(#hdr-amber)"/>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">purchase_orders (PO)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK supplier_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint (null)</text>
+    <text x="15" y="102" fill="#60A5FA" font-size="12" font-weight="bold">FK requested_by</text><text x="140" y="102" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">po_number</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">total_amount</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">status</text><text x="140" y="168" fill="#94A3B8" font-size="12">enum(pending..)</text>
+    <text x="15" y="190" fill="#64748B" font-size="11">order_date, timestamps</text>
+  </g>
+
+  <!-- suppliers -->
+  <g transform="translate(880, 900)" filter="url(#shadow)">
     <rect width="260" height="170" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
     <rect width="260" height="36" rx="8" fill="url(#hdr-amber)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">purchase_orders</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#E2E8F0" font-size="12">po_number</text><text x="150" y="80" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="102" fill="#38BDF8" font-size="12" font-weight="bold">FK supplier_id</text><text x="150" y="102" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">total_cost</text><text x="150" y="124" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">status</text><text x="150" y="146" fill="#94A3B8" font-size="12">varchar(20)</text>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">suppliers</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(150)</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">category</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">contact_person</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="146" fill="#64748B" font-size="11">phone, lead_time_days</text>
   </g>
 
-  <!-- Group 4: Modul Kasir Shift, Karyawan &amp; Akuntansi (Purple) -->
+
+  <!-- ========================================== -->
+  <!-- GROUP 4: MODUL SDM, KASIR & AUDIT (Purple) -->
+  <!-- ========================================== -->
+
   <!-- cashier_shifts -->
-  <g transform="translate(60, 360)" filter="url(#shadow)">
-    <rect width="250" height="190" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
-    <rect width="250" height="36" rx="8" fill="url(#hdr-purple)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">cashier_shifts</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK user_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">opened_at</text><text x="140" y="102" fill="#94A3B8" font-size="12">timestamp</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">starting_cash</text><text x="140" y="124" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">cash_sales</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">difference</text><text x="140" y="168" fill="#94A3B8" font-size="12">decimal(12,2)</text>
+  <g transform="translate(1290, 130)" filter="url(#shadow)">
+    <rect width="270" height="230" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="270" height="36" rx="8" fill="url(#hdr-purple)"/>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">cashier_shifts (Shift Kasir)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK user_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">opened_at / closed_at</text><text x="160" y="102" fill="#94A3B8" font-size="12">timestamp</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">starting_cash (Modal)</text><text x="160" y="124" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">cash_sales (Sistem)</text><text x="160" y="146" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="168" fill="#E2E8F0" font-size="12">actual_cash (Fisik)</text><text x="160" y="168" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="190" fill="#E2E8F0" font-size="12">difference (Selisih)</text><text x="160" y="190" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="212" fill="#64748B" font-size="11">notes, status, timestamps</text>
   </g>
 
   <!-- users -->
-  <g transform="translate(60, 590)" filter="url(#shadow)">
-    <rect width="250" height="150" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
-    <rect width="250" height="36" rx="8" fill="url(#hdr-purple)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">users</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(255)</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">email</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(255)</text>
+  <g transform="translate(1290, 390)" filter="url(#shadow)">
+    <rect width="270" height="170" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="270" height="36" rx="8" fill="url(#hdr-purple)"/>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">users (Akun Pengguna)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#E2E8F0" font-size="12">name</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">email</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(150)</text>
     <text x="15" y="124" fill="#E2E8F0" font-size="12">password</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(255)</text>
+    <text x="15" y="146" fill="#64748B" font-size="11">remember_token, timestamps</text>
   </g>
 
   <!-- employees -->
-  <g transform="translate(60, 770)" filter="url(#shadow)">
-    <rect width="250" height="190" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
-    <rect width="250" height="36" rx="8" fill="url(#hdr-purple)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">employees</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK user_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">employee_code</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(20)</text>
+  <g transform="translate(1290, 590)" filter="url(#shadow)">
+    <rect width="270" height="180" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="270" height="36" rx="8" fill="url(#hdr-purple)"/>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">employees (Data Staf)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK user_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">employee_code</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(30)</text>
     <text x="15" y="124" fill="#E2E8F0" font-size="12">position</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">base_salary</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(12,2)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">qr_token</text><text x="140" y="168" fill="#94A3B8" font-size="12">varchar(64)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">device_id (Lock)</text><text x="140" y="146" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="168" fill="#64748B" font-size="11">base_salary, qr_token</text>
   </g>
 
   <!-- attendances -->
-  <g transform="translate(370, 770)" filter="url(#shadow)">
-    <rect width="290" height="190" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
-    <rect width="290" height="36" rx="8" fill="url(#hdr-purple)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">attendances (Presensi)</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#38BDF8" font-size="12" font-weight="bold">FK employee_id</text><text x="160" y="80" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">clock_in</text><text x="160" y="102" fill="#94A3B8" font-size="12">timestamp</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">clock_out</text><text x="160" y="124" fill="#94A3B8" font-size="12">timestamp</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">late_minutes</text><text x="160" y="146" fill="#94A3B8" font-size="12">integer</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">status</text><text x="160" y="168" fill="#94A3B8" font-size="12">varchar(20)</text>
-  </g>
-
-  <!-- journal_entries -->
-  <g transform="translate(720, 770)" filter="url(#shadow)">
-    <rect width="270" height="190" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+  <g transform="translate(1290, 800)" filter="url(#shadow)">
+    <rect width="270" height="170" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
     <rect width="270" height="36" rx="8" fill="url(#hdr-purple)"/>
-    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">journal_entries (Jurnal)</text>
-    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="80" y="58" fill="#94A3B8" font-size="12">bigint</text>
-    <text x="15" y="80" fill="#E2E8F0" font-size="12">entry_number</text><text x="140" y="80" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="102" fill="#E2E8F0" font-size="12">entry_date</text><text x="140" y="102" fill="#94A3B8" font-size="12">date</text>
-    <text x="15" y="124" fill="#E2E8F0" font-size="12">reference_type</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(50)</text>
-    <text x="15" y="146" fill="#E2E8F0" font-size="12">total_debit</text><text x="140" y="146" fill="#94A3B8" font-size="12">decimal(14,2)</text>
-    <text x="15" y="168" fill="#E2E8F0" font-size="12">total_credit</text><text x="140" y="168" fill="#94A3B8" font-size="12">decimal(14,2)</text>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">attendances (Presensi)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK employee_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">clock_in / clock_out</text><text x="150" y="102" fill="#94A3B8" font-size="12">timestamp</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">late_minutes</text><text x="140" y="124" fill="#94A3B8" font-size="12">integer</text>
+    <text x="15" y="146" fill="#64748B" font-size="11">location_lat, location_lng</text>
   </g>
 
-  <!-- Relational Lines with Crow Foot Markers -->
-  <!-- dining_tables (PK) -> orders (FK) -->
-  <path d="M 310 220 L 370 220" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- cashier_shifts (PK) -> orders (FK) -->
-  <path d="M 310 430 L 340 430 L 340 260 L 370 260" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- orders (PK) -> order_items (FK) -->
-  <path d="M 660 210 L 720 210" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- order_items (PK) -> order_item_modifiers (FK) -->
-  <path d="M 855 365 L 855 395" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- categories (PK) -> products (FK) -->
-  <path d="M 1180 280 L 1180 310" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- products (PK) -> order_items (FK) -->
-  <path d="M 1050 380 L 990 230" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- products (PK) -> recipes (FK) -->
-  <path d="M 1310 390 L 1360 390" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- raw_materials (PK) -> recipes (FK) -->
-  <path d="M 1500 520 L 1500 480" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- raw_materials (PK) -> stock_movements (FK) -->
-  <path d="M 1500 730 L 1500 760" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- modifiers (PK) -> order_item_modifiers (FK) -->
-  <path d="M 1050 620 L 990 480" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- users (PK) -> employees (FK) -->
-  <path d="M 185 740 L 185 770" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#crow)"/>
-  <!-- employees (PK) -> attendances (FK) -->
-  <path d="M 310 860 L 370 860" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#crow)"/>
+  <!-- audit_logs -->
+  <g transform="translate(1290, 990)" filter="url(#shadow)">
+    <rect width="270" height="180" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="270" height="36" rx="8" fill="url(#hdr-purple)"/>
+    <text x="15" y="24" fill="#FFF" font-size="14" font-weight="bold">audit_logs (Jejak Audit)</text>
+    <text x="15" y="58" fill="#FCD34D" font-size="12" font-weight="bold">PK id</text><text x="75" y="58" fill="#94A3B8" font-size="12">bigint</text>
+    <text x="15" y="80" fill="#60A5FA" font-size="12" font-weight="bold">FK user_id</text><text x="140" y="80" fill="#94A3B8" font-size="12">bigint (null)</text>
+    <text x="15" y="102" fill="#E2E8F0" font-size="12">action</text><text x="140" y="102" fill="#94A3B8" font-size="12">varchar(50)</text>
+    <text x="15" y="124" fill="#E2E8F0" font-size="12">entity_type</text><text x="140" y="124" fill="#94A3B8" font-size="12">varchar(100)</text>
+    <text x="15" y="146" fill="#E2E8F0" font-size="12">description</text><text x="140" y="146" fill="#94A3B8" font-size="12">text</text>
+    <text x="15" y="168" fill="#64748B" font-size="11">ip_address, created_at</text>
+  </g>
 
-  <!-- Legend -->
-  <rect x="60" y="1010" width="1580" height="120" rx="10" fill="#1E293B" stroke="#334155"/>
-  <text x="90" y="1045" fill="#F8FAFC" font-size="16" font-weight="bold">LEGENDA DAN MODUL SISTEM:</text>
-  <rect x="90" y="1065" width="18" height="18" rx="4" fill="#3B82F6"/>
-  <text x="120" y="1079" fill="#E2E8F0" font-size="13">Modul Transaksi &amp; Pemesanan Meja (Pemesanan Mandiri QR &amp; Kasir)</text>
-  <rect x="530" y="1065" width="18" height="18" rx="4" fill="#10B981"/>
-  <text x="560" y="1079" fill="#E2E8F0" font-size="13">Modul Katalog Menu, Opsi Varian &amp; Resep &amp; Komposisi Menu</text>
-  <rect x="1010" y="1065" width="18" height="18" rx="4" fill="#F59E0B"/>
-  <text x="1040" y="1079" fill="#E2E8F0" font-size="13">Modul Inventori Stok Gudang &amp; Pengadaan (Procurement)</text>
-  <rect x="90" y="1098" width="18" height="18" rx="4" fill="#8B5CF6"/>
-  <text x="120" y="1112" fill="#E2E8F0" font-size="13">Modul SDM Karyawan, Presensi, Kasir Shift &amp; Jurnal Akuntansi</text>
-  <text x="1040" y="1112" fill="#38BDF8" font-size="13" font-weight="bold">Relasi Kardinalitas: 1 : Banyak (One-to-Many Crow's Foot Notation)</text>
+
+  <!-- ========================================== -->
+  <!-- RELATIONSHIP CONNECTING PATHS               -->
+  <!-- ========================================== -->
+  <!-- dining_tables (1) -> orders (N) -->
+  <path d="M 180 320 L 180 360" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="190" y="345" fill="#38BDF8" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- orders (1) -> order_items (N) -->
+  <path d="M 180 650 L 180 690" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="190" y="675" fill="#38BDF8" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- order_items (1) -> order_item_modifiers (N) -->
+  <path d="M 180 900 L 180 940" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="190" y="925" fill="#38BDF8" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- categories (1) -> products (N) -->
+  <path d="M 590 280 L 590 320" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="600" y="305" fill="#10B981" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- products (1) -> recipes (N) -->
+  <path d="M 590 550 L 590 590" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="600" y="575" fill="#10B981" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- products (1) -> order_items (N) -->
+  <path d="M 470 435 L 370 435 L 370 760 L 310 760" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="380" y="580" fill="#38BDF8" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- raw_materials (1) -> recipes (N) -->
+  <path d="M 880 240 L 780 240 L 780 680 L 720 680" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="790" y="460" fill="#F59E0B" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- raw_materials (1) -> stock_movements (N) -->
+  <path d="M 1010 360 L 1010 400" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="1020" y="385" fill="#F59E0B" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- suppliers (1) -> purchase_orders (N) -->
+  <path d="M 1010 900 L 1010 860" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="1020" y="885" fill="#F59E0B" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- users (1) -> employees (1) -->
+  <path d="M 1420 560 L 1420 590" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="1430" y="580" fill="#8B5CF6" font-size="11" font-weight="bold">1 : 1</text>
+
+  <!-- employees (1) -> attendances (N) -->
+  <path d="M 1420 770 L 1420 800" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="1430" y="790" fill="#8B5CF6" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- users (1) -> cashier_shifts (N) -->
+  <path d="M 1420 390 L 1420 360" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="1430" y="380" fill="#8B5CF6" font-size="11" font-weight="bold">1 : N</text>
+
+  <!-- cashier_shifts (1) -> orders (N) -->
+  <path d="M 1290 240 L 400 240 L 400 480 L 310 480" stroke="#38BDF8" stroke-width="2" fill="none" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <text x="410" y="340" fill="#38BDF8" font-size="11" font-weight="bold">1 : N (Shift)</text>
+
+  <!-- users (1) -> audit_logs (N) -->
+  <path d="M 1560 480 L 1600 480 L 1600 1080 L 1560 1080" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="1610" y="780" fill="#8B5CF6" font-size="11" font-weight="bold">1 : N</text>
+
 </svg>
