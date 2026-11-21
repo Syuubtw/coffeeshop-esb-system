@@ -24,10 +24,12 @@ import {
   UserCheck,
   UserPlus,
   Pencil,
+  QrCode,
   X
 } from 'lucide-react';
 import api from '../services/api';
 import { exportStyledExcel } from '../utils/exportCsv';
+import { TableQrGenerator } from './TableQrGenerator';
 
 interface RawMaterialStock {
   id: number;
@@ -137,7 +139,7 @@ const getPackagingSpec = (m: RawMaterialStock): string => {
 };
 
 export const ManagerDashboard: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'approvals' | 'menu_bom' | 'asset_valuation' | 'employees' | 'shifts'>('approvals');
+  const [activeSubTab, setActiveSubTab] = useState<'approvals' | 'menu_bom' | 'asset_valuation' | 'employees' | 'shifts' | 'tables'>('approvals');
   const [materials, setMaterials] = useState<RawMaterialStock[]>(FALLBACK_MATERIALS);
   const [searchMaterial, setSearchMaterial] = useState('');
   const [assetFilter, setAssetFilter] = useState<'ALL' | 'LOW' | 'OUT' | 'SAFE'>('ALL');
@@ -755,6 +757,14 @@ export const ManagerDashboard: React.FC = () => {
               {attendanceData && (
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               )}
+            </button>
+            <button
+              onClick={() => setActiveSubTab('tables')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
+                activeSubTab === 'tables' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <QrCode className="w-3.5 h-3.5 text-amber-600" /> Stiker & QR Meja
             </button>
           </div>
 
@@ -1842,6 +1852,11 @@ export const ManagerDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* SUBTAB 5: PUSAT QR CODE & STIKER MEJA PELANGGAN */}
+      {activeSubTab === 'tables' && (
+        <TableQrGenerator />
       )}
 
       {/* MODAL TAMBAH MENU BARU DENGAN RESEP BOM (BACK OFFICE) */}

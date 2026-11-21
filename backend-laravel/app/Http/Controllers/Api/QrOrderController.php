@@ -239,5 +239,66 @@ class QrOrderController extends Controller
             'data' => $order,
         ]);
     }
+
+    /**
+     * Ambil Seluruh Daftar Meja untuk Cetak Stiker QR & Monitoring
+     */
+    public function getDiningTables(Request $request): JsonResponse
+    {
+        $tables = DiningTable::orderBy('id', 'asc')->get()->map(function ($table) {
+            return [
+                'id' => $table->id,
+                'table_number' => $table->table_number,
+                'capacity' => $table->capacity,
+                'status' => $table->status,
+                'qr_token' => $table->qr_token,
+                'order_url' => url('/order/table/' . $table->table_number),
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $tables,
+        ]);
+    }
+
+    /**
+     * Tambah Meja Baru
+     */
+    public function storeDiningTable(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'table_number' => 'required|string|max:20|unique:dining_tables,table_number',
+            'capacity' => 'nullable|integer|min:1|max:50',
+        ]);
+
+        $table = DiningTable::create([
+            'table_number' => strtoupper(trim($validated['table_number'])),
+            'capacity' => $validated['capacity'] ?? 4,
+            'status' => 'AVAILABLE',
+            'qr_token' => Str::uuid()->toString(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Meja {$table->table_number} berhasil ditambahkan.",
+            'data' => $table,
+        ], 201);
+    }
+
+    /**
+     * Hapus Meja
+     */
+    public function deleteDiningTable(int $id): JsonResponse
+    {
+        $table = DiningTable::findOrFail($id);
+        $tableNumber = $table->table_number;
+        $table->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Meja {$tableNumber} berhasil dihapus.",
+        ]);
+    }
 }
 

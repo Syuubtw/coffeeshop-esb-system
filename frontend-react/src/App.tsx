@@ -9,6 +9,7 @@ import { WarehouseDashboard } from './components/WarehouseDashboard';
 import { AttendanceKiosk } from './components/AttendanceKiosk';
 import { OutletQrPoster } from './components/OutletQrPoster';
 import { StaffMobileAttendance } from './components/StaffMobileAttendance';
+import { TableQrGenerator } from './components/TableQrGenerator';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StaffLayout } from './components/StaffLayout';
 
@@ -131,6 +132,19 @@ export function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* QR Meja Pelanggan Studio — Store Manager & Owner */}
+        <Route
+          path="/table-qr"
+          element={
+            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
+              <StaffLayout>
+                <TableQrGenerator />
+              </StaffLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/tables" element={<Navigate to="/table-qr" replace />} />
 
         {/* Default Redirect */}
         <Route path="/" element={<Navigate to="/order/table/TB-01" replace />} />

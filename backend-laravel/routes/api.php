@@ -42,6 +42,9 @@ Route::prefix('qr')->group(function () {
     Route::get('/table/{token}', [QrOrderController::class, 'verifyTable']);
     Route::post('/order', [QrOrderController::class, 'placeOrder']);
     Route::get('/order/{orderNumber}/status', [QrOrderController::class, 'checkStatus']);
+    Route::get('/tables', [QrOrderController::class, 'getDiningTables']);
+    Route::post('/tables', [QrOrderController::class, 'storeDiningTable']);
+    Route::delete('/tables/{id}', [QrOrderController::class, 'deleteDiningTable']);
 });
 
 // ==========================================
