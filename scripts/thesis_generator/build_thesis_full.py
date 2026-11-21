@@ -246,7 +246,11 @@ def table(headers, rows, col_widths=None):
             
     return tbl
 
-def frame_diagram(title, desc_lines):
+def frame_diagram(title, file_source, desc_lines):
+    """
+    Creates a prominent, beautifully styled image placeholder box so the student
+    can immediately see where to insert images and which source file to use.
+    """
     tbl = ET.Element(w("tbl"))
     tblPr = ET.SubElement(tbl, w("tblPr"))
     tblW = ET.SubElement(tblPr, w("tblW"))
@@ -259,9 +263,9 @@ def frame_diagram(title, desc_lines):
     for b_name in ["top", "left", "bottom", "right"]:
         b = ET.SubElement(tblBorders, w(b_name))
         b.set(w("val"), "single")
-        b.set(w("sz"), "6")
+        b.set(w("sz"), "12") # 1.5 pt border
         b.set(w("space"), "0")
-        b.set(w("color"), "7F7F7F")
+        b.set(w("color"), "2B4C7E") # Dark academic blue border
     for b_name in ["insideH", "insideV"]:
         b = ET.SubElement(tblBorders, w(b_name))
         b.set(w("val"), "none")
@@ -278,50 +282,116 @@ def frame_diagram(title, desc_lines):
     tcW.set(w("type"), "dxa")
     shd = ET.SubElement(tcPr, w("shd"))
     shd.set(w("val"), "clear")
-    shd.set(w("fill"), "F9FAFB")
+    shd.set(w("fill"), "F0F4F8") # Soft blue-gray background
     
     tcMar = ET.SubElement(tcPr, w("tcMar"))
     for m in ["top", "bottom"]:
         node = ET.SubElement(tcMar, w(m))
-        node.set(w("w"), "180")
+        node.set(w("w"), "220")
         node.set(w("type"), "dxa")
     for m in ["left", "right"]:
         node = ET.SubElement(tcMar, w(m))
-        node.set(w("w"), "220")
+        node.set(w("w"), "260")
         node.set(w("type"), "dxa")
         
-    p0 = ET.SubElement(tc, w("p"))
-    pPr0 = ET.SubElement(p0, w("pPr"))
-    jc0 = ET.SubElement(pPr0, w("jc"))
-    jc0.set(w("val"), "center")
-    spc0 = ET.SubElement(pPr0, w("spacing"))
-    spc0.set(w("after"), "80")
-    spc0.set(w("line"), "240")
-    r0 = ET.SubElement(p0, w("r"))
-    rPr0 = ET.SubElement(r0, w("rPr"))
-    ET.SubElement(rPr0, w("b"))
-    sz0 = ET.SubElement(rPr0, w("sz"))
-    sz0.set(w("val"), "22")
-    t0 = ET.SubElement(r0, w("t"))
-    t0.text = f"[DIAGRAM PERANCANGAN SISTEM: {title.upper()}]"
+    # 1. Header Badge: [ 📍 PENANDA TEMPAT PENEMPELAN GAMBAR / DIAGRAM ]
+    p_badge = ET.SubElement(tc, w("p"))
+    pPr_b = ET.SubElement(p_badge, w("pPr"))
+    jc_b = ET.SubElement(pPr_b, w("jc"))
+    jc_b.set(w("val"), "center")
+    spc_b = ET.SubElement(pPr_b, w("spacing"))
+    spc_b.set(w("after"), "80")
+    spc_b.set(w("line"), "240")
+    r_b = ET.SubElement(p_badge, w("r"))
+    rPr_b = ET.SubElement(r_b, w("rPr"))
+    ET.SubElement(rPr_b, w("b"))
+    sz_b = ET.SubElement(rPr_b, w("sz"))
+    sz_b.set(w("val"), "22")
+    col_b = ET.SubElement(rPr_b, w("color"))
+    col_b.set(w("val"), "1E3A8A")
+    t_b = ET.SubElement(r_b, w("t"))
+    t_b.text = "📍 [ PENANDA TEMPAT PENEMPELAN GAMBAR / DIAGRAM ]"
     
+    # 2. Judul Gambar
+    p_title = ET.SubElement(tc, w("p"))
+    pPr_t = ET.SubElement(p_title, w("pPr"))
+    jc_t = ET.SubElement(pPr_t, w("jc"))
+    jc_t.set(w("val"), "center")
+    spc_t = ET.SubElement(pPr_t, w("spacing"))
+    spc_t.set(w("after"), "100")
+    spc_t.set(w("line"), "240")
+    r_t = ET.SubElement(p_title, w("r"))
+    rPr_t = ET.SubElement(r_t, w("rPr"))
+    ET.SubElement(rPr_t, w("b"))
+    sz_t = ET.SubElement(rPr_t, w("sz"))
+    sz_t.set(w("val"), "22")
+    t_t = ET.SubElement(r_t, w("t"))
+    t_t.text = title
+    
+    # 3. Kotak Petunjuk Berkas Sumber
+    p_hint = ET.SubElement(tc, w("p"))
+    pPr_h = ET.SubElement(p_hint, w("pPr"))
+    jc_h = ET.SubElement(pPr_h, w("jc"))
+    jc_h.set(w("val"), "left")
+    spc_h = ET.SubElement(pPr_h, w("spacing"))
+    spc_h.set(w("after"), "60")
+    spc_h.set(w("line"), "240")
+    r_h = ET.SubElement(p_hint, w("r"))
+    rPr_h = ET.SubElement(r_h, w("rPr"))
+    ET.SubElement(rPr_h, w("b"))
+    sz_h = ET.SubElement(rPr_h, w("sz"))
+    sz_h.set(w("val"), "20")
+    col_h = ET.SubElement(rPr_h, w("color"))
+    col_h.set(w("val"), "065F46") # Emerald green
+    t_h = ET.SubElement(r_h, w("t"))
+    t_h.text = f"📁 Berkas Sumber Disiapkan: {file_source}"
+    
+    # 4. Petunjuk Praktis Word
+    p_guide = ET.SubElement(tc, w("p"))
+    pPr_g = ET.SubElement(p_guide, w("pPr"))
+    jc_g = ET.SubElement(pPr_g, w("jc"))
+    jc_g.set(w("val"), "left")
+    spc_g = ET.SubElement(pPr_g, w("spacing"))
+    spc_g.set(w("after"), "120")
+    spc_g.set(w("line"), "240")
+    r_g = ET.SubElement(p_guide, w("r"))
+    rPr_g = ET.SubElement(r_g, w("rPr"))
+    ET.SubElement(rPr_g, w("i"))
+    sz_g = ET.SubElement(rPr_g, w("sz"))
+    sz_g.set(w("val"), "18")
+    t_g = ET.SubElement(r_g, w("t"))
+    t_g.text = "👉 Petunjuk Word: Klik pada area kotak ini, pilih menu Insert -> Pictures -> This Device -> pilih berkas di atas, lalu atur format posisi Rata Tengah (Center) dengan lebar sekitar 13 - 15 cm."
+    
+    # 5. Header Rincian
+    p_sub = ET.SubElement(tc, w("p"))
+    pPr_s = ET.SubElement(p_sub, w("pPr"))
+    spc_s = ET.SubElement(pPr_s, w("spacing"))
+    spc_s.set(w("after"), "40")
+    spc_s.set(w("line"), "240")
+    r_s = ET.SubElement(p_sub, w("r"))
+    rPr_s = ET.SubElement(r_s, w("rPr"))
+    ET.SubElement(rPr_s, w("b"))
+    sz_s = ET.SubElement(rPr_s, w("sz"))
+    sz_s.set(w("val"), "19")
+    t_s = ET.SubElement(r_s, w("t"))
+    t_s.text = "Rincian Komponen / Aliran yang Dimuat pada Gambar Ini:"
+    
+    # 6. Rincian Baris Deskripsi
     for line in desc_lines:
         p_line = ET.SubElement(tc, w("p"))
-        pPr = ET.SubElement(p_line, w("pPr"))
-        spc = ET.SubElement(pPr, w("spacing"))
-        spc.set(w("after"), "40")
-        spc.set(w("line"), "240")
-        jc = ET.SubElement(pPr, w("jc"))
-        jc.set(w("val"), "left")
-        r = ET.SubElement(p_line, w("r"))
-        rPr = ET.SubElement(r, w("rPr"))
-        sz = ET.SubElement(rPr, w("sz"))
-        sz.set(w("val"), "18")
-        if line.startswith("•") or line.startswith("-"):
-            ET.SubElement(rPr, w("i"))
-        t = ET.SubElement(r, w("t"))
-        t.text = line
+        pPr_l = ET.SubElement(p_line, w("pPr"))
+        spc_l = ET.SubElement(pPr_l, w("spacing"))
+        spc_l.set(w("after"), "40")
+        spc_l.set(w("line"), "240")
+        jc_l = ET.SubElement(pPr_l, w("jc"))
+        jc_l.set(w("val"), "left")
+        r_l = ET.SubElement(p_line, w("r"))
+        rPr_l = ET.SubElement(r_l, w("rPr"))
+        sz_l = ET.SubElement(rPr_l, w("sz"))
+        sz_l.set(w("val"), "18")
+        t_l = ET.SubElement(r_l, w("t"))
+        t_l.text = line
         
     return tbl
 
-print("Base generator utilities defined.")
+print("build_thesis_full updated with enhanced frame_diagram.")

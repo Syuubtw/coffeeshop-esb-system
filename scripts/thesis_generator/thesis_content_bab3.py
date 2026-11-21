@@ -37,7 +37,7 @@ def get_bab3_elements():
         ["1", "Komputer Pengembang", "Intel Core i7-12700H, RAM 16 GB DDR4, SSD 512 GB NVMe, Layar 15.6\" FHD", "Stasiun kerja utama untuk penulisan kode sumber, kompilasi, dan pengujian lokal"],
         ["2", "Ponsel Pintar Penguji A", "Xiaomi Redmi Note 11, RAM 6 GB, Layar AMOLED 6.43\", Kamera 50 MP, Android 13", "Pengujian pemindaian QR Code meja dan responsivitas web pemesanan pada Android"],
         ["3", "Ponsel Pintar Penguji B", "Apple iPhone 12, RAM 4 GB, Layar Super Retina XDR 6.1\", Kamera 12 MP, iOS 17", "Pengujian pemindaian QR Code kamera natif dan responsivitas Safari pada iOS"],
-        ["4", "Perangkat Jaringan", "Wireless Router TP-Link Archer C6 AC1200 Dual-Band Gigabit Wi-Fi", "Infrastruktur jaringan komunikasi lokal antara klien seluler dan server web local"]
+        ["4", "Perangkat Jaringan", "Wireless Router TP-Link Archer C6 AC1200 Dual-Band Gigabit Wi-Fi", "Infrastruktur jaringan komunikasi lokal antara klien seluler dan server web lokal"]
     ]
     widths_3_1 = [500, 2200, 3600, 3200]
     elems.append(table(headers_3_1, rows_3_1, widths_3_1))
@@ -126,7 +126,7 @@ def get_bab3_elements():
         "• Proses 8: Pesanan muncul di antrean KDS dapur barista berurutan waktu (FIFO) dan kasir menerima notifikasi.",
         "• Titik Selesai (End): Pelanggan menerima nomor nota dan halaman beralih ke status pelacakan pesanan."
     ]
-    elems.append(frame_diagram("Flowchart Alur Pemesanan Mandiri Meja", flowchart_desc))
+    elems.append(frame_diagram("Gambar 3.1 Flowchart Alur Pemesanan Mandiri Meja Menggunakan QR Code", "Diagram Alir Alur Kerja Aplikasi Pemesanan Mandiri Meja", flowchart_desc))
     elems.append(caption("Gambar 3.1 Flowchart Alur Pemesanan Mandiri Meja Menggunakan QR Code", is_table=False))
     
     # 3.4.2 DFD Level 0 (Diagram Konteks)
@@ -142,7 +142,7 @@ def get_bab3_elements():
         "• Entitas Pemilik Toko (Owner): Menerima laporan omzet penjualan riil, rekapitulasi penerimaan pajak restoran PB1 (10%), rata-rata transaksi belanja tamu (AOV), analisis top 5 menu terlaris, jam ramai rush hours, rekonsiliasi kas kasir per shift, dan seluruh log audit staf.",
         "• Entitas Midtrans Payment Gateway: Menerima permintaan pembuatan transaksi QRIS dinamis; mengirimkan notifikasi balik status pelunasan pembayaran nontunai (settlement webhook)."
     ]
-    elems.append(frame_diagram("Diagram Konteks (DFD Level 0) Sistem Pemesanan Coffeeshop", dfd0_desc))
+    elems.append(frame_diagram("Gambar 3.2 Diagram Konteks (DFD Level 0) Sistem Pemesanan Coffeeshop", "public/diagrams/3_dfd_level_0_konteks.svg", dfd0_desc))
     elems.append(caption("Gambar 3.2 Diagram Konteks (DFD Level 0) Sistem Pemesanan Coffeeshop", is_table=False))
     
     # 3.4.3 DFD Level 1
@@ -158,7 +158,7 @@ def get_bab3_elements():
         "• Proses 6.0 (Audit Trail & Rekonsiliasi Kasir): Mencatat seluruh aksi penting staf ke D6 (audit_logs & cashier_shifts) guna rekonsiliasi kas fisik dan deteksi selisih kas kasir.",
         "• Proses 7.0 (Pelaporan Eksekutif Penjualan & Pajak PB1): Mengagregasi data transaksi dari D2 dan D6 untuk disajikan kepada Owner dalam bentuk laporan omzet, pajak restoran PB1 (10%), AOV, dan jam ramai."
     ]
-    elems.append(frame_diagram("DFD Level 1 Dekomposisi Sistem Pemesanan dan Operasional", dfd1_desc))
+    elems.append(frame_diagram("Gambar 3.3 DFD Level 1 Dekomposisi Sistem Pemesanan dan Operasional", "public/diagrams/4_dfd_level_1.svg", dfd1_desc))
     elems.append(caption("Gambar 3.3 DFD Level 1 Dekomposisi Sistem Pemesanan dan Operasional", is_table=False))
     
     # 3.4.4 DFD Level 2
@@ -171,7 +171,7 @@ def get_bab3_elements():
         "• Subproses 1.3 (Pengelolaan Keranjang & Kalkulasi Biaya): Menghitung kalkulasi subtotal item pesanan, penambahan pajak restoran PB1 sebesar 10%, biaya layanan jika dine-in, serta menampung instruksi catatan khusus pemesan.",
         "• Subproses 1.4 (Pembuatan Transaksi & Pengiriman ke Dapur FIFO): Menyimpan record order baru ke D2 (orders) dan rincian item ke D2 (order_items), sekaligus memicu pengurangan stok resep pada D3 (recipes) dan mengirimkan notifikasi antrean ke layar KDS barista."
     ]
-    elems.append(frame_diagram("DFD Level 2 Proses 1.0 Pemesanan Mandiri Pelanggan", dfd2_desc))
+    elems.append(frame_diagram("Gambar 3.4 DFD Level 2 Proses 1.0 Pemesanan Mandiri Pelanggan", "public/diagrams/5_dfd_level_2_pemesanan.svg", dfd2_desc))
     elems.append(caption("Gambar 3.4 DFD Level 2 Proses 1.0 Pemesanan Mandiri Pelanggan", is_table=False))
     
     # 3.4.5 ERD
@@ -191,12 +191,21 @@ def get_bab3_elements():
         "• CASHIER_SHIFT (1) --- (N) ORDER: Satu sesi shift kasir menaungi seluruh transaksi penjualan tunai dan QRIS.",
         "• USER (1) --- (N) AUDIT_LOG: Seluruh aktivitas operasional staf dicatat dalam log audit pengawasan sistem."
     ]
-    elems.append(frame_diagram("Entity Relationship Diagram (ERD) Sistem Coffeeshop", erd_desc))
+    elems.append(frame_diagram("Gambar 3.5 Entity Relationship Diagram (ERD) Sistem Coffeeshop", "public/diagrams/2_erd_coffeeshop.svg", erd_desc))
     elems.append(caption("Gambar 3.5 Entity Relationship Diagram (ERD) Sistem Coffeeshop", is_table=False))
     
     # 3.4.6 Perancangan Basis Data Relasional Fisik
     elems.append(heading("3.4.6  Perancangan Basis Data Relasional Fisik", level=3))
-    elems.append(p("Perancangan fisik basis data merinci struktur skema tabel, tipe data kolom, batasan (constraints), serta kunci relasi yang diimplementasikan pada MySQL 8.0 berdasarkan 16 tabel relasional aktif:"))
+    elems.append(p("Perancangan fisik basis data merinci struktur skema tabel, tipe data kolom, batasan (constraints), serta kunci relasi yang diimplementasikan pada MySQL 8.0 berdasarkan 16 tabel relasional aktif. Diagram struktur basis data fisik disajikan pada Gambar 3.6."))
+    
+    db_struct_desc = [
+        "• Modul Meja & Transaksi: Terdiri atas tabel dining_tables (Meja 01-05), orders, order_items, dan order_item_modifiers.",
+        "• Modul Menu & Formula Resep: Terdiri atas tabel categories, products, recipes, raw_materials, dan modifiers.",
+        "• Modul Logistik & Pengadaan: Terdiri atas tabel stock_movements, purchase_orders, dan suppliers.",
+        "• Modul SDM & Audit Keamanan: Terdiri atas tabel users, employees, cashier_shifts, dan audit_logs."
+    ]
+    elems.append(frame_diagram("Gambar 3.6 Struktur Basis Data Fisik Relasional Sistem Coffeeshop", "public/diagrams/1_struktur_database.svg", db_struct_desc))
+    elems.append(caption("Gambar 3.6 Struktur Basis Data Fisik Relasional Sistem Coffeeshop", is_table=False))
     
     # Tables 3.4 to 3.19
     table_defs = [
@@ -337,49 +346,49 @@ def get_bab3_elements():
     elems.append(p("Perancangan antarmuka pengguna mengadopsi prinsip desain human-centered dan pendekatan Mobile-First untuk menghadirkan pengalaman navigasi yang intuitif. Delapan rancangan antarmuka utama sistem diuraikan sebagai berikut:"))
     
     mockups = [
-        ("Gambar 3.6 Rancangan Layar Sambutan dan Verifikasi QR Meja", [
+        ("Gambar 3.7 Rancangan Layar Sambutan dan Verifikasi QR Meja", "Tangkapan Layar Antarmuka CustomerOrder.tsx (Rute: /order/table/TB-01)", [
             "• Elemen Visual: Header identitas gerai coffeeshop, kartu status verifikasi nomor meja (Meja 01 s/d Meja 05), dan tombol aksi 'Buka Buku Menu'.",
             "• Fungsi: Memvalidasi parameter token meja dari kamera ponsel dan memastikan pelanggan berada di meja yang sah."
         ]),
-        ("Gambar 3.7 Rancangan Layar Katalog Menu Digital dan Kategori Produk", [
+        ("Gambar 3.8 Rancangan Layar Katalog Menu Digital dan Kategori Produk", "Tangkapan Layar Antarmuka Katalog Menu pada Perangkat Ponsel", [
             "• Elemen Visual: Bilah pencarian nama menu, tab navigasi horizontal kategori produk (Semua, Coffee, Non-Coffee, Pastry, Meals), serta kartu produk dengan foto, deskripsi singkat, dan harga dasar.",
             "• Fungsi: Memudahkan pelanggan menelusuri menu secara visual dan responsif."
         ]),
-        ("Gambar 3.8 Rancangan Modal Kustomisasi Varian Rasa dan Catatan Khusus", [
+        ("Gambar 3.9 Rancangan Modal Kustomisasi Varian Rasa dan Catatan Khusus", "Tangkapan Layar Modal Opsi Varian Produk (CustomerOrder.tsx)", [
             "• Elemen Visual: Pilihan opsi suhu (Hot / Iced), tingkat kemanisan (Normal, Less Sugar, No Sugar), pilihan susu alternatif, kolom input catatan instruksi barista, dan tombol 'Tambah ke Pesanan'.",
             "• Fungsi: Mengakomodasi preferensi personal pelanggan pada setiap menu yang dipesan."
         ]),
-        ("Gambar 3.9 Rancangan Layar Keranjang Belanja dan Rincian Biaya", [
+        ("Gambar 3.10 Rancangan Layar Keranjang Belanja dan Rincian Biaya", "Tangkapan Layar Antarmuka Keranjang Pesanan Mandiri & Kalkulasi Subtotal PB1", [
             "• Elemen Visual: Daftar item terpilih dengan tombol kontrol kuantitas (+ / -), kolom input nama pemesan, rincian hitung subtotal, pajak restoran PB1 (10%), biaya layanan dine-in, dan tombol konfirmasi 'Kirim Pesanan'.",
             "• Fungsi: Memastikan akurasi rincian pesanan dan kalkulasi biaya sebelum dikirimkan ke dapur."
         ]),
-        ("Gambar 3.10 Rancangan Antarmuka Terminal Kasir POS dan Shift Laci Kas", [
+        ("Gambar 3.11 Rancangan Antarmuka Terminal Kasir POS dan Shift Laci Kas", "Tangkapan Layar Modul CashierPos.tsx (Terminal Kasir & Shift Modal)", [
             "• Elemen Visual: Modal input modal awal kas (starting cash), grid menu kasir, pemilih 5 meja (Meja 01-05 atau Takeaway), tombol bayar tunai / cetak nota, dan tombol tutup shift rekonsiliasi kas fisik.",
             "• Fungsi: Melayani transaksi langsung di meja kasir dan mengaudit arus kas fisik kasir per shift."
         ]),
-        ("Gambar 3.11 Rancangan Antarmuka Dapur Barista (Kitchen Display System FIFO)", [
+        ("Gambar 3.12 Rancangan Antarmuka Dapur Barista (Kitchen Display System FIFO)", "Tangkapan Layar Modul BaristaKds.tsx (Layar Dapur Barista)", [
             "• Elemen Visual: Kolom kartu antrean pesanan urut waktu (First-In, First-Out), indikator waktu tunggu dalam menit, daftar item beserta varian dan catatan khusus, serta tombol status pengerjaan racik.",
             "• Fungsi: Menjaga ketertiban dan kecepatan kerja barista dapur secara kronologis."
         ]),
-        ("Gambar 3.12 Rancangan Antarmuka Pengelolaan Gudang dan Purchase Order", [
+        ("Gambar 3.13 Rancangan Antarmuka Pengelolaan Gudang dan Purchase Order", "Tangkapan Layar Modul WarehouseInventory.tsx (Gudang & PO Pengadaan)", [
             "• Elemen Visual: Tabel persediaan bahan baku real-time, lencana peringatan batas stok minimum, tombol input barang masuk manual, dan formulir pengajuan PO pengadaan bahan ke rekanan supplier.",
             "• Fungsi: Memantau sisa bahan baku dan mempermudah pengadaan logistik gerai."
         ]),
-        ("Gambar 3.13 Rancangan Antarmuka Dashboard Penjualan dan Rekonsiliasi Kasir Owner", [
+        ("Gambar 3.14 Rancangan Antarmuka Dashboard Penjualan dan Rekonsiliasi Kasir Owner", "Tangkapan Layar Modul OwnerDashboard.tsx (Dashboard Pemilik)", [
             "• Elemen Visual: Kartu KPI omzet penjualan riil, penerimaan pajak restoran PB1 (10%), total transaksi selesai, rata-rata belanja tamu (AOV), grafik tren transaksi jam sibuk (rush hours), top 5 menu terlaris, dan tabel audit rekonsiliasi kas kasir per shift.",
             "• Fungsi: Memberikan ringkasan eksekutif performa finansial gerai yang bersih dari modul akuntansi rumit."
         ])
     ]
     
-    for cap, desc_lines in mockups:
-        elems.append(frame_diagram(cap, desc_lines))
+    for cap, f_src, desc_lines in mockups:
+        elems.append(frame_diagram(cap, f_src, desc_lines))
         elems.append(caption(cap, is_table=False))
         
     return elems
 
 def get_daftar_pustaka_elements():
     """
-    Returns 8 verified real academic references strictly formatted according to UTDI Name-Year style.
+    Returns 11 verified real academic references strictly formatted according to UTDI Name-Year style.
     """
     refs = [
         "Hidayat, T., dan M. Muttaqin. 2020. Pengujian Sistem Informasi Berbasis Web dengan Metode Black Box Testing Equivalence Partitions. Jurnal Sisfokom (Sistem Informasi dan Komputer) 9(3): 400–408.",
@@ -397,8 +406,7 @@ def get_daftar_pustaka_elements():
     
     elems = []
     for ref in sorted(refs):
-        # UTDI references are hung indent or standard paragraph with 1.5 line spacing
         elems.append(p(ref, indent_first=False, space_after=120, space_line=360))
     return elems
 
-print("BAB III and DAFTAR PUSTAKA elements defined.")
+print("Enhanced thesis_content_bab3 ready.")
