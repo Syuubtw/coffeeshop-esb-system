@@ -7,10 +7,8 @@ import {
   Eye, 
   Search,
   TrendingUp,
-  BookOpen,
   ShieldCheck,
   Scale,
-  FileText,
   AlertTriangle,
   Clock,
   ArrowUpRight,
@@ -58,27 +56,6 @@ interface Transaction {
   }>;
 }
 
-interface JournalEntryItemData {
-  id: number;
-  entry_number: string;
-  entry_date: string;
-  reference_type: string;
-  reference_number: string;
-  description: string;
-  total_debit: number;
-  total_credit: number;
-  items: Array<{
-    id: number;
-    debit: number;
-    credit: number;
-    memo: string;
-    account?: {
-      account_code: string;
-      account_name: string;
-    };
-  }>;
-}
-
 interface AuditLogItem {
   id: number;
   user_name: string;
@@ -118,11 +95,8 @@ const getAvailableRollingMonths = () => {
 };
 
 export const OwnerDashboard: React.FC = () => {
-  // Top Level Navigation
-  const [activeOwnerTab, setActiveOwnerTab] = useState<'FINANCIAL' | 'ACCOUNTING' | 'AUDIT'>('FINANCIAL');
-
-  // Accounting Subtab
-  const [accountingSubTab, setAccountingSubTab] = useState<'PROFIT_LOSS' | 'JOURNALS'>('PROFIT_LOSS');
+  // Top Level Navigation: Laporan Penjualan & Pemeriksaan Kasir
+  const [activeOwnerTab, setActiveOwnerTab] = useState<'FINANCIAL' | 'AUDIT'>('FINANCIAL');
 
   // Audit Subtab
   const [auditSubTab, setAuditSubTab] = useState<'LOGS' | 'RECONCILIATION' | 'VOID'>('LOGS');
@@ -133,10 +107,6 @@ export const OwnerDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedReceipt, setSelectedReceipt] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Accounting Data State
-  const [journals, setJournals] = useState<JournalEntryItemData[]>([]);
-  const [profitLossData, setProfitLossData] = useState<any>(null);
 
   // Business Intelligence & Sales Analytics State
   const [biStats, setBiStats] = useState<any>(null);
@@ -165,7 +135,7 @@ export const OwnerDashboard: React.FC = () => {
   const isFetchingRef = useRef(false);
 
   const fetchStatsAndOrders = async (
-    forceTab?: 'FINANCIAL' | 'ACCOUNTING' | 'AUDIT',
+    forceTab?: 'FINANCIAL' | 'AUDIT',
     periodOverride?: { month: number; year: number }
   ) => {
     if (document.hidden && !forceTab) return;
@@ -180,15 +150,11 @@ export const OwnerDashboard: React.FC = () => {
       setLoading(true);
 
       if (currentTab === 'FINANCIAL') {
-        // Fetch orders + profit-loss aktual + BI stats secara bersamaan dengan filter periode
-        const [resOrders, resPLFinancial, resBIStats] = await Promise.allSettled([
+        // Fetch orders + BI stats secara bersamaan dengan filter periode
+        const [resOrders, resBIStats] = await Promise.allSettled([
           api.get(`/pos/orders/recent${qParams}`),
-          api.get(`/accounting/profit-loss${qParams}`),
           api.get(`/dashboard/stats${qParams}`),
         ]);
-        if (resPLFinancial.status === 'fulfilled' && resPLFinancial.value.data?.data) {
-          setProfitLossData(resPLFinancial.value.data.data);
-        }
         if (resBIStats.status === 'fulfilled' && resBIStats.value.data?.data) {
           setBiStats(resBIStats.value.data.data);
         }
@@ -219,18 +185,6 @@ export const OwnerDashboard: React.FC = () => {
             }))
           }));
           setTransactions(mapped);
-        }
-      } else if (currentTab === 'ACCOUNTING') {
-        const [resJournals, resPL] = await Promise.allSettled([
-          api.get(`/accounting/journals${qParams}`),
-          api.get(`/accounting/profit-loss${qParams}`),
-        ]);
-
-        if (resJournals.status === 'fulfilled' && resJournals.value.data?.data?.data) {
-          setJournals(resJournals.value.data.data.data);
-        }
-        if (resPL.status === 'fulfilled' && resPL.value.data?.data) {
-          setProfitLossData(resPL.value.data.data);
         }
       } else if (currentTab === 'AUDIT') {
         const [resLogs, resCash, resVoid] = await Promise.allSettled([
@@ -279,14 +233,8 @@ export const OwnerDashboard: React.FC = () => {
   const paidTransactions = useMemo(() => filteredTransactions.filter((t) => t.payment_status === 'PAID'), [filteredTransactions]);
   const unpaidTransactionsCount = useMemo(() => filteredTransactions.filter((t) => t.payment_status === 'UNPAID').length, [filteredTransactions]);
   const totalRevenue = useMemo(() => paidTransactions.reduce((acc, curr) => acc + curr.grand_total, 0), [paidTransactions]);
-  const totalSubtotal = useMemo(() => paidTransactions.reduce((acc, curr) => acc + curr.subtotal, 0), [paidTransactions]);
   const totalPB1Tax = useMemo(() => paidTransactions.reduce((acc, curr) => acc + curr.tax_amount, 0), [paidTransactions]);
-  // Gunakan data aktual dari profitLossData jika sudah load, fallback ke estimasi 30%
-  const actualCOGS = profitLossData?.cogs?.total ? Math.abs(Number(profitLossData.cogs.total)) : null;
-  const actualGrossProfit = profitLossData?.gross_profit?.amount ? Number(profitLossData.gross_profit.amount) : null;
-  const estimatedCOGS = actualCOGS ?? Math.round(totalSubtotal * 0.30);
-  const estimatedGrossProfit = actualGrossProfit ?? (totalSubtotal - Math.round(totalSubtotal * 0.30));
-  const isActualProfit = actualGrossProfit !== null;
+  const avgOrderValue = useMemo(() => (paidTransactions.length > 0 ? Math.round(totalRevenue / paidTransactions.length) : 0), [paidTransactions, totalRevenue]);
 
   const weeklyTrend = biStats?.weekly_trend;
   const maxWeeklySales = useMemo(() => {
@@ -342,74 +290,13 @@ export const OwnerDashboard: React.FC = () => {
         author: 'Pemilik Kedai (Owner)',
         summaryItems: [
           { label: 'TOTAL UANG MASUK PENJUALAN', value: formatIDR(totalRevenue) },
-          { label: 'TOTAL PESANAN', value: `${filteredTransactions.length} Pesanan` },
-          { label: 'TITIPAN PAJAK RESTORAN (10%)', value: formatIDR(totalPB1Tax) },
-          { label: isActualProfit ? 'KEUNTUNGAN KOTOR' : 'PERKIRAAN KEUNTUNGAN KOTOR (~70%)', value: formatIDR(estimatedGrossProfit) },
+          { label: 'TOTAL PESANAN SELESAI', value: `${paidTransactions.length} Pesanan` },
+          { label: 'TITIPAN PAJAK RESTORAN PB1 (10%)', value: formatIDR(totalPB1Tax) },
+          { label: 'RATA-RATA NILAI BELANJA (AOV)', value: formatIDR(avgOrderValue) },
         ],
         headers,
         rows,
       });
-    } else if (activeOwnerTab === 'ACCOUNTING') {
-      if (accountingSubTab === 'JOURNALS') {
-        const headers = [
-          'Nomor Catatan',
-          'Tanggal',
-          'Sumber Transaksi',
-          'Nomor Referensi',
-          'Keterangan Transaksi',
-          'Kode Akun',
-          'Pos Pembukuan',
-          'Uang Masuk / Tambah (Rp)',
-          'Uang Keluar / Kurang (Rp)',
-        ];
-        const rows = journals.flatMap((j) =>
-          j.items.map((it) => [
-            j.entry_number,
-            j.entry_date,
-            j.reference_type === 'ORDER' ? 'Penjualan Menu' : j.reference_type === 'STOCK_IN' ? 'Beli Bahan Gudang' : j.reference_type === 'WASTE' ? 'Bahan Rusak/Tumpah' : j.reference_type,
-            j.reference_number,
-            j.description,
-            it.account?.account_code ? `AKUN ${it.account.account_code}` : '-',
-            it.account?.account_name || it.memo || '-',
-            it.debit,
-            it.credit,
-          ])
-        );
-        exportStyledExcel({
-          filename: `Laporan_Buku_Kas_${today}`,
-          title: 'LAPORAN BUKU KAS & CATATAN KEUANGAN TOKO',
-          subtitle: 'Catatan uang masuk dan keluar otomatis dari pesanan kasir dan pembelian bahan',
-          author: 'Pemilik Kedai (Owner)',
-          summaryItems: [
-            { label: 'TOTAL CATATAN PEMBUKUAN', value: `${journals.length} Transaksi` },
-            { label: 'TOTAL BARIS MUTASI', value: `${rows.length} Baris` },
-          ],
-          headers,
-          rows,
-        });
-      } else {
-        const headers = ['Pos Keuangan Toko', 'Jumlah Uang (Rp)'];
-        const rows = [
-          ['Total Uang Masuk Penjualan (Omset)', totalRevenue],
-          ['Total Harga Menu Terjual', totalSubtotal],
-          ['Modal Pemakaian Bahan Baku', estimatedCOGS],
-          ['Keuntungan Kotor Toko', estimatedGrossProfit],
-          ['Titipan Pajak Restoran (10%)', totalPB1Tax],
-        ];
-        exportStyledExcel({
-          filename: `Laporan_Keuntungan_${today}`,
-          title: 'LAPORAN KEUNTUNGAN TOKO (LABA RUGI)',
-          subtitle: 'Rincian uang masuk dari penjualan, biaya modal bahan baku, dan keuntungan toko',
-          author: 'Pemilik Kedai (Owner)',
-          summaryItems: [
-            { label: 'TOTAL UANG MASUK (OMSET)', value: formatIDR(totalRevenue) },
-            { label: 'KEUNTUNGAN KOTOR', value: formatIDR(estimatedGrossProfit) },
-            { label: 'PAJAK RESTORAN (10%)', value: formatIDR(totalPB1Tax) },
-          ],
-          headers,
-          rows,
-        });
-      }
     } else if (activeOwnerTab === 'AUDIT') {
       if (auditSubTab === 'RECONCILIATION') {
         const headers = ['Nama Kasir', 'Jam Buka Shift', 'Jam Tutup Shift', 'Status Shift', 'Modal Awal Kasir (Rp)', 'Total Uang Tunai Masuk (Rp)', 'Uang yang Seharusnya Ada (Rp)', 'Uang Fisik Dihitung Kasir (Rp)', 'Selisih Uang (Rp)', 'Kesesuaian Uang'];
@@ -632,53 +519,6 @@ export const OwnerDashboard: React.FC = () => {
     }
   };
 
-  // 4. Export Laporan Keuntungan Bersih (Laba Rugi)
-  const handleExportMonthlyProfitLoss = async () => {
-    try {
-      setExportingType('profit-loss');
-      let pl = profitLossData;
-      if (!pl || pl.period !== selectedPeriodLabel) {
-        const res = await api.get(`/accounting/profit-loss?month=${selectedPeriod.month}&year=${selectedPeriod.year}`);
-        pl = res.data.data;
-      }
-
-      const headers = ['No.', 'Kategori Keuangan', 'Rincian Pemasukan / Pengeluaran', 'Nominal Rupiah (Rp)', 'Keterangan Aliran Kas'];
-      const rows: (string | number)[][] = [];
-
-      pl.revenue.accounts.forEach((acc: any) => {
-        rows.push([rows.length + 1, '1. Pemasukan (Omset Penjualan)', acc.account_name, Number(acc.current_balance || 0), 'Uang Masuk (+)']);
-      });
-      pl.cogs.accounts.forEach((acc: any) => {
-        rows.push([rows.length + 1, '2. Modal Bahan Baku Terpakai', acc.account_name, -Math.abs(Number(acc.current_balance || 0)), 'Pengurangan Modal (-)']);
-      });
-      pl.operating_expenses.accounts.forEach((acc: any) => {
-        rows.push([rows.length + 1, '3. Biaya Operasional Toko', acc.account_name, -Math.abs(Number(acc.current_balance || 0)), 'Pengeluaran Toko (-)']);
-      });
-
-      exportStyledExcel({
-        filename: `Laporan_Laba_Rugi_${selectedPeriod.month}_${selectedPeriod.year}`,
-        title: `LAPORAN LABA RUGI & KEUANGAN TOKO - PERIODE ${selectedPeriodLabel.toUpperCase()}`,
-        subtitle: 'Rincian omset penjualan, modal bahan baku, biaya operasional riil, dan laba bersih',
-        author: 'Pemilik Kedai (Owner)',
-        themeColor: '#059669',
-        summaryItems: [
-          { label: 'PERIODE', value: selectedPeriodLabel },
-          { label: 'TOTAL OMSET PENJUALAN', value: formatIDR(pl.revenue.total) },
-          { label: 'MODAL BAHAN BAKU', value: `(${formatIDR(pl.cogs.total)})` },
-          { label: 'KEUNTUNGAN KOTOR', value: formatIDR(pl.gross_profit.amount) },
-          { label: 'BIAYA OPERASIONAL', value: `(${formatIDR(pl.operating_expenses.total)})` },
-          { label: 'KEUNTUNGAN BERSIH USAHA', value: formatIDR(pl.net_profit.amount) },
-        ],
-        headers,
-        rows,
-      });
-    } catch (err) {
-      console.error('Failed to export profit & loss:', err);
-    } finally {
-      setExportingType(null);
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       {/* Top Banner & Tab Navigation */}
@@ -691,7 +531,7 @@ export const OwnerDashboard: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Pantau penjualan harian, modal bahan, keuntungan bersih, dan kejujuran kasir secara otomatis.
+            Pantau omzet penjualan harian, performa menu terlaris, dan audit pemeriksaan kasir secara otomatis.
           </p>
         </div>
 
@@ -705,14 +545,6 @@ export const OwnerDashboard: React.FC = () => {
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5 text-blue-600" /> Laporan Penjualan
-            </button>
-            <button
-              onClick={() => setActiveOwnerTab('ACCOUNTING')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer font-bold ${
-                activeOwnerTab === 'ACCOUNTING' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-emerald-600" /> Laba Rugi & Biaya Toko
             </button>
             <button
               onClick={() => setActiveOwnerTab('AUDIT')}
@@ -817,38 +649,34 @@ export const OwnerDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Modal Bahan Baku */}
+            {/* Total Transaksi Selesai */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
               <div className="flex justify-between items-center text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Modal Bahan Baku {!isActualProfit && <span className="text-amber-500 normal-case">(perkiraan)</span>}
-                </span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Transaksi Selesai</span>
                 <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
                   <ShoppingBag className="w-4 h-4" />
                 </div>
               </div>
               <div className="mt-3">
-                <h3 className="text-2xl font-bold text-amber-700 font-mono tracking-tight">{formatIDR(estimatedCOGS)}</h3>
+                <h3 className="text-2xl font-bold text-amber-700 font-mono tracking-tight">{paidTransactions.length} Pesanan</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  {isActualProfit ? 'Biaya riil biji kopi, susu & cup' : 'Perkiraan ~30% dari penjualan'}
+                  Transaksi pesanan lunas di outlet
                 </p>
               </div>
             </div>
 
-            {/* Keuntungan Kotor */}
+            {/* Rata-Rata Belanja Tamu (AOV) */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
               <div className="flex justify-between items-center text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Keuntungan Kotor {isActualProfit ? <span className="text-emerald-600 normal-case">(Riil)</span> : <span className="text-amber-500 normal-case">(perkiraan)</span>}
-                </span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Rata-Rata Belanja Tamu</span>
                 <div className="p-2 bg-purple-50 text-purple-600 rounded-xl">
                   <TrendingUp className="w-4 h-4" />
                 </div>
               </div>
               <div className="mt-3">
-                <h3 className="text-2xl font-bold text-purple-700 font-mono tracking-tight">{formatIDR(estimatedGrossProfit)}</h3>
+                <h3 className="text-2xl font-bold text-purple-700 font-mono tracking-tight">{formatIDR(avgOrderValue)}</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Untung: ~{Math.round((estimatedGrossProfit / (totalSubtotal || 1)) * 100)}% (sebelum potong gaji & operasional)
+                  Rata-rata belanja per struk kasir
                 </p>
               </div>
             </div>
@@ -860,23 +688,23 @@ export const OwnerDashboard: React.FC = () => {
 
           {/* 1. Baris Informasi Penting Kedai */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Rata-Rata Belanja per Tamu (AOV) */}
+            {/* Rata-Rata Omzet Harian */}
             <div className="bg-linear-to-br from-indigo-50/70 to-white border border-indigo-100/80 p-5 rounded-2xl shadow-xs">
               <div className="flex justify-between items-center text-indigo-500">
-                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700">Rata-Rata Belanja per Tamu</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700">Rata-Rata Omzet Harian</span>
                 <div className="p-2 bg-indigo-100 text-indigo-700 rounded-xl">
-                  <TrendingUp className="w-4 h-4" />
+                  <DollarSign className="w-4 h-4" />
                 </div>
               </div>
               <div className="mt-3">
                 <h3 className="text-2xl font-bold text-slate-900 font-mono tracking-tight">
-                  {formatIDR(biStats?.month_to_date?.aov || (paidTransactions.length > 0 ? Math.round(totalRevenue / paidTransactions.length) : 0))}
+                  {formatIDR(Math.round(totalRevenue / 30))}
                 </h3>
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">
-                    Rata-Rata per Struk
+                    Est. 30 Hari Kerja
                   </span>
-                  <span className="text-[11px] text-slate-500">Standar: ~Rp 40.000</span>
+                  <span className="text-[11px] text-slate-500">Penjualan harian</span>
                 </div>
               </div>
             </div>
@@ -988,8 +816,8 @@ export const OwnerDashboard: React.FC = () => {
                       <Award className="w-5 h-5" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-slate-900 text-base">5 Menu Paling Laris & Paling Menguntungkan</h2>
-                      <p className="text-xs text-slate-500">Menu favorit pelanggan yang menyumbang keuntungan terbesar.</p>
+                      <h2 className="font-bold text-slate-900 text-base">5 Menu Paling Laris di Kedai</h2>
+                      <p className="text-xs text-slate-500">Menu favorit pelanggan dengan jumlah pesanan terbanyak.</p>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
@@ -1027,9 +855,8 @@ export const OwnerDashboard: React.FC = () => {
                           <div className="text-right">
                             <div className="font-bold text-slate-900 text-sm font-mono">{formatIDR(item.total_revenue)}</div>
                             <div className="flex items-center justify-end gap-1.5 text-xs mt-0.5">
-                              <span className="text-emerald-600 font-bold font-mono">+{formatIDR(item.gross_profit)} untung</span>
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
-                                {item.margin_percent}%
+                              <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded border border-blue-200">
+                                {item.total_qty} porsi terjual
                               </span>
                             </div>
                           </div>
@@ -1047,9 +874,9 @@ export const OwnerDashboard: React.FC = () => {
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/60 p-3 rounded-xl">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <strong>Catatan Pemilik:</strong> Menu Kopi Susu dan Makanan Ringan menyumbang lebih dari 50% keuntungan toko.
+                  <strong>Catatan Bisnis:</strong> Menu Kopi Susu dan Makanan Ringan menyumbang porsi penjualan terbesar di kedai.
                 </span>
-                <span className="font-semibold text-slate-700">Modal Terhitung Otomatis</span>
+                <span className="font-semibold text-slate-700">Data Struk Penjualan</span>
               </div>
             </div>
 
@@ -1377,199 +1204,8 @@ export const OwnerDashboard: React.FC = () => {
       )}
 
       {/* ============================================================== */}
-      {/* VIEW 2: AKUNTANSI, LABA RUGI & GENERAL LEDGER */}
+      {/* VIEW 2: PUSAT AUDIT TRAIL & PEMERIKSAAN KASIR */}
       {/* ============================================================== */}
-      {activeOwnerTab === 'ACCOUNTING' && (
-        <div className="space-y-6">
-          {/* Sub Navigation Bar for Accounting */}
-          <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit border border-slate-200/60 text-xs font-bold">
-            <button
-              onClick={() => setAccountingSubTab('PROFIT_LOSS')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition cursor-pointer ${
-                accountingSubTab === 'PROFIT_LOSS' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5 text-emerald-600" /> Laporan Keuntungan Bersih (Laba Rugi)
-            </button>
-            <button
-              onClick={() => setAccountingSubTab('JOURNALS')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition cursor-pointer ${
-                accountingSubTab === 'JOURNALS' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-blue-600" /> Buku Kas (Jurnal Keuangan)
-            </button>
-          </div>
-
-          {/* SUB-VIEW 1: LABA RUGI */}
-          {accountingSubTab === 'PROFIT_LOSS' && (
-            !profitLossData ? (
-              <div className="bg-white border border-slate-200/80 rounded-3xl p-12 text-center text-slate-400">
-                <RefreshCcw className="w-8 h-8 text-slate-300 mx-auto mb-2 animate-spin" />
-                Memuat data Laporan Keuntungan...
-              </div>
-            ) : (
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-bold text-slate-900">Laporan Keuntungan Bersih Toko (Laba Rugi)</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Dihitung otomatis dari seluruh penjualan menu kasir, pemakaian bahan baku, dan biaya operasional.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100">
-                  <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">Total Uang Masuk Penjualan (Omset)</span>
-                  <div className="text-2xl font-mono font-bold text-emerald-900 mt-2">
-                    {formatIDR(profitLossData.revenue.total)}
-                  </div>
-                  <span className="text-[11px] text-emerald-700 mt-1 block">Dari pesanan kopi, makanan & biaya servis</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-100">
-                  <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">Keuntungan Kotor Toko</span>
-                  <div className="text-2xl font-mono font-bold text-amber-900 mt-2">
-                    {formatIDR(profitLossData.gross_profit.amount)}
-                  </div>
-                  <span className="text-[11px] text-amber-700 mt-1 block">Persentase Untung Kotor: ~{profitLossData.gross_profit.margin_percent}%</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100">
-                  <span className="text-xs font-bold text-purple-800 uppercase tracking-wide">Keuntungan Bersih Usaha (Uang Bersih Toko)</span>
-                  <div className="text-2xl font-mono font-bold text-purple-900 mt-2">
-                    {formatIDR(profitLossData.net_profit.amount)}
-                  </div>
-                  <span className="text-[11px] text-purple-700 mt-1 block">Persentase Untung Bersih: ~{profitLossData.net_profit.margin_percent}%</span>
-                </div>
-              </div>
-
-              {/* Rincian Akun P&L */}
-              <div className="border border-slate-100 rounded-2xl overflow-hidden text-xs">
-                <div className="bg-slate-50 px-4 py-2.5 font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100">
-                  1. Rincian Pemasukan Penjualan Minuman & Makanan
-                </div>
-                <div className="divide-y divide-slate-100 p-2">
-                  {profitLossData.revenue.accounts.map((acc: any) => (
-                    <div key={acc.id} className="flex justify-between py-2 px-3 hover:bg-slate-50/60 rounded-lg">
-                      <span className="text-slate-700 font-medium font-mono">[{acc.account_code}] {acc.account_name}</span>
-                      <span className="font-mono font-bold text-emerald-700">{formatIDR(acc.current_balance)}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-slate-50 px-4 py-2.5 font-bold text-slate-800 uppercase tracking-wider border-t border-b border-slate-100">
-                  2. Modal Pemakaian Bahan Baku (Biji Kopi, Susu, Sirup & Cup)
-                </div>
-                <div className="divide-y divide-slate-100 p-2">
-                  {profitLossData.cogs.accounts.map((acc: any) => (
-                    <div key={acc.id} className="flex justify-between py-2 px-3 hover:bg-slate-50/60 rounded-lg">
-                      <span className="text-slate-700 font-medium font-mono">[{acc.account_code}] {acc.account_name}</span>
-                      <span className="font-mono font-bold text-amber-700">({formatIDR(acc.current_balance)})</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-slate-50 px-4 py-2.5 font-bold text-slate-800 uppercase tracking-wider border-t border-b border-slate-100">
-                  3. Biaya Operasional Toko (Gaji Karyawan, Listrik, Wi-Fi, dll.)
-                </div>
-                <div className="divide-y divide-slate-100 p-2">
-                  {profitLossData.operating_expenses.accounts.map((acc: any) => (
-                    <div key={acc.id} className="flex justify-between py-2 px-3 hover:bg-slate-50/60 rounded-lg">
-                      <span className="text-slate-700 font-medium font-mono">[{acc.account_code}] {acc.account_name}</span>
-                      <span className="font-mono font-bold text-rose-700">({formatIDR(acc.current_balance)})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            )
-          )}
-
-          {/* SUB-VIEW 2: BUKU KAS (JURNAL UMUM) */}
-          {accountingSubTab === 'JOURNALS' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 flex-wrap gap-2">
-                <div>
-                  <h2 className="font-bold text-slate-900 text-base">Buku Catatan Keuangan (Jurnal Kas Masuk & Keluar)</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Semua catatan transaksi pemasukan dan pengeluaran tersusun rapi dan seimbang secara otomatis.</p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                  Total {journals.length} Catatan Pembukuan
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold bg-slate-50/50">
-                      <th className="py-3 px-3 w-40">Nomor Catatan & Tanggal</th>
-                      <th className="py-3 px-3 w-32">Sumber Transaksi</th>
-                      <th className="py-3 px-3">Keterangan Transaksi</th>
-                      <th className="py-3 px-3 w-48">Pos Pembukuan</th>
-                      <th className="py-3 px-3 w-32 text-right">Uang Masuk / Tambah</th>
-                      <th className="py-3 px-3 w-32 text-right">Uang Keluar / Kurang</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {journals.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
-                          Belum ada catatan pembukuan transaksi.
-                        </td>
-                      </tr>
-                    ) : (
-                      journals.map((j) => (
-                        <tr key={j.id} className="hover:bg-slate-50/60 transition align-top">
-                          <td className="py-3 px-3 font-mono">
-                            <span className="font-bold text-slate-900 block">{j.entry_number}</span>
-                            <span className="text-[10px] text-slate-400">{j.entry_date}</span>
-                          </td>
-                          <td className="py-3 px-3">
-                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
-                              {j.reference_type === 'ORDER' ? 'Penjualan' : j.reference_type === 'STOCK_IN' ? 'Beli Bahan' : j.reference_type === 'WASTE' ? 'Bahan Rusak' : j.reference_type}
-                            </span>
-                            {j.reference_number && (
-                              <span className="text-[10px] font-mono text-slate-400 block mt-0.5">{j.reference_number}</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-3 text-slate-700 font-medium">
-                            {j.description}
-                          </td>
-                          <td className="py-3 px-3">
-                            <div className="space-y-1">
-                              {j.items.map((it, idx) => (
-                                <div key={idx} className="text-[11px] font-mono text-slate-600 truncate">
-                                  {it.account?.account_code} - {it.account?.account_name}
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <div className="space-y-1 font-mono">
-                              {j.items.map((it, idx) => (
-                                <div key={idx} className="text-[11px] text-emerald-700 font-semibold">
-                                  {it.debit > 0 ? formatIDR(it.debit) : '-'}
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <div className="space-y-1 font-mono">
-                              {j.items.map((it, idx) => (
-                                <div key={idx} className="text-[11px] text-blue-700 font-semibold">
-                                  {it.credit > 0 ? formatIDR(it.credit) : '-'}
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ============================================================== */}
       {/* VIEW 3: PUSAT AUDIT TRAIL & ANTI-FRAUD */}
@@ -1941,30 +1577,6 @@ export const OwnerDashboard: React.FC = () => {
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>{exportingType === 'inventory' ? 'Membuat File...' : 'Unduh Laporan Stok'}</span>
-                </button>
-              </div>
-
-              {/* 4. Laporan Laba Rugi */}
-              <div className="p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-xs transition bg-white flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                      Keuangan Usaha
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">.xlsx</span>
-                  </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Laporan Keuntungan Bersih</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Ikhtisar laba rugi resmi: omset kotor, modal bahan baku (HPP), rincian 5 biaya operasional riil, dan laba bersih toko.
-                  </p>
-                </div>
-                <button
-                  onClick={handleExportMonthlyProfitLoss}
-                  disabled={exportingType === 'profit-loss'}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{exportingType === 'profit-loss' ? 'Membuat File...' : 'Unduh Laporan Laba Rugi'}</span>
                 </button>
               </div>
             </div>

@@ -60,9 +60,8 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
           {/* NAV: Owner (super_admin) */}
           {isSuperAdmin && (
             <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
-              <NavButton path="/admin" label="Laporan & Keuntungan" icon={<ShieldCheck className="w-3.5 h-3.5 text-purple-600" />} location={location} navigate={navigate} />
+              <NavButton path="/admin" label="Laporan Penjualan" icon={<ShieldCheck className="w-3.5 h-3.5 text-purple-600" />} location={location} navigate={navigate} />
               <NavButton path="/manager" label="Menu & Resep" icon={<ShieldCheck className="w-3.5 h-3.5 text-blue-600" />} location={location} navigate={navigate} />
-              <NavButton path="/table-qr" label="QR Meja" icon={<QrCode className="w-3.5 h-3.5 text-amber-600" />} location={location} navigate={navigate} />
               <NavButton path="/warehouse" label="Gudang Bahan Baku" icon={<Package className="w-3.5 h-3.5 text-indigo-600" />} location={location} navigate={navigate} />
               <NavButton path="/attendance" label="Absensi Karyawan" icon={<Clock className="w-3.5 h-3.5 text-emerald-600" />} location={location} navigate={navigate} />
             </nav>
