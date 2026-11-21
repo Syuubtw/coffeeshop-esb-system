@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Execution script to integrate BAB II, BAB III, and verified DAFTAR PUSTAKA
-into '2026_FTI_UTDI_Template_Tugas Akhir-Skripsi.docx'.
-Ensures all occurrences of 'saya' are replaced with 'penulis' and all diagrams have prominent placeholder markers.
+Execution script to integrate INTISARI, ABSTRACT, BAB I, BAB II, BAB III,
+and verified DAFTAR PUSTAKA into '2026_FTI_UTDI_Template_Tugas Akhir-Skripsi.docx'.
+Ensures all occurrences of 'saya' are replaced with 'penulis', all headings have proper styles,
+all foreign terms are italicized, and all diagrams have prominent placeholder markers.
 """
 
 import zipfile
@@ -11,6 +12,7 @@ import os
 import shutil
 import re
 
+import thesis_content_bab1
 import thesis_content_bab2
 import thesis_content_bab3
 
@@ -37,12 +39,17 @@ with zipfile.ZipFile(DOCX_PATH, 'r') as zin:
 root = ET.fromstring(xml_content)
 body = root.find(f"{{{W_NS}}}body")
 
-# 3. Replace any 'saya' with 'penulis' in all text nodes across the entire document
+# 3. Clean up front matter text nodes across the entire document:
 w_t = f"{{{W_NS}}}t"
 saya_count = 0
 for t_node in root.iter(w_t):
-    if t_node.text and re.search(r'\bsaya\b', t_node.text, re.IGNORECASE):
-        # Case preserving replacement
+    if not t_node.text:
+        continue
+    # Replace 'Ketua Program Studi Program Studi' with 'Ketua Program Studi Sistem Informasi'
+    if 'Ketua Program Studi Program Studi' in t_node.text:
+        t_node.text = t_node.text.replace('Ketua Program Studi Program Studi', 'Ketua Program Studi Sistem Informasi')
+    # Replace any 'saya' with 'penulis'
+    if re.search(r'\bsaya\b', t_node.text, re.IGNORECASE):
         def replace_saya(match):
             word = match.group(0)
             if word.istitle():
@@ -56,10 +63,11 @@ for t_node in root.iter(w_t):
 
 print(f"Replaced {saya_count} occurrence(s) of 'saya' with 'penulis'.")
 
-# 4. Locate target indices in body using strict Heading1 and text matching
+# 4. Locate target indices in body
 w_pStyle = f"{{{W_NS}}}pStyle"
 w_val = f"{{{W_NS}}}val"
 
+intisari_idx = None
 bab2_idx = None
 bab4_idx = None
 daftar_pustaka_idx = None
@@ -73,47 +81,68 @@ for idx, child in enumerate(body):
     if 'TOC' in t:
         continue
         
-    if style == 'Heading1':
-        if 'BAB II' in t and 'TINJAUAN PUSTAKA' in t:
-            bab2_idx = idx
-        elif 'BAB IV' in t and 'IMPLEMENTASI' in t:
-            bab4_idx = idx
-        elif 'DAFTAR PUSTAKA' in t:
-            daftar_pustaka_idx = idx
-            
+    if t == 'INTISARI' and intisari_idx is None:
+        intisari_idx = idx
+    elif style == 'Heading1' and 'BAB II' in t and 'TINJAUAN PUSTAKA' in t:
+        bab2_idx = idx
+    elif style == 'Heading1' and 'BAB IV' in t and 'IMPLEMENTASI' in t:
+        bab4_idx = idx
+    elif style == 'Heading1' and 'DAFTAR PUSTAKA' in t:
+        daftar_pustaka_idx = idx
+        
     if 'LAMPIRAN' in t and daftar_pustaka_idx is not None and idx > daftar_pustaka_idx:
         if lampiran_idx is None:
             lampiran_idx = idx
 
-print(f"Verified Indices: BAB II={bab2_idx}, BAB IV={bab4_idx}, DAFTAR PUSTAKA={daftar_pustaka_idx}, LAMPIRAN={lampiran_idx}")
-assert bab2_idx is not None and bab4_idx is not None and daftar_pustaka_idx is not None and lampiran_idx is not None
+print(f"Verified Indices:")
+print(f"  INTISARI: {intisari_idx}")
+print(f"  BAB II: {bab2_idx}")
+print(f"  BAB IV: {bab4_idx}")
+print(f"  DAFTAR PUSTAKA: {daftar_pustaka_idx}")
+print(f"  LAMPIRAN: {lampiran_idx}")
+
+assert intisari_idx is not None and bab2_idx is not None and bab4_idx is not None and daftar_pustaka_idx is not None and lampiran_idx is not None
 
 # 5. Generate elements
+intisari_elements = thesis_content_bab1.get_intisari_elements()
+abstract_elements = thesis_content_bab1.get_abstract_elements()
+bab1_elements = thesis_content_bab1.get_bab1_elements()
 bab2_elements = thesis_content_bab2.get_bab2_elements()
 bab3_elements = thesis_content_bab3.get_bab3_elements()
 daftar_pustaka_elements = thesis_content_bab3.get_daftar_pustaka_elements()
 
-print(f"Elements generated: BAB II={len(bab2_elements)}, BAB III={len(bab3_elements)}, DAFTAR PUSTAKA={len(daftar_pustaka_elements)}")
+print(f"Elements generated:")
+print(f"  INTISARI: {len(intisari_elements)}")
+print(f"  ABSTRACT: {len(abstract_elements)}")
+print(f"  BAB I: {len(bab1_elements)}")
+print(f"  BAB II: {len(bab2_elements)}")
+print(f"  BAB III: {len(bab3_elements)}")
+print(f"  DAFTAR PUSTAKA: {len(daftar_pustaka_elements)}")
 
 # 6. Build new body children list
 new_children = []
 
-# Part A: Before BAB II (including BAB II Heading at index 192)
-for i in range(0, bab2_idx + 1):
+# Part A: Front matter up to (excluding) INTISARI
+for i in range(0, intisari_idx):
     new_children.append(body[i])
 
-# Part B: New BAB II and BAB III elements
+# Part B: New INTISARI, ABSTRACT, and BAB I elements
+new_children.extend(intisari_elements)
+new_children.extend(abstract_elements)
+new_children.extend(bab1_elements)
+
+# Part C: New BAB II and BAB III elements
 new_children.extend(bab2_elements)
 new_children.extend(bab3_elements)
 
-# Part C: From BAB IV to DAFTAR PUSTAKA (inclusive)
+# Part D: BAB IV up to DAFTAR PUSTAKA Heading (inclusive)
 for i in range(bab4_idx, daftar_pustaka_idx + 1):
     new_children.append(body[i])
 
-# Part D: New DAFTAR PUSTAKA elements
+# Part E: New DAFTAR PUSTAKA entries
 new_children.extend(daftar_pustaka_elements)
 
-# Part E: From LAMPIRAN to the end
+# Part F: From LAMPIRAN to the end
 for i in range(lampiran_idx, len(body)):
     new_children.append(body[i])
 

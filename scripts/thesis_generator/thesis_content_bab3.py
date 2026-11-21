@@ -3,13 +3,13 @@
 Thesis content module containing comprehensive academic text, tables, and diagram frames for BAB III.
 """
 
-from build_thesis_full import p, heading, caption, table, frame_diagram
+from build_thesis_full import p, heading, caption, table, frame_diagram, chapter_heading
 
 def get_bab3_elements():
     elems = []
     
     # BAB III Heading (Heading 1)
-    elems.append(heading("BAB III\nMETODE PENELITIAN", level=1, space_before=240, space_after=180))
+    elems.append(chapter_heading("BAB III", "METODE PENELITIAN"))
     elems.append(p("Bab ini menyajikan secara komprehensif metodologi rekayasa perangkat lunak yang diterapkan dalam penelitian rancang bangun aplikasi pemesanan mandiri berbasis web menggunakan QR Code pada gerai coffeeshop. Pembahasan mencakup identifikasi bahan dan data penelitian, spesifikasi peralatan perangkat keras dan perangkat lunak pendukung, prosedur pengumpulan data, analisis kebutuhan fungsional dan non-fungsional sistem, perancangan diagram terstruktur (Flowchart, DFD Level 0, DFD Level 1, dan DFD Level 2), perancangan konseptual basis data (ERD), perancangan fisik basis data 16 tabel relasional, serta perancangan antarmuka pengguna."))
     
     # 3.1 Bahan dan Peralatan Penelitian
@@ -18,7 +18,7 @@ def get_bab3_elements():
     # 3.1.1
     elems.append(heading("3.1.1  Bahan dan Data Penelitian", level=3))
     elems.append(p("Bahan dan data penelitian yang dikumpulkan dan dimanfaatkan dalam proses perancangan, pengembangan, dan pengujian sistem diklasifikasikan ke dalam tujuh kelompok data operasional utama sebagai berikut:"))
-    elems.append(p("1. Data Meja Pelanggan: Data pengenal unik untuk 5 meja fisik utama gerai (Meja 01 sampai dengan Meja 05), meliputi nomor identitas meja (TB-01 s/d TB-05), token acak unik berbasis UUID untuk pembangkitan QR Code aman, kapasitas tempat duduk (2, 4, hingga 6 kursi), dan status ketersediaan operasional meja (AVAILABLE, OCCUPIED)."))
+    elems.append(p("1. Data Meja Pelanggan: Data pengenal unik untuk 5 meja fisik utama gerai (Meja 01 sampai dengan Meja 05), meliputi nomor identitas meja (TB-01 sampai dengan TB-05), token acak unik berbasis UUID untuk pembangkitan QR Code aman, kapasitas tempat duduk (2, 4, hingga 6 kursi), dan status ketersediaan operasional meja (AVAILABLE, OCCUPIED)."))
     elems.append(p("2. Data Kategori dan Katalog Menu: Data produk makanan dan minuman yang ditawarkan, mencakup kategori menu (Coffee, Non-Coffee, Pastry, Meals), nama produk, deskripsi profil rasa, harga dasar jual, status ketersediaan (aktif atau sold out), dan berkas citra visual produk."))
     elems.append(p("3. Data Formula Resep Komposisi Bahan: Data takaran baku pemakaian bahan mentah untuk setiap porsi menu sajian (misalnya takaran gramasi biji kopi espresso, mililiter susu segar/fresh milk, mililiter sirup rasa, dan satu unit cup kertas/plastik) guna mendukung pemotongan saldo persediaan secara otomatis."))
     elems.append(p("4. Data Persediaan Bahan Baku Gudang: Data saldo fisik bahan baku di gudang (kopi, susu, gula aren, sirup vanila, cup 12oz, cup 16oz), batas minimum stok aman (safety stock), serta pencatatan riwayat kartu mutasi stok masuk dan keluar."))
@@ -87,7 +87,7 @@ def get_bab3_elements():
     elems.append(caption("Tabel 3.3 Matriks Kebutuhan Fungsional Pengguna Berdasarkan Peran RBAC", is_table=True))
     headers_3_3 = ["Peran Pengguna", "Hak Akses & Fungsionalitas Sistem yang Disediakan", "Batasan Akses"]
     rows_3_3 = [
-        ["Pelanggan (Public / Tamu)", "Memindai QR Meja (Meja 01 s/d Meja 05), membuka katalog menu digital, memilih varian modifikasi rasa (es, gula, topping), menambahkan catatan per item, mengelola keranjang belanja, mengirimkan pesanan meja, dan memantau status pesanan secara waktu nyata.", "Tanpa perlu login akun; dibatasi hanya pada nomor meja yang dipindai."],
+        ["Pelanggan (Public / Tamu)", "Memindai QR Meja (Meja 01 sampai dengan Meja 05), membuka katalog menu digital, memilih varian modifikasi rasa (es, gula, topping), menambahkan catatan per item, mengelola keranjang belanja, mengirimkan pesanan meja, dan memantau status pesanan secara waktu nyata.", "Tanpa perlu login akun; dibatasi hanya pada nomor meja yang dipindai."],
         ["Kasir (cashier)", "Membuka shift kas laci dengan input modal awal (starting cash), melayani transaksi langsung kasir (dine-in meja 01-05 atau bungkus takeaway), konfirmasi pembayaran tunai dan verifikasi QRIS, cetak struk nota transaksi, dan menutup shift kasir dengan input kas fisik aktual untuk rekonsiliasi.", "Tidak dapat mengubah master harga menu atau formula resep."],
         ["Barista (barista)", "Memantau layar Kitchen Display System (KDS) antrean dapur secara kronologis urut waktu masuk (FIFO), memperbarui status pengerjaan pesanan (Sedang Diracik -> Siap Saji), dan mengaktifkan sakelar darurat menu habis (sold-out).", "Hanya mengakses antarmuka antrean dapur barista."],
         ["Admin Gudang (warehouse_admin)", "Memantau saldo persediaan bahan baku secara real-time, mencatat penerimaan barang masuk manual (inbound), membuat draf pengadaan bahan (Purchase Order / PO) ke vendor rekanan, dan melakukan input stok opname fisik gudang.", "Tidak memiliki wewenang menyetujui transaksi penjualan kasir."],
@@ -111,10 +111,10 @@ def get_bab3_elements():
     
     # 3.4.1 Flowchart
     elems.append(heading("3.4.1  Diagram Alir Sistem (Flowchart)", level=3))
-    elems.append(p("Diagram alir sistem memodelkan urutan langkah logis yang dilalui oleh pelanggan dalam melakukan pemesanan mandiri menggunakan QR Code meja. Alur dimulai ketika pelanggan memindai stiker QR Code di meja (Meja 01 s/d Meja 05), sistem memvalidasi token meja, menampilkan menu aktif, pelanggan memilih menu dan varian modifikasi, memeriksa ringkasan keranjang belanja beserta rincian subtotal dan pajak PB1 (10%), lalu mengirimkan pesanan ke peladen untuk diteruskan secara instan ke layar KDS dapur barista berprinsip FIFO."))
+    elems.append(p("Diagram alir sistem memodelkan urutan langkah logis yang dilalui oleh pelanggan dalam melakukan pemesanan mandiri menggunakan QR Code meja. Alur dimulai ketika pelanggan memindai stiker QR Code di meja (Meja 01 sampai dengan Meja 05), sistem memvalidasi token meja, menampilkan menu aktif, pelanggan memilih menu dan varian modifikasi, memeriksa ringkasan keranjang belanja beserta rincian subtotal dan pajak PB1 (10%), lalu mengirimkan pesanan ke peladen untuk diteruskan secara instan ke layar KDS dapur barista berprinsip FIFO."))
     
     flowchart_desc = [
-        "• Titik Mulai (Start): Pelanggan menduduki salah satu meja gerai (Meja 01 s/d Meja 05).",
+        "• Titik Mulai (Start): Pelanggan menduduki salah satu meja gerai (Meja 01 sampai dengan Meja 05).",
         "• Proses 1: Pelanggan memindai stiker QR Code yang tertera pada meja menggunakan kamera ponsel.",
         "• Keputusan 1: Sistem memvalidasi token meja; jika token tidak valid, tampilkan pesan peringatan eror.",
         "• Proses 2: Jika valid, sistem memuat antarmuka katalog menu digital beserta kelompok kategori.",
@@ -166,7 +166,7 @@ def get_bab3_elements():
     elems.append(p("DFD Level 2 merupakan dekomposisi rinci dari Proses 1.0 (Pemesanan Mandiri Meja) yang memetakan empat subproses esensial saat pelanggan bertransaksi melalui pemindaian QR Code:"))
     
     dfd2_desc = [
-        "• Subproses 1.1 (Verifikasi Token QR Meja): Menerima parameter kode token meja dari URL pemindaian pelanggan, mencocokkan dengan data store D1 (dining_tables), dan memastikan status meja dalam keadaan aktif (Meja 01 s/d Meja 05).",
+        "• Subproses 1.1 (Verifikasi Token QR Meja): Menerima parameter kode token meja dari URL pemindaian pelanggan, mencocokkan dengan data store D1 (dining_tables), dan memastikan status meja dalam keadaan aktif (Meja 01 sampai dengan Meja 05).",
         "• Subproses 1.2 (Penjelajahan Katalog & Seleksi Varian): Mengambil data produk aktif beserta opsi varian (suhu, gula, topping) dari D5 (products & categories) dan menyajikannya pada antarmuka peramban pelanggan.",
         "• Subproses 1.3 (Pengelolaan Keranjang & Kalkulasi Biaya): Menghitung kalkulasi subtotal item pesanan, penambahan pajak restoran PB1 sebesar 10%, biaya layanan jika dine-in, serta menampung instruksi catatan khusus pemesan.",
         "• Subproses 1.4 (Pembuatan Transaksi & Pengiriman ke Dapur FIFO): Menyimpan record order baru ke D2 (orders) dan rincian item ke D2 (order_items), sekaligus memicu pengurangan stok resep pada D3 (recipes) dan mengirimkan notifikasi antrean ke layar KDS barista."
@@ -179,7 +179,7 @@ def get_bab3_elements():
     elems.append(p("Entity Relationship Diagram (ERD) memodelkan arsitektur data konseptual sistem dengan menggambarkan 16 entitas inti yang saling berelasi. Relasi utama mencakup: DINING_TABLE yang memiliki relasi One-to-Many dengan ORDER; ORDER yang memiliki relasi One-to-Many dengan ORDER_ITEM; ORDER_ITEM yang memiliki relasi One-to-Many dengan ORDER_ITEM_MODIFIER; PRODUCT yang memiliki relasi Many-to-One dengan CATEGORY; PRODUCT yang memiliki relasi One-to-Many dengan RECIPE; RECIPE yang berelasi Many-to-One dengan RAW_MATERIAL; CASHIER_SHIFT yang memiliki relasi One-to-Many dengan ORDER; serta USER yang berelasi One-to-One dengan EMPLOYEE."))
     
     erd_desc = [
-        "• DINING_TABLE (1) --- (N) ORDER: Satu meja (Meja 01 s/d Meja 05) dapat menampung banyak riwayat transaksi pesanan.",
+        "• DINING_TABLE (1) --- (N) ORDER: Satu meja (Meja 01 sampai dengan Meja 05) dapat menampung banyak riwayat transaksi pesanan.",
         "• ORDER (1) --- (N) ORDER_ITEM: Satu transaksi order memuat banyak item menu yang dipesan pelanggan.",
         "• ORDER_ITEM (1) --- (N) ORDER_ITEM_MODIFIER: Satu item menu pesanan dapat memiliki banyak opsi kustomisasi rasa.",
         "• CATEGORY (1) --- (N) PRODUCT: Satu kelompok kategori mengelompokkan banyak produk makanan/minuman.",
@@ -211,7 +211,7 @@ def get_bab3_elements():
     table_defs = [
         ("Tabel 3.4 Struktur Tabel dining_tables (Master 5 Meja Utama)", ["No", "Nama Kolom (Field)", "Tipe Data", "Kunci", "Keterangan"], [
             ["1", "id", "BIGINT UNSIGNED", "PK", "Pengenal unik meja (Auto Increment)"],
-            ["2", "table_number", "VARCHAR(20)", "-", "Kode nomor meja unik (TB-01 s/d TB-05)"],
+            ["2", "table_number", "VARCHAR(20)", "-", "Kode nomor meja unik (TB-01 sampai dengan TB-05)"],
             ["3", "capacity", "INT", "-", "Kapasitas tempat duduk kursi meja (2, 4, 6)"],
             ["4", "status", "ENUM('AVAILABLE','OCCUPIED')", "-", "Status ketersediaan meja pelanggan"],
             ["5", "qr_token", "VARCHAR(64)", "-", "Token unik UUID untuk pembangkitan QR Code meja"],
@@ -219,7 +219,7 @@ def get_bab3_elements():
         ]),
         ("Tabel 3.5 Struktur Tabel categories (Kelompok Kategori Menu)", ["No", "Nama Kolom (Field)", "Tipe Data", "Kunci", "Keterangan"], [
             ["1", "id", "BIGINT UNSIGNED", "PK", "Pengenal unik kategori (Auto Increment)"],
-            ["2", "name", "VARCHAR(100)", "-", "Nama kelompok kategori (Coffee, Non-Coffee, dll)"],
+            ["2", "name", "VARCHAR(100)", "-", "Nama kelompok kategori (Coffee, Non-Coffee, Makanan)"],
             ["3", "slug", "VARCHAR(100)", "-", "Pengenal ramah URL untuk filter kategori"],
             ["4", "display_order", "INT", "-", "Urutan tampilan kategori pada antarmuka web"],
             ["5", "is_active", "BOOLEAN", "-", "Status keaktifan kategori produk"]
@@ -347,7 +347,7 @@ def get_bab3_elements():
     
     mockups = [
         ("Gambar 3.7 Rancangan Layar Sambutan dan Verifikasi QR Meja", "Tangkapan Layar Antarmuka CustomerOrder.tsx (Rute: /order/table/TB-01)", [
-            "• Elemen Visual: Header identitas gerai coffeeshop, kartu status verifikasi nomor meja (Meja 01 s/d Meja 05), dan tombol aksi 'Buka Buku Menu'.",
+            "• Elemen Visual: Header identitas gerai coffeeshop, kartu status verifikasi nomor meja (Meja 01 sampai dengan Meja 05), dan tombol aksi 'Buka Buku Menu'.",
             "• Fungsi: Memvalidasi parameter token meja dari kamera ponsel dan memastikan pelanggan berada di meja yang sah."
         ]),
         ("Gambar 3.8 Rancangan Layar Katalog Menu Digital dan Kategori Produk", "Tangkapan Layar Antarmuka Katalog Menu pada Perangkat Ponsel", [
@@ -406,7 +406,7 @@ def get_daftar_pustaka_elements():
     
     elems = []
     for ref in sorted(refs):
-        elems.append(p(ref, indent_first=False, space_after=120, space_line=360))
+        elems.append(p(ref, indent_first=False, hanging=True, space_after=120, space_line=360))
     return elems
 
 print("Enhanced thesis_content_bab3 ready.")
