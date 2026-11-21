@@ -441,7 +441,7 @@ class FreshDataSeeder extends Seeder
             ['product' => $pAren, 'qty' => 1],
         ], $yDate->copy()->setHour(14)->setMinute(20));
 
-        $createOrder('ORD-' . $yDate->format('Ymd') . '-00104', $tables->get('TB-06'), $shiftYesterday, 'QR_TABLE', 'DINE_IN', 'Meja 6 - Tim Creative', 'QRIS', 'PAID', 'COMPLETED', [
+        $createOrder('ORD-' . $yDate->format('Ymd') . '-00104', $tables->get('TB-02'), $shiftYesterday, 'QR_TABLE', 'DINE_IN', 'Meja 2 - Tim Creative', 'QRIS', 'PAID', 'COMPLETED', [
             ['product' => $pAren, 'qty' => 4],
             ['product' => $pV60, 'qty' => 2],
             ['product' => $pCroissant, 'qty' => 3],

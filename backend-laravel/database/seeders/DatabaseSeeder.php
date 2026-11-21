@@ -598,22 +598,7 @@ class DatabaseSeeder extends Seeder
             ['table_number' => 'TB-02', 'capacity' => 2, 'status' => 'AVAILABLE'],
             ['table_number' => 'TB-03', 'capacity' => 4, 'status' => 'AVAILABLE'],
             ['table_number' => 'TB-04', 'capacity' => 4, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-05', 'capacity' => 4, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-06', 'capacity' => 6, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-07', 'capacity' => 6, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-08', 'capacity' => 8, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-09', 'capacity' => 4, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-10', 'capacity' => 4, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-11', 'capacity' => 2, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-12', 'capacity' => 2, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-VIP-01', 'capacity' => 10, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-VIP-02', 'capacity' => 8, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-BAR-01', 'capacity' => 1, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-BAR-02', 'capacity' => 1, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-BAR-03', 'capacity' => 1, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-BAR-04', 'capacity' => 1, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-OUT-01', 'capacity' => 4, 'status' => 'AVAILABLE'],
-            ['table_number' => 'TB-OUT-02', 'capacity' => 4, 'status' => 'AVAILABLE'],
+            ['table_number' => 'TB-05', 'capacity' => 6, 'status' => 'AVAILABLE'],
         ];
 
         foreach ($tables as $table) {

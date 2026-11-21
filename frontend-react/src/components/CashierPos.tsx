@@ -570,16 +570,6 @@ export const CashierPos: React.FC = () => {
                   <option value="TB-03">Meja 03</option>
                   <option value="TB-04">Meja 04</option>
                   <option value="TB-05">Meja 05</option>
-                  <option value="TB-06">Meja 06</option>
-                  <option value="TB-07">Meja 07</option>
-                  <option value="TB-08">Meja 08</option>
-                  <option value="TB-09">Meja 09</option>
-                  <option value="TB-10">Meja 10</option>
-                  <option value="TB-11">Meja 11</option>
-                  <option value="TB-12">Meja 12</option>
-                  <option value="TB-VIP-01">Ruang VIP</option>
-                  <option value="TB-BAR-01">Meja Bar</option>
-                  <option value="TB-OUT-01">Outdoor</option>
                 </select>
               ) : (
                 <div className="bg-slate-200/70 text-slate-500 text-[11px] font-semibold rounded-xl flex items-center justify-center">

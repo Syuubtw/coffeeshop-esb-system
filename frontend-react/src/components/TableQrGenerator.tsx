@@ -28,35 +28,19 @@ interface DiningTable {
   order_url?: string;
 }
 
-// Default fallback tables if backend not yet reached
+// Default fallback tables (5 Meja Utama: Meja 01 s/d Meja 05)
 const FALLBACK_TABLES: DiningTable[] = [
   { id: 1, table_number: 'TB-01', capacity: 2, status: 'AVAILABLE' },
   { id: 2, table_number: 'TB-02', capacity: 2, status: 'AVAILABLE' },
   { id: 3, table_number: 'TB-03', capacity: 4, status: 'AVAILABLE' },
   { id: 4, table_number: 'TB-04', capacity: 4, status: 'AVAILABLE' },
-  { id: 5, table_number: 'TB-05', capacity: 4, status: 'AVAILABLE' },
-  { id: 6, table_number: 'TB-06', capacity: 6, status: 'AVAILABLE' },
-  { id: 7, table_number: 'TB-07', capacity: 6, status: 'AVAILABLE' },
-  { id: 8, table_number: 'TB-08', capacity: 8, status: 'AVAILABLE' },
-  { id: 9, table_number: 'TB-09', capacity: 4, status: 'AVAILABLE' },
-  { id: 10, table_number: 'TB-10', capacity: 4, status: 'AVAILABLE' },
-  { id: 11, table_number: 'TB-11', capacity: 2, status: 'AVAILABLE' },
-  { id: 12, table_number: 'TB-12', capacity: 2, status: 'AVAILABLE' },
-  { id: 13, table_number: 'TB-VIP-01', capacity: 10, status: 'AVAILABLE' },
-  { id: 14, table_number: 'TB-VIP-02', capacity: 8, status: 'AVAILABLE' },
-  { id: 15, table_number: 'TB-BAR-01', capacity: 1, status: 'AVAILABLE' },
-  { id: 16, table_number: 'TB-BAR-02', capacity: 1, status: 'AVAILABLE' },
-  { id: 17, table_number: 'TB-BAR-03', capacity: 1, status: 'AVAILABLE' },
-  { id: 18, table_number: 'TB-BAR-04', capacity: 1, status: 'AVAILABLE' },
-  { id: 19, table_number: 'TB-OUT-01', capacity: 4, status: 'AVAILABLE' },
-  { id: 20, table_number: 'TB-OUT-02', capacity: 4, status: 'AVAILABLE' },
+  { id: 5, table_number: 'TB-05', capacity: 6, status: 'AVAILABLE' },
 ];
 
 export const TableQrGenerator: React.FC = () => {
   const [tables, setTables] = useState<DiningTable[]>(FALLBACK_TABLES);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [areaFilter, setAreaFilter] = useState<'ALL' | 'INDOOR' | 'VIP' | 'BAR' | 'OUTDOOR'>('ALL');
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   // Modal Add Table
@@ -124,13 +108,11 @@ export const TableQrGenerator: React.FC = () => {
   };
 
   const filteredTables = tables.filter((t) => {
-    const area = getTableArea(t.table_number);
-    if (areaFilter !== 'ALL' && area !== areaFilter) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
       return (
         t.table_number.toLowerCase().includes(q) ||
-        getAreaLabel(area).toLowerCase().includes(q)
+        formatTableDisplayName(t.table_number).toLowerCase().includes(q)
       );
     }
     return true;
@@ -327,39 +309,20 @@ export const TableQrGenerator: React.FC = () => {
           </div>
         </div>
 
-        {/* Filter Tabs & Search */}
-        <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-            {(
-              [
-                { id: 'ALL', label: 'Semua Area' },
-                { id: 'INDOOR', label: 'Indoor Reguler' },
-                { id: 'VIP', label: 'Area VIP' },
-                { id: 'BAR', label: 'Meja Bar' },
-                { id: 'OUTDOOR', label: 'Outdoor' },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setAreaFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
-                  areaFilter === tab.id
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* Search & Info Bar */}
+        <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            <span>Daftar 5 Meja Utama Kedai (Meja 01 s/d Meja 05)</span>
           </div>
 
-          <div className="relative w-full md:w-72">
+          <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari kode meja (misal: TB-01, VIP)..."
+              placeholder="Cari meja (misal: Meja 01, TB-02)..."
               className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
             />
           </div>
@@ -570,13 +533,13 @@ export const TableQrGenerator: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: TB-13, TB-VIP-03, TB-OUT-03"
+                  placeholder="Contoh: TB-06, TB-07"
                   value={newTableNumber}
                   onChange={(e) => setNewTableNumber(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 uppercase transition"
                 />
                 <span className="text-[11px] text-slate-400 mt-1 block">
-                  Format rekomendasi: TB-01 (Indoor), TB-VIP-01 (VIP), TB-BAR-01 (Bar), TB-OUT-01 (Outdoor)
+                  Format rekomendasi: TB-01 s/d TB-05 (Meja 01 s/d Meja 05)
                 </span>
               </div>
 
