@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\PayrollPeriod;
 use App\Models\Payslip;
 use App\Models\PayslipItem;
+use App\Models\User;
 use App\Models\WorkSchedule;
 use App\Services\AuditService;
 use Carbon\Carbon;
@@ -30,7 +31,19 @@ class HrPayrollController extends Controller
     public function getLiveAttendance(Request $request): JsonResponse
     {
         $today = Carbon::today()->toDateString();
-        $employees = Employee::with(['user'])->where('employment_status', 'ACTIVE')->orderBy('employee_code')->get();
+
+        // Auto-close leftover attendance from previous days that staff forgot to clock-out
+        Attendance::whereDate('created_at', '<', $today)
+            ->whereNull('clock_out')
+            ->get()
+            ->each(function ($stale) {
+                $clockIn = Carbon::parse($stale->clock_in);
+                $stale->update([
+                    'clock_out' => $clockIn->copy()->addHours(8),
+                ]);
+            });
+
+        $employees = Employee::with(['user'])->where('employment_status', 'ACTIVE')->where('position', '!=', 'OWNER')->orderBy('employee_code')->get();
         $attendances = Attendance::whereDate('created_at', $today)->get()->keyBy('employee_id');
 
         $data = $employees->map(function ($emp) use ($attendances) {
@@ -57,6 +70,209 @@ class HrPayrollController extends Controller
     public function getPublicEmployees(Request $request): JsonResponse
     {
         return $this->getLiveAttendance($request);
+    }
+
+    /**
+     * Daftar Seluruh Data SDM & Profil Karyawan
+     */
+    public function getEmployees(): JsonResponse
+    {
+        $employees = Employee::with('user')
+            ->where('position', '!=', 'OWNER')
+            ->orderBy('employee_code')
+            ->get()
+            ->map(function ($emp) {
+                return [
+                    'id' => $emp->id,
+                    'user_id' => $emp->user_id,
+                    'employee_code' => $emp->employee_code,
+                    'name' => $emp->user->name ?? 'Staf',
+                    'email' => $emp->user->email ?? '-',
+                    'position' => $emp->position,
+                    'department' => $emp->department,
+                    'employment_status' => $emp->employment_status,
+                    'phone' => $emp->phone,
+                    'base_salary' => (float) $emp->base_salary,
+                    'daily_allowance' => (float) $emp->daily_allowance,
+                    'hourly_overtime_rate' => (float) $emp->hourly_overtime_rate,
+                    'qr_token' => $emp->qr_token,
+                    'is_device_locked' => !empty($emp->device_id),
+                    'device_info' => $emp->device_info,
+                    'created_at' => $emp->created_at?->format('Y-m-d'),
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $employees,
+        ]);
+    }
+
+    /**
+     * Tambah Karyawan Baru Otomatis (Buat Akun, Kode Staf & QR Presensi)
+     */
+    public function storeEmployee(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'nullable|string|min:6',
+            'position' => 'required|string|in:MANAGER,CASHIER,BARISTA,ADMIN_GUDANG',
+            'department' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'base_salary' => 'nullable|numeric|min:0',
+            'daily_allowance' => 'nullable|numeric|min:0',
+            'hourly_overtime_rate' => 'nullable|numeric|min:0',
+        ]);
+
+        return DB::transaction(function () use ($validated) {
+            $password = !empty($validated['password']) ? $validated['password'] : 'password';
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => bcrypt($password),
+                'email_verified_at' => now(),
+            ]);
+
+            $roleName = match ($validated['position']) {
+                'MANAGER' => 'store_manager',
+                'CASHIER' => 'cashier',
+                'ADMIN_GUDANG' => 'warehouse_admin',
+                default => 'barista',
+            };
+            $user->assignRole($roleName);
+
+            $lastEmp = Employee::orderBy('id', 'desc')->first();
+            $nextNum = ($lastEmp ? $lastEmp->id : 0) + 1;
+            $code = sprintf('EMP-%03d', $nextNum);
+            while (Employee::where('employee_code', $code)->exists()) {
+                $nextNum++;
+                $code = sprintf('EMP-%03d', $nextNum);
+            }
+
+            $qrToken = 'QR-' . strtoupper(substr(md5(uniqid($code, true)), 0, 10));
+
+            $department = !empty($validated['department']) ? $validated['department'] : match ($validated['position']) {
+                'MANAGER' => 'OPERATIONAL',
+                'CASHIER' => 'FRONT_OFFICE',
+                'ADMIN_GUDANG' => 'LOGISTICS',
+                default => 'BAR',
+            };
+
+            $employee = Employee::create([
+                'user_id' => $user->id,
+                'employee_code' => $code,
+                'position' => $validated['position'],
+                'department' => $department,
+                'employment_status' => 'ACTIVE',
+                'phone' => $validated['phone'] ?? null,
+                'base_salary' => (float) ($validated['base_salary'] ?? 0),
+                'daily_allowance' => (float) ($validated['daily_allowance'] ?? 0),
+                'hourly_overtime_rate' => (float) ($validated['hourly_overtime_rate'] ?? 0),
+                'qr_token' => $qrToken,
+            ]);
+
+            AuditService::log(
+                'EMPLOYEE_CREATED',
+                'Employee',
+                $employee->id,
+                "Karyawan baru {$user->name} ({$code}) berhasil didaftarkan sebagai {$employee->position}."
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Karyawan {$user->name} ({$code}) berhasil ditambahkan ke sistem.",
+                'data' => [
+                    'id' => $employee->id,
+                    'user_id' => $user->id,
+                    'employee_code' => $code,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'position' => $employee->position,
+                    'department' => $employee->department,
+                    'phone' => $employee->phone,
+                    'base_salary' => (float) $employee->base_salary,
+                    'daily_allowance' => (float) $employee->daily_allowance,
+                    'hourly_overtime_rate' => (float) $employee->hourly_overtime_rate,
+                    'qr_token' => $employee->qr_token,
+                ],
+            ], 201);
+        });
+    }
+
+    /**
+     * Ubah Data Karyawan (Profil, Jabatan, Divisi, Telepon, Email, Status & Reset Password)
+     */
+    public function updateEmployee(Request $request, $id): JsonResponse
+    {
+        $employee = Employee::with('user')->findOrFail($id);
+        $user = $employee->user;
+
+        // Proteksi Akun Owner: Store Manager tidak boleh mengubah akun Owner / super_admin
+        if ($employee->position === 'OWNER' || ($user && $user->hasRole('super_admin'))) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Akses Ditolak: Akun Pemilik Kedai (Owner) dilindungi dan tidak dapat diubah oleh Store Manager.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => 'required|email|unique:users,email,' . ($user ? $user->id : 0),
+            'password' => 'nullable|string|min:6',
+            'position' => 'required|string|in:MANAGER,CASHIER,BARISTA,ADMIN_GUDANG',
+            'department' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'employment_status' => 'required|string|in:ACTIVE,INACTIVE',
+        ]);
+
+        return DB::transaction(function () use ($employee, $user, $validated) {
+            if ($user) {
+                $userData = [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                ];
+                if (!empty($validated['password'])) {
+                    $userData['password'] = bcrypt($validated['password']);
+                }
+                $user->update($userData);
+
+                $roleName = match ($validated['position']) {
+                    'MANAGER' => 'store_manager',
+                    'CASHIER' => 'cashier',
+                    'ADMIN_GUDANG' => 'warehouse_admin',
+                    default => 'barista',
+                };
+                $user->syncRoles([$roleName]);
+            }
+
+            $department = !empty($validated['department']) ? $validated['department'] : match ($validated['position']) {
+                'MANAGER' => 'OPERATIONAL',
+                'CASHIER' => 'FRONT_OFFICE',
+                'ADMIN_GUDANG' => 'LOGISTICS',
+                default => 'BAR',
+            };
+
+            $employee->update([
+                'position' => $validated['position'],
+                'department' => $department,
+                'employment_status' => $validated['employment_status'],
+                'phone' => $validated['phone'] ?? null,
+            ]);
+
+            AuditService::log(
+                'EMPLOYEE_UPDATED',
+                'Employee',
+                $employee->id,
+                "Data profil karyawan {$employee->employee_code} ({$validated['name']}) berhasil diperbarui."
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Data karyawan {$validated['name']} ({$employee->employee_code}) berhasil diperbarui.",
+                'data' => $employee->fresh(['user']),
+            ]);
+        });
     }
 
     /**

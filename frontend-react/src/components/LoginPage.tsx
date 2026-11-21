@@ -1,14 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Coffee, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (location.state?.email) {
+      setEmail(location.state.email);
+      setPassword('password');
+    }
+  }, [location.state]);
 
   const handleRedirectByRole = (user: any) => {
     if (user.roles?.includes('super_admin')) {
@@ -93,7 +101,7 @@ export const LoginPage: React.FC = () => {
           <div className="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-lg shadow-amber-600/30">
             <Coffee className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Portal Staf ESB Coffee</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Portal Staf CoffeeShop</h1>
           <p className="text-xs text-slate-500 mt-1">
             Khusus Karyawan & Manajemen Restoran
           </p>
@@ -105,6 +113,16 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Attendance Success Banner */}
+        {location.state?.attendanceSuccess && (
+          <div className="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600" />
+            <span>
+              Presensi atas nama <strong>{location.state.name || 'Staf'}</strong> berhasil dicatat! Silakan login untuk memulai stasiun kerja.
+            </span>
+          </div>
+        )}
 
         {/* Error Alert */}
         {errorMsg && (

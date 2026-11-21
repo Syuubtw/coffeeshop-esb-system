@@ -70,8 +70,9 @@ class PurchaseOrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'supplier_name' => 'nullable|string',
+            'supplier_id' => 'nullable',
+            'supplier_name' => 'nullable|string|max:200',
+            'vendor_name' => 'nullable|string|max:200',
             'expected_delivery_date' => 'required|date|after_or_equal:today',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
@@ -79,8 +80,6 @@ class PurchaseOrderController extends Controller
             'items.*.qty_ordered' => 'required|numeric|min:0.01',
             'items.*.unit_cost' => 'nullable|numeric|min:0',
         ], [
-            'supplier_id.required' => 'Vendor / Supplier wajib dipilih.',
-            'supplier_id.exists' => 'Vendor yang dipilih tidak valid di sistem.',
             'expected_delivery_date.required' => 'Estimasi tanggal kirim wajib diisi.',
             'expected_delivery_date.date' => 'Format estimasi tanggal kirim tidak valid.',
             'expected_delivery_date.after_or_equal' => 'Estimasi tanggal kirim tidak boleh tanggal yang sudah lewat.',
@@ -108,10 +107,14 @@ class PurchaseOrderController extends Controller
                 $totalAmount += ((float) $it['qty_ordered'] * $unitCost);
             }
 
+            $vendorText = !empty($validated['supplier_name']) 
+                ? $validated['supplier_name'] 
+                : (!empty($validated['vendor_name']) ? $validated['vendor_name'] : ($supplier ? $supplier->name : 'Pembelian Bebas / Pasar / Toko'));
+
             $purchaseOrder = PurchaseOrder::create([
                 'po_number' => $poNumber,
                 'supplier_id' => $supplier ? $supplier->id : null,
-                'supplier_name' => $supplier ? $supplier->name : ($validated['supplier_name'] ?? 'Supplier Terdaftar'),
+                'supplier_name' => $vendorText,
                 'requested_by' => auth()->id() ?: 1,
                 'status' => 'PENDING_APPROVAL',
                 'total_amount' => $totalAmount,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\RawMaterial;
 use App\Models\StockMovement;
 use App\Models\WasteLog;
+use App\Services\AuditService;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,6 +32,125 @@ class InventoryController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $materials,
+        ]);
+    }
+
+    /**
+     * Tambah Bahan Baku Baru ke Database (Mendukung Satuan kg, liter, gram, ml, pcs & Normalisasi Resep)
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:150|unique:raw_materials,name',
+            'unit' => 'required|string|in:gram,ml,pcs,kg,liter',
+            'min_stock_alert' => 'required|numeric|min:0',
+            'current_stock' => 'nullable|numeric|min:0',
+            'avg_cost_per_unit' => 'required|numeric|min:0',
+            'sku' => 'nullable|string|max:50|unique:raw_materials,sku',
+        ]);
+
+        $rawUnit = strtolower($validated['unit']);
+        $initialStock = (float) ($validated['current_stock'] ?? 0);
+        $minStock = (float) $validated['min_stock_alert'];
+        $cost = (float) $validated['avg_cost_per_unit'];
+
+        // Normalisasi otomatis jika input dalam kg atau liter
+        if ($rawUnit === 'kg') {
+            $baseUnit = 'gram';
+            $initialStock = $initialStock * 1000;
+            $minStock = $minStock * 1000;
+            $cost = $cost / 1000;
+        } elseif ($rawUnit === 'liter') {
+            $baseUnit = 'ml';
+            $initialStock = $initialStock * 1000;
+            $minStock = $minStock * 1000;
+            $cost = $cost / 1000;
+        } else {
+            $baseUnit = $rawUnit;
+        }
+
+        $sku = $validated['sku'] ?? null;
+        if (!$sku) {
+            $prefix = match($baseUnit) {
+                'ml' => 'RM-LIQ',
+                'pcs' => 'RM-PKG',
+                default => 'RM-ING',
+            };
+            $count = RawMaterial::count() + 1;
+            $sku = sprintf('%s-%03d', $prefix, $count);
+            while (RawMaterial::where('sku', $sku)->exists()) {
+                $count++;
+                $sku = sprintf('%s-%03d', $prefix, $count);
+            }
+        }
+
+        $material = DB::transaction(function () use ($validated, $sku, $baseUnit, $initialStock, $minStock, $cost) {
+            $rm = RawMaterial::create([
+                'name' => $validated['name'],
+                'sku' => $sku,
+                'unit' => $baseUnit,
+                'current_stock' => $initialStock,
+                'min_stock_alert' => $minStock,
+                'avg_cost_per_unit' => $cost,
+            ]);
+
+            if ($initialStock > 0) {
+                StockMovement::create([
+                    'raw_material_id' => $rm->id,
+                    'type' => 'IN_PURCHASE',
+                    'qty' => $initialStock,
+                    'unit_cost' => $cost,
+                    'notes' => 'Pendaftaran bahan baku baru (Stok awal)',
+                ]);
+            }
+
+            AuditService::log(
+                'RAW_MATERIAL_CREATED',
+                'RawMaterial',
+                $rm->id,
+                "Bahan baku baru '{$rm->name}' ({$rm->sku}) berhasil ditambahkan dengan stok awal {$initialStock} {$rm->unit}."
+            );
+
+            return $rm;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Bahan baku '{$material->name}' berhasil didaftarkan ke gudang.",
+            'data' => $material,
+        ], 201);
+    }
+
+    /**
+     * Perbarui Data Bahan Baku (Nama, Batas Minimum, Harga Rata-rata)
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+        $material = RawMaterial::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150|unique:raw_materials,name,' . $material->id,
+            'min_stock_alert' => 'required|numeric|min:0',
+            'avg_cost_per_unit' => 'required|numeric|min:0',
+        ]);
+
+        $material->update([
+            'name' => $validated['name'],
+            'min_stock_alert' => $validated['min_stock_alert'],
+            'avg_cost_per_unit' => $validated['avg_cost_per_unit'],
+        ]);
+
+        AuditService::log(
+            'RAW_MATERIAL_UPDATED',
+            'RawMaterial',
+            $material->id,
+            "Bahan baku '{$material->name}' ({$material->sku}) berhasil diperbarui: Min {$material->min_stock_alert}, Biaya Rp {$material->avg_cost_per_unit}."
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Bahan baku '{$material->name}' berhasil diperbarui.",
+            'data' => $material,
         ]);
     }
 

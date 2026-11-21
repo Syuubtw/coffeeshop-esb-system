@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1200" width="100%" height="100%" style="background:#090D16; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <defs>
+    <filter id="shadow-erd" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="erd-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="50" y="25" width="1600" height="70" rx="12" fill="#1E293B" filter="url(#shadow-erd)"/>
+  <text x="80" y="68" fill="#F8FAFC" font-size="24" font-weight="bold">ENTITY-RELATIONSHIP DIAGRAM (ERD)</text>
+  <text x="1280" y="67" fill="#38BDF8" font-size="14" font-weight="600">Model Konseptual &amp; Logikal Sistem CoffeeShop</text>
+
+  <!-- ENTITAS 1: DINING_TABLE -->
+  <g transform="translate(80, 150)" filter="url(#shadow-erd)">
+    <rect width="260" height="160" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 40 L 0 40 Z" fill="#0284C7"/>
+    <text x="130" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">DINING_TABLE</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#E2E8F0" font-size="13">• table_number</text>
+    <text x="20" y="111" fill="#E2E8F0" font-size="13">• qr_token</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• capacity, status</text>
+  </g>
+
+  <!-- RELASI 1: MENEMPATI / MEMILIKI -->
+  <g transform="translate(420, 185)">
+    <polygon points="60,0 120,35 60,70 0,35" fill="#1E293B" stroke="#38BDF8" stroke-width="1.8"/>
+    <text x="60" y="39" fill="#38BDF8" font-size="11" font-weight="bold" text-anchor="middle">menampung</text>
+  </g>
+
+  <!-- ENTITAS 2: ORDER -->
+  <g transform="translate(620, 130)" filter="url(#shadow-erd)">
+    <rect width="280" height="200" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 270 0 Q 280 0 280 10 L 280 40 L 0 40 Z" fill="#0284C7"/>
+    <text x="140" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">ORDER</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#E2E8F0" font-size="13">• order_number</text>
+    <text x="20" y="111" fill="#38BDF8" font-size="13">• table_id (FK)</text>
+    <text x="20" y="134" fill="#38BDF8" font-size="13">• cashier_shift_id (FK)</text>
+    <text x="20" y="157" fill="#E2E8F0" font-size="13">• customer_name, status</text>
+    <text x="20" y="180" fill="#E2E8F0" font-size="13">• total_amount, payment_status</text>
+  </g>
+
+  <!-- RELASI 2: MEMUAT ITEM -->
+  <g transform="translate(970, 185)">
+    <polygon points="60,0 120,35 60,70 0,35" fill="#1E293B" stroke="#38BDF8" stroke-width="1.8"/>
+    <text x="60" y="39" fill="#38BDF8" font-size="11" font-weight="bold" text-anchor="middle">memuat</text>
+  </g>
+
+  <!-- ENTITAS 3: ORDER_ITEM -->
+  <g transform="translate(1160, 140)" filter="url(#shadow-erd)">
+    <rect width="260" height="180" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 40 L 0 40 Z" fill="#0284C7"/>
+    <text x="130" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">ORDER_ITEM</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#38BDF8" font-size="13">• order_id (FK)</text>
+    <text x="20" y="111" fill="#38BDF8" font-size="13">• product_id (FK)</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• qty, unit_price</text>
+    <text x="20" y="157" fill="#E2E8F0" font-size="13">• subtotal, notes</text>
+  </g>
+
+  <!-- RELASI 3: MEMILIH PRODUK -->
+  <g transform="translate(1230, 370)">
+    <polygon points="60,0 120,35 60,70 0,35" fill="#1E293B" stroke="#10B981" stroke-width="1.8"/>
+    <text x="60" y="39" fill="#10B981" font-size="11" font-weight="bold" text-anchor="middle">merujuk</text>
+  </g>
+
+  <!-- ENTITAS 4: PRODUCT -->
+  <g transform="translate(1160, 480)" filter="url(#shadow-erd)">
+    <rect width="260" height="180" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 40 L 0 40 Z" fill="#059669"/>
+    <text x="130" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">PRODUCT</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#38BDF8" font-size="13">• category_id (FK)</text>
+    <text x="20" y="111" fill="#E2E8F0" font-size="13">• name, sku</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• base_price, is_active</text>
+    <text x="20" y="157" fill="#E2E8F0" font-size="13">• image_url</text>
+  </g>
+
+  <!-- ENTITAS 5: CATEGORY -->
+  <g transform="translate(750, 490)" filter="url(#shadow-erd)">
+    <rect width="240" height="150" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 230 0 Q 240 0 240 10 L 240 40 L 0 40 Z" fill="#059669"/>
+    <text x="120" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">CATEGORY</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#E2E8F0" font-size="13">• name</text>
+    <text x="20" y="111" fill="#E2E8F0" font-size="13">• slug</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• sort_order</text>
+  </g>
+
+  <g transform="translate(1020, 530)">
+    <polygon points="50,0 100,30 50,60 0,30" fill="#1E293B" stroke="#10B981" stroke-width="1.8"/>
+    <text x="50" y="35" fill="#10B981" font-size="10" font-weight="bold" text-anchor="middle">klasifikasi</text>
+  </g>
+
+  <!-- ENTITAS 6: RECIPE (Resep Menu) &amp; RAW_MATERIAL -->
+  <g transform="translate(1160, 770)" filter="url(#shadow-erd)">
+    <rect width="260" height="150" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 40 L 0 40 Z" fill="#D97706"/>
+    <text x="130" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">RECIPE (Resep Menu)</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#38BDF8" font-size="13">• product_id (FK)</text>
+    <text x="20" y="111" fill="#38BDF8" font-size="13">• raw_material_id (FK)</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• qty_needed</text>
+  </g>
+
+  <g transform="translate(1240, 680)">
+    <polygon points="45,0 90,25 45,50 0,25" fill="#1E293B" stroke="#F59E0B" stroke-width="1.8"/>
+    <text x="45" y="30" fill="#F59E0B" font-size="10" font-weight="bold" text-anchor="middle">resep</text>
+  </g>
+
+  <!-- ENTITAS 7: RAW_MATERIAL -->
+  <g transform="translate(750, 760)" filter="url(#shadow-erd)">
+    <rect width="250" height="170" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 240 0 Q 250 0 250 10 L 250 40 L 0 40 Z" fill="#D97706"/>
+    <text x="125" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">RAW_MATERIAL</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#E2E8F0" font-size="13">• name, sku</text>
+    <text x="20" y="111" fill="#E2E8F0" font-size="13">• unit, current_stock</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• min_stock_alert</text>
+    <text x="20" y="157" fill="#E2E8F0" font-size="13">• cost_per_unit</text>
+  </g>
+
+  <!-- ENTITAS 8: USER &amp; EMPLOYEE -->
+  <g transform="translate(80, 480)" filter="url(#shadow-erd)">
+    <rect width="260" height="150" rx="10" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 40 L 0 40 Z" fill="#7C3AED"/>
+    <text x="130" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">USER (Akun Staf)</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#E2E8F0" font-size="13">• name</text>
+    <text x="20" y="111" fill="#E2E8F0" font-size="13">• email</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• password</text>
+  </g>
+
+  <g transform="translate(80, 760)" filter="url(#shadow-erd)">
+    <rect width="260" height="170" rx="10" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 40 L 0 40 Z" fill="#7C3AED"/>
+    <text x="130" y="26" fill="#FFF" font-size="15" font-weight="bold" text-anchor="middle">EMPLOYEE</text>
+    <text x="20" y="65" fill="#FCD34D" font-size="13" font-weight="bold">• id (PK)</text>
+    <text x="20" y="88" fill="#38BDF8" font-size="13">• user_id (FK)</text>
+    <text x="20" y="111" fill="#E2E8F0" font-size="13">• employee_code</text>
+    <text x="20" y="134" fill="#E2E8F0" font-size="13">• position, base_salary</text>
+    <text x="20" y="157" fill="#E2E8F0" font-size="13">• qr_token</text>
+  </g>
+
+  <!-- Connectors &amp; Cardinalities -->
+  <line x1="340" y1="220" x2="420" y2="220" stroke="#38BDF8" stroke-width="2"/>
+  <text x="360" y="210" fill="#38BDF8" font-size="13" font-weight="bold">1</text>
+  <line x1="540" y1="220" x2="620" y2="220" stroke="#38BDF8" stroke-width="2"/>
+  <text x="590" y="210" fill="#38BDF8" font-size="13" font-weight="bold">N</text>
+
+  <line x1="900" y1="220" x2="970" y2="220" stroke="#38BDF8" stroke-width="2"/>
+  <text x="920" y="210" fill="#38BDF8" font-size="13" font-weight="bold">1</text>
+  <line x1="1090" y1="220" x2="1160" y2="220" stroke="#38BDF8" stroke-width="2"/>
+  <text x="1135" y="210" fill="#38BDF8" font-size="13" font-weight="bold">N</text>
+
+  <line x1="1290" y1="320" x2="1290" y2="370" stroke="#10B981" stroke-width="2"/>
+  <text x="1305" y="345" fill="#10B981" font-size="13" font-weight="bold">N</text>
+  <line x1="1290" y1="440" x2="1290" y2="480" stroke="#10B981" stroke-width="2"/>
+  <text x="1305" y="465" fill="#10B981" font-size="13" font-weight="bold">1</text>
+
+  <line x1="990" y1="560" x2="1020" y2="560" stroke="#10B981" stroke-width="2"/>
+  <text x="1000" y="550" fill="#10B981" font-size="13" font-weight="bold">1</text>
+  <line x1="1120" y1="560" x2="1160" y2="560" stroke="#10B981" stroke-width="2"/>
+  <text x="1135" y="550" fill="#10B981" font-size="13" font-weight="bold">N</text>
+
+  <line x1="1285" y1="660" x2="1285" y2="680" stroke="#F59E0B" stroke-width="2"/>
+  <text x="1295" y="675" fill="#F59E0B" font-size="13" font-weight="bold">1</text>
+  <line x1="1285" y1="730" x2="1285" y2="770" stroke="#F59E0B" stroke-width="2"/>
+  <text x="1295" y="755" fill="#F59E0B" font-size="13" font-weight="bold">N</text>
+
+  <line x1="1160" y1="845" x2="1000" y2="845" stroke="#F59E0B" stroke-width="2"/>
+  <text x="1140" y="835" fill="#F59E0B" font-size="13" font-weight="bold">N</text>
+  <text x="1015" y="835" fill="#F59E0B" font-size="13" font-weight="bold">1</text>
+
+  <line x1="210" y1="630" x2="210" y2="760" stroke="#8B5CF6" stroke-width="2"/>
+  <text x="225" y="660" fill="#8B5CF6" font-size="13" font-weight="bold">1</text>
+  <text x="225" y="740" fill="#8B5CF6" font-size="13" font-weight="bold">1</text>
+
+  <!-- Bottom Legend -->
+  <rect x="50" y="1030" width="1600" height="110" rx="10" fill="#1E293B" stroke="#334155"/>
+  <text x="80" y="1065" fill="#F8FAFC" font-size="15" font-weight="bold">KETERANGAN NOTASI ERD:</text>
+  <text x="80" y="1095" fill="#94A3B8" font-size="13">• Persegi Panjang = Entitas Kuat (Entity Set)  |  Belah Ketupat = Hubungan / Relasi (Relationship Set)</text>
+  <text x="80" y="1120" fill="#94A3B8" font-size="13">• Kardinalitas 1 : N (Satu ke Banyak), 1 : 1 (Satu ke Satu)  |  (PK) = Kunci Utama  |  (FK) = Kunci Tamu</text>
+</svg>

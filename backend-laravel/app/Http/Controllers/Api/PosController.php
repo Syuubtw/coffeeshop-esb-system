@@ -13,6 +13,7 @@ use App\Models\RawMaterial;
 use App\Models\StockMovement;
 use App\Services\AccountingService;
 use App\Services\AuditService;
+use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,12 +21,97 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Group(
-    name: '04. Kasir (POS & Kas Laci)',
+    name: '04. Kasir (Operasional Kas Laci & Transaksi)',
     description: 'Operasional kasir: buka/tutup shift laci kasir, transaksi kasir langsung, daftar pesanan, dan pelunasan bayar.',
     weight: 4
 )]
 class PosController extends Controller
 {
+    /**
+     * Helper: Ambil shift kasir aktif untuk hari ini.
+     * Shift dari hari sebelumnya yang belum ditutup otomatis direkonsiliasi & ditutup (Auto-Close on Day Change).
+     */
+    private function getActiveDailyShift($user): ?CashierShift
+    {
+        $today = Carbon::today();
+
+        // 1. Auto-close stale unclosed shifts from previous days
+        $staleShifts = CashierShift::where('user_id', $user->id)
+            ->whereNull('closed_at')
+            ->whereDate('opened_at', '<', $today)
+            ->get();
+
+        foreach ($staleShifts as $stale) {
+            $cashSales = (float) Order::where('cashier_shift_id', $stale->id)
+                ->where('payment_method', 'CASH')
+                ->where('payment_status', 'PAID')
+                ->sum('grand_total');
+
+            $expectedEnding = (float) $stale->starting_cash + $cashSales;
+
+            $stale->update([
+                'closed_at' => Carbon::parse($stale->opened_at)->endOfDay(),
+                'expected_ending_cash' => $expectedEnding,
+                'actual_ending_cash' => $expectedEnding,
+            ]);
+        }
+
+        // 2. Return active shift specifically for today
+        return CashierShift::where('user_id', $user->id)
+            ->whereNull('closed_at')
+            ->whereDate('opened_at', $today)
+            ->first();
+    }
+
+    /**
+     * Dapatkan Status Shift Kasir Hari Ini (Aktif / Belum Buka)
+     */
+    public function currentShift(Request $request): JsonResponse
+    {
+        $shift = $this->getActiveDailyShift($request->user());
+
+        if (!$shift) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'is_open' => false,
+                    'shift' => null,
+                    'cash_sales' => 0,
+                    'non_cash_sales' => 0,
+                    'total_sales' => 0,
+                    'orders_count' => 0,
+                    'expected_cash' => 0,
+                ],
+            ]);
+        }
+
+        $cashSales = (float) Order::where('cashier_shift_id', $shift->id)
+            ->where('payment_method', 'CASH')
+            ->where('payment_status', 'PAID')
+            ->sum('grand_total');
+
+        $nonCashSales = (float) Order::where('cashier_shift_id', $shift->id)
+            ->where('payment_method', '!=', 'CASH')
+            ->where('payment_status', 'PAID')
+            ->sum('grand_total');
+
+        $ordersCount = Order::where('cashier_shift_id', $shift->id)->count();
+        $expectedCash = (float) $shift->starting_cash + $cashSales;
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'is_open' => true,
+                'shift' => $shift,
+                'cash_sales' => $cashSales,
+                'non_cash_sales' => $nonCashSales,
+                'total_sales' => $cashSales + $nonCashSales,
+                'orders_count' => $ordersCount,
+                'expected_cash' => $expectedCash,
+            ],
+        ]);
+    }
+
     /**
      * Buka Shift Kasir Baru (Input Modal Awal Kas Laci)
      */
@@ -35,14 +121,12 @@ class PosController extends Controller
             'starting_cash' => 'required|numeric|min:0',
         ]);
 
-        $activeShift = CashierShift::where('user_id', $request->user()->id)
-            ->whereNull('closed_at')
-            ->first();
+        $activeShift = $this->getActiveDailyShift($request->user());
 
         if ($activeShift) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Anda masih memiliki shift kasir yang aktif.',
+                'message' => 'Anda sudah memiliki shift kasir yang aktif untuk hari ini.',
                 'data' => $activeShift,
             ], 400);
         }
@@ -58,12 +142,12 @@ class PosController extends Controller
             'SHIFT_OPEN',
             'CashierShift',
             $shift->id,
-            "Kasir {$request->user()->name} membuka shift kasir dengan modal Rp " . number_format($validated['starting_cash'], 0, ',', '.')
+            "Kasir {$request->user()->name} membuka shift kasir hari ini dengan modal Rp " . number_format($validated['starting_cash'], 0, ',', '.')
         );
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Shift kasir berhasil dibuka.',
+            'message' => 'Shift kasir hari ini berhasil dibuka.',
             'data' => $shift,
         ], 201);
     }
@@ -77,24 +161,22 @@ class PosController extends Controller
             'actual_ending_cash' => 'required|numeric|min:0',
         ]);
 
-        $shift = CashierShift::where('user_id', $request->user()->id)
-            ->whereNull('closed_at')
-            ->first();
+        $shift = $this->getActiveDailyShift($request->user());
 
         if (!$shift) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak ada shift kasir yang aktif.',
+                'message' => 'Tidak ada shift kasir yang aktif untuk hari ini.',
             ], 404);
         }
 
         // Calculate total cash sales in this shift
-        $cashSales = Order::where('cashier_shift_id', $shift->id)
+        $cashSales = (float) Order::where('cashier_shift_id', $shift->id)
             ->where('payment_method', 'CASH')
             ->where('payment_status', 'PAID')
             ->sum('grand_total');
 
-        $expectedEnding = $shift->starting_cash + $cashSales;
+        $expectedEnding = (float) $shift->starting_cash + $cashSales;
 
         $shift->update([
             'closed_at' => now(),
@@ -102,7 +184,7 @@ class PosController extends Controller
             'actual_ending_cash' => $validated['actual_ending_cash'],
         ]);
 
-        $difference = $validated['actual_ending_cash'] - $expectedEnding;
+        $difference = (float) $validated['actual_ending_cash'] - $expectedEnding;
 
         AuditService::log(
             'SHIFT_CLOSED',
@@ -119,6 +201,8 @@ class PosController extends Controller
             'data' => [
                 'shift' => $shift,
                 'difference' => $difference,
+                'expected_ending_cash' => $expectedEnding,
+                'cash_sales' => $cashSales,
             ],
         ]);
     }
@@ -128,15 +212,23 @@ class PosController extends Controller
      */
     public function storeOrder(Request $request): JsonResponse
     {
-        $shift = CashierShift::where('user_id', $request->user()->id)
-            ->whereNull('closed_at')
-            ->first();
+        $shift = $this->getActiveDailyShift($request->user());
 
         if (!$shift) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Buka shift kasir terlebih dahulu sebelum membuat pesanan.',
-            ], 400);
+            // Auto-open standard daily shift with default starting cash so checkout never fails
+            $shift = CashierShift::create([
+                'user_id' => $request->user()->id,
+                'opened_at' => now(),
+                'starting_cash' => 500000,
+                'expected_ending_cash' => 500000,
+            ]);
+
+            AuditService::log(
+                'SHIFT_AUTO_OPEN',
+                'CashierShift',
+                $shift->id,
+                "Sistem otomatis membuka shift kasir harian untuk {$request->user()->name} dengan modal default Rp 500.000"
+            );
         }
 
         $validated = $request->validate([

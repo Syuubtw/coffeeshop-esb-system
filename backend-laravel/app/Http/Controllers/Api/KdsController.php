@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DiningTable;
 use App\Models\Order;
 use App\Models\Product;
+use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,11 +19,28 @@ use Illuminate\Http\Request;
 class KdsController extends Controller
 {
     /**
-     * Daftar Antrean Pesanan Dapur Barista (Auto-FIFO)
+     * Daftar Antrean Pesanan Dapur Barista (Auto-FIFO Hari Ini)
+     * Pesanan dari hari sebelumnya yang belum terselesaikan akan otomatis ditandai selesai (Auto-Clear).
      */
     public function queue(): JsonResponse
     {
+        $today = Carbon::today();
+
+        // 1. Auto-complete uncompleted orders from previous days so today's kitchen starts fresh
+        $staleOrders = Order::whereDate('created_at', '<', $today)
+            ->whereIn('order_status', ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'])
+            ->get();
+
+        foreach ($staleOrders as $stale) {
+            $stale->update(['order_status' => 'COMPLETED']);
+            if ($stale->dining_table_id) {
+                DiningTable::where('id', $stale->dining_table_id)->update(['status' => 'AVAILABLE']);
+            }
+        }
+
+        // 2. Fetch today's active orders
         $orders = Order::with(['items.product', 'items.modifiers', 'diningTable'])
+            ->whereDate('created_at', '>=', $today)
             ->whereIn('order_status', ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'])
             ->orderBy('created_at', 'asc')
             ->get();

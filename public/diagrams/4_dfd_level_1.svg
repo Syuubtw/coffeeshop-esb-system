@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1250" width="100%" height="100%" style="background:#0F172A; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <defs>
+    <filter id="shadow-dfd1" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10B981"/>
+    </marker>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="50" y="25" width="1600" height="70" rx="12" fill="#1E293B" filter="url(#shadow-dfd1)"/>
+  <text x="80" y="68" fill="#F8FAFC" font-size="24" font-weight="bold">DATA FLOW DIAGRAM (DFD) LEVEL 1 — DEKOMPOSISI UTAMA</text>
+  <text x="1260" y="67" fill="#38BDF8" font-size="14" font-weight="600">7 Proses Inti &amp; 6 Data Store</text>
+
+  <!-- External Entities Column Left -->
+  <g transform="translate(60, 160)" filter="url(#shadow-dfd1)">
+    <rect width="180" height="80" rx="8" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <text x="90" y="45" fill="#38BDF8" font-size="14" font-weight="bold" text-anchor="middle">PELANGGAN</text>
+  </g>
+  <g transform="translate(60, 390)" filter="url(#shadow-dfd1)">
+    <rect width="180" height="80" rx="8" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <text x="90" y="45" fill="#10B981" font-size="14" font-weight="bold" text-anchor="middle">KASIR</text>
+  </g>
+  <g transform="translate(60, 620)" filter="url(#shadow-dfd1)">
+    <rect width="180" height="80" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <text x="90" y="45" fill="#F59E0B" font-size="14" font-weight="bold" text-anchor="middle">BARISTA / DAPUR</text>
+  </g>
+  <g transform="translate(60, 850)" filter="url(#shadow-dfd1)">
+    <rect width="180" height="80" rx="8" fill="#1E293B" stroke="#EC4899" stroke-width="2"/>
+    <text x="90" y="45" fill="#EC4899" font-size="14" font-weight="bold" text-anchor="middle">STAF GUDANG</text>
+  </g>
+
+  <!-- External Entities Column Right -->
+  <g transform="translate(1460, 390)" filter="url(#shadow-dfd1)">
+    <rect width="180" height="80" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="90" y="45" fill="#8B5CF6" font-size="14" font-weight="bold" text-anchor="middle">MANAJER / OWNER</text>
+  </g>
+  <g transform="translate(1460, 850)" filter="url(#shadow-dfd1)">
+    <rect width="180" height="80" rx="8" fill="#1E293B" stroke="#6366F1" stroke-width="2"/>
+    <text x="90" y="45" fill="#6366F1" font-size="14" font-weight="bold" text-anchor="middle">KARYAWAN</text>
+  </g>
+
+  <!-- PROCESS BUBBLES (Rounded rect / circle) -->
+  <!-- 1.0 Pemesanan Mandiri Meja -->
+  <g transform="translate(360, 150)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <text x="140" y="45" fill="#38BDF8" font-size="16" font-weight="bold" text-anchor="middle">1.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Pemesanan Mandiri Meja (QR)</text>
+  </g>
+
+  <!-- 2.0 Kasir POS &amp; Shift -->
+  <g transform="translate(360, 380)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <text x="140" y="45" fill="#10B981" font-size="16" font-weight="bold" text-anchor="middle">2.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Transaksi Kasir &amp; Shift</text>
+  </g>
+
+  <!-- 3.0 Antrean Dapur KDS -->
+  <g transform="translate(360, 610)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <text x="140" y="45" fill="#F59E0B" font-size="16" font-weight="bold" text-anchor="middle">3.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Antrean Dapur Barista (KDS)</text>
+  </g>
+
+  <!-- 4.0 Inventori &amp; Pengadaan -->
+  <g transform="translate(360, 840)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#EC4899" stroke-width="2"/>
+    <text x="140" y="45" fill="#EC4899" font-size="16" font-weight="bold" text-anchor="middle">4.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Inventori Stok &amp; Pengadaan PO</text>
+  </g>
+
+  <!-- 5.0 Presensi &amp; Payroll -->
+  <g transform="translate(1080, 840)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#6366F1" stroke-width="2"/>
+    <text x="140" y="45" fill="#6366F1" font-size="16" font-weight="bold" text-anchor="middle">5.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Presensi Staf &amp; Penggajian</text>
+  </g>
+
+  <!-- 6.0 Akuntansi &amp; Jurnal -->
+  <g transform="translate(1080, 610)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="140" y="45" fill="#8B5CF6" font-size="16" font-weight="bold" text-anchor="middle">6.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Jurnal Finansial &amp; Akuntansi</text>
+  </g>
+
+  <!-- 7.0 Pelaporan &amp; Dashboard -->
+  <g transform="translate(1080, 380)" filter="url(#shadow-dfd1)">
+    <rect width="280" height="100" rx="50" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <text x="140" y="45" fill="#38BDF8" font-size="16" font-weight="bold" text-anchor="middle">7.0</text>
+    <text x="140" y="68" fill="#FFF" font-size="13" font-weight="bold" text-anchor="middle">Pelaporan &amp; Analisis Owner</text>
+  </g>
+
+  <!-- DATA STORES (Open ended rects) -->
+  <!-- D1: dining_tables -->
+  <g transform="translate(730, 150)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#38BDF8" stroke-width="1.5"/>
+    <line x1="780" y1="150" x2="780" y2="210" stroke="#38BDF8" stroke-width="1.5"/>
+    <text x="755" y="185" fill="#38BDF8" font-size="14" font-weight="bold" text-anchor="middle">D1</text>
+    <text x="860" y="185" fill="#E2E8F0" font-size="13" text-anchor="middle">dining_tables</text>
+  </g>
+
+  <!-- D2: orders &amp; items -->
+  <g transform="translate(730, 270)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#38BDF8" stroke-width="1.5"/>
+    <line x1="780" y1="270" x2="780" y2="330" stroke="#38BDF8" stroke-width="1.5"/>
+    <text x="755" y="305" fill="#38BDF8" font-size="14" font-weight="bold" text-anchor="middle">D2</text>
+    <text x="860" y="305" fill="#E2E8F0" font-size="13" text-anchor="middle">orders &amp; order_items</text>
+  </g>
+
+  <!-- D3: products &amp; recipes -->
+  <g transform="translate(730, 420)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+    <line x1="780" y1="420" x2="780" y2="480" stroke="#10B981" stroke-width="1.5"/>
+    <text x="755" y="455" fill="#10B981" font-size="14" font-weight="bold" text-anchor="middle">D3</text>
+    <text x="860" y="455" fill="#E2E8F0" font-size="13" text-anchor="middle">products &amp; recipes</text>
+  </g>
+
+  <!-- D4: raw_materials &amp; stock -->
+  <g transform="translate(730, 610)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
+    <line x1="780" y1="610" x2="780" y2="670" stroke="#F59E0B" stroke-width="1.5"/>
+    <text x="755" y="645" fill="#F59E0B" font-size="14" font-weight="bold" text-anchor="middle">D4</text>
+    <text x="860" y="645" fill="#E2E8F0" font-size="13" text-anchor="middle">raw_materials &amp; stock</text>
+  </g>
+
+  <!-- D5: employees &amp; attendances -->
+  <g transform="translate(730, 840)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#6366F1" stroke-width="1.5"/>
+    <line x1="780" y1="840" x2="780" y2="900" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="755" y="875" fill="#6366F1" font-size="14" font-weight="bold" text-anchor="middle">D5</text>
+    <text x="860" y="875" fill="#E2E8F0" font-size="13" text-anchor="middle">employees &amp; presensi</text>
+  </g>
+
+  <!-- D6: journal_entries -->
+  <g transform="translate(730, 720)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+    <line x1="780" y1="720" x2="780" y2="780" stroke="#8B5CF6" stroke-width="1.5"/>
+    <text x="755" y="755" fill="#8B5CF6" font-size="14" font-weight="bold" text-anchor="middle">D6</text>
+    <text x="860" y="755" fill="#E2E8F0" font-size="13" text-anchor="middle">journal_entries &amp; COA</text>
+  </g>
+
+  <!-- FLOW ARROWS -->
+  <!-- Pelanggan -> 1.0 -->
+  <line x1="240" y1="190" x2="360" y2="190" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="250" y="180" fill="#38BDF8" font-size="11">Input Order Meja</text>
+  <line x1="360" y1="215" x2="240" y2="215" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="250" y="235" fill="#E2E8F0" font-size="11">Status Pesanan</text>
+
+  <!-- 1.0 -> D1 &amp; D2 -->
+  <line x1="640" y1="180" x2="730" y2="180" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="640" y1="220" x2="730" y2="280" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- 2.0 (Kasir) <-> D2 -->
+  <line x1="240" y1="430" x2="360" y2="430" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <line x1="640" y1="410" x2="730" y2="320" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- 3.0 (Dapur) reads D2 -->
+  <line x1="730" y1="310" x2="640" y2="630" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="360" y1="660" x2="240" y2="660" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- 4.0 Gudang <-> D4 -->
+  <line x1="240" y1="890" x2="360" y2="890" stroke="#EC4899" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="640" y1="890" x2="730" y2="660" stroke="#EC4899" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- 5.0 Karyawan <-> D5 -->
+  <line x1="1460" y1="890" x2="1360" y2="890" stroke="#6366F1" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="1080" y1="890" x2="970" y2="890" stroke="#6366F1" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- 6.0 Akuntansi <-> D6 -->
+  <line x1="1080" y1="660" x2="970" y2="740" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- 7.0 Pelaporan -> Owner -->
+  <line x1="1360" y1="430" x2="1460" y2="430" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Footer Legend -->
+  <rect x="50" y="1120" width="1600" height="90" rx="10" fill="#1E293B" stroke="#334155"/>
+  <text x="80" y="1155" fill="#F8FAFC" font-size="15" font-weight="bold">NOTASI DFD LEVEL 1 (DEKOMPOSISI PROSES SISTEM):</text>
+  <text x="80" y="1185" fill="#94A3B8" font-size="13">• Kapsul Bulat = Proses Fungsional (1.0 s/d 7.0)  |  Dua Garis Sejajar = Simpanan Data (Data Store D1 s/d D6)</text>
+</svg>

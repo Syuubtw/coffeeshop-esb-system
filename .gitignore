@@ -3,6 +3,8 @@ node_modules/
 **/node_modules/
 vendor/
 **/vendor/
+!backend-laravel/resources/views/vendor/
+!backend-laravel/resources/views/vendor/**
 
 # Environment files
 .env
@@ -43,3 +45,8 @@ Thumbs.db
 # Private documents
 *.docx
 DAFTAR_AKUN_DASHBOARD.md
+
+# Local database tools
+public/db.php
+*.log
+

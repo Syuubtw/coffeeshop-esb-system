@@ -13,12 +13,13 @@ import {
   Truck,
   ShoppingCart,
   Clock,
+  Trash2,
+  History,
+  X,
+  Building2,
   Phone,
   Mail,
-  MapPin,
-  Building2,
-  Trash2,
-  History
+  MapPin
 } from 'lucide-react';
 import api from '../services/api';
 import { exportStyledExcel } from '../utils/exportCsv';
@@ -94,84 +95,32 @@ interface StockMovementLog {
 const formatHumanQuantity = (qty: number, m: { name?: string; sku?: string; unit?: string }): { primary: string; secondary?: string } => {
   const name = (m.name || '').toLowerCase();
   const sku = (m.sku || '').toUpperCase();
+  const unit = (m.unit || '').toLowerCase();
 
-  // Susu (ml) -> Liter & Kotak
-  if (name.includes('susu') || name.includes('milk') || sku.includes('DAIRY')) {
+  // 1. Bahan Cair (ml / Liter)
+  if (unit === 'ml' || unit === 'liter' || name.includes('susu') || name.includes('air') || name.includes('sirup') || name.includes('aren') || sku.includes('LIQ') || sku.includes('WATER') || sku.includes('DAIRY')) {
     const liter = (qty / 1000).toFixed(1).replace('.0', '');
     return {
       primary: `${liter} Liter`,
-      secondary: `≈ ${liter} Kotak (1 L)`
+      secondary: `${qty.toLocaleString('id-ID')} ml`
     };
   }
-  // Air Mineral Galon (ml) -> Galon & Liter
-  if (name.includes('galon') || name.includes('air') || sku.includes('WATER')) {
-    const galon = (qty / 19000).toFixed(1).replace('.0', '');
-    const liter = (qty / 1000).toFixed(1).replace('.0', '');
+
+  // 2. Bahan Bubuk / Biji / Padat (gram / kg)
+  if (unit === 'gram' || unit === 'kg' || sku.includes('COFFEE') || sku.includes('ING') || sku.includes('PASTRY') || name.includes('kopi') || name.includes('matcha') || name.includes('cokelat') || name.includes('es batu') || name.includes('teh')) {
+    if (qty >= 1000) {
+      const kg = (qty / 1000).toFixed(1).replace('.0', '');
+      return {
+        primary: `${kg} kg`,
+        secondary: `${qty.toLocaleString('id-ID')} gram`
+      };
+    }
     return {
-      primary: `${galon} Galon`,
-      secondary: `≈ ${liter} L`
+      primary: `${qty.toLocaleString('id-ID')} gram`
     };
   }
-  // Sirup (ml) -> Liter & Botol
-  if (name.includes('sirup') || name.includes('syrup')) {
-    const btl = (qty / 750).toFixed(1).replace('.0', '');
-    const liter = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${liter} Liter`,
-      secondary: `≈ ${btl} Botol (750 ml)`
-    };
-  }
-  // Gula Aren Cair (ml) -> Liter & Botol
-  if (name.includes('gula aren') || name.includes('sweet')) {
-    const liter = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${liter} Liter`,
-      secondary: `≈ ${liter} Botol (1 L)`
-    };
-  }
-  // Biji Kopi (gram) -> kg & Bag
-  if (name.includes('kopi') || name.includes('coffee') || sku.includes('COFFEE')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${kg} Bag (1 kg)`
-    };
-  }
-  // Matcha Powder (gram) -> kg & Pouch
-  if (name.includes('matcha') || name.includes('tea')) {
-    const pouch = (qty / 500).toFixed(1).replace('.0', '');
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${pouch} Pouch (500 g)`
-    };
-  }
-  // Cokelat Bubuk (gram) -> kg & Pack
-  if (name.includes('cokelat') || name.includes('choco')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${kg} Pack (1 kg)`
-    };
-  }
-  // Adonan Pastry (gram) -> kg & Pack
-  if (name.includes('pastry') || name.includes('croissant') || sku.includes('PASTRY')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${kg} Pack (1 kg)`
-    };
-  }
-  // Es Batu (gram) -> kg & Karung
-  if (name.includes('es batu') || name.includes('ice')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    const karung = (qty / 10000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${karung} Karung (10 kg)`
-    };
-  }
-  // Cup Slop (pcs) -> Slop & pcs
+
+  // 3. Kemasan Cup (Slop & pcs)
   if (name.includes('cup') || sku.includes('CUP')) {
     const slops = Math.floor(qty / 50);
     const sisa = qty % 50;
@@ -181,23 +130,7 @@ const formatHumanQuantity = (qty: number, m: { name?: string; sku?: string; unit
     };
   }
 
-  if (m.unit === 'gram') {
-    if (qty >= 1000) {
-      const kg = (qty / 1000).toFixed(1).replace('.0', '');
-      return { primary: `${kg} kg`, secondary: `${qty.toLocaleString('id-ID')} g` };
-    }
-    return { primary: `${qty.toLocaleString('id-ID')} gram` };
-  }
-
-  if (m.unit === 'ml') {
-    if (qty >= 1000) {
-      const liter = (qty / 1000).toFixed(1).replace('.0', '');
-      return { primary: `${liter} Liter`, secondary: `${qty.toLocaleString('id-ID')} ml` };
-    }
-    return { primary: `${qty.toLocaleString('id-ID')} ml` };
-  }
-
-  return { primary: `${qty.toLocaleString('id-ID')} ${m.unit}` };
+  return { primary: `${qty.toLocaleString('id-ID')} ${m.unit || 'pcs'}` };
 };
 
 
@@ -499,6 +432,61 @@ export const WarehouseDashboard: React.FC = () => {
   const [opnameReasons, setOpnameReasons] = useState<{ [materialId: number]: string }>({});
   const [opnameHistory, setOpnameHistory] = useState<any[]>([]);
   const [isSubmittingOpname, setIsSubmittingOpname] = useState(false);
+
+  // Add Material State (Konsisten kg, liter, pcs, gram, ml)
+  const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
+  const [matName, setMatName] = useState('');
+  const [matUnit, setMatUnit] = useState<'kg' | 'liter' | 'pcs' | 'gram' | 'ml'>('kg');
+  const [matMinAlert, setMatMinAlert] = useState<number>(2);
+  const [matInitialStock, setMatInitialStock] = useState<number>(5);
+  const [matCostPerUnit, setMatCostPerUnit] = useState<number>(100000);
+  const [isSubmittingMat, setIsSubmittingMat] = useState(false);
+
+  const handleAddMaterial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!matName) {
+      alert('Nama bahan baku wajib diisi!');
+      return;
+    }
+    setIsSubmittingMat(true);
+    try {
+      let finalUnit: string = matUnit;
+      let finalStock = Number(matInitialStock) || 0;
+      let finalMin = Number(matMinAlert) || 0;
+      let finalCost = Number(matCostPerUnit) || 0;
+
+      if (matUnit === 'kg') {
+        finalUnit = 'gram';
+        finalStock = finalStock * 1000;
+        finalMin = finalMin * 1000;
+        finalCost = finalCost > 0 ? Math.round(finalCost / 1000) : 0;
+      } else if (matUnit === 'liter') {
+        finalUnit = 'ml';
+        finalStock = finalStock * 1000;
+        finalMin = finalMin * 1000;
+        finalCost = finalCost > 0 ? Math.round(finalCost / 1000) : 0;
+      }
+
+      const res = await api.post('/inventory/materials', {
+        name: matName,
+        unit: finalUnit,
+        min_stock_alert: finalMin,
+        current_stock: finalStock,
+        avg_cost_per_unit: finalCost,
+      });
+      alert(res.data.message || 'Bahan baku baru berhasil didaftarkan ke gudang!');
+      setShowAddMaterialModal(false);
+      setMatName('');
+      setMatInitialStock(5);
+      setMatMinAlert(2);
+      setMatCostPerUnit(100000);
+      fetchDashboardData('inventory');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menambahkan bahan baku');
+    } finally {
+      setIsSubmittingMat(false);
+    }
+  };
 
   const isFetchingRef = useRef(false);
 
@@ -1134,12 +1122,20 @@ export const WarehouseDashboard: React.FC = () => {
               />
             </div>
 
-            <button
-              onClick={handleExportStock}
-              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-500" /> Unduh Laporan Excel
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAddMaterialModal(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> + Tambah Bahan Baku Baru
+              </button>
+              <button
+                onClick={handleExportStock}
+                className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-500" /> Unduh Laporan Excel
+              </button>
+            </div>
           </div>
 
           <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
@@ -1788,6 +1784,163 @@ export const WarehouseDashboard: React.FC = () => {
                   className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition cursor-pointer"
                 >
                   {isSubmittingPo ? 'Mengajukan...' : 'Ajukan PO ke Store Manager'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH BAHAN BAKU BARU */}
+      {showAddMaterialModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Tambah Bahan Baku Baru</h3>
+                  <p className="text-xs text-slate-500">Kode SKU otomatis di-generate oleh sistem</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddMaterialModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddMaterial} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nama Bahan Baku <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Sirup Pandan Wangi, Susu Almond, dll."
+                  value={matName}
+                  onChange={(e) => setMatName(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Satuan Ukur Bahan <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={matUnit}
+                  onChange={(e) => {
+                    const u = e.target.value as any;
+                    setMatUnit(u);
+                    if (u === 'kg') {
+                      setMatMinAlert(2);
+                      setMatInitialStock(5);
+                      setMatCostPerUnit(120000);
+                    } else if (u === 'liter') {
+                      setMatMinAlert(2);
+                      setMatInitialStock(10);
+                      setMatCostPerUnit(20000);
+                    } else if (u === 'pcs') {
+                      setMatMinAlert(100);
+                      setMatInitialStock(500);
+                      setMatCostPerUnit(1500);
+                    } else {
+                      setMatMinAlert(1000);
+                      setMatInitialStock(2000);
+                      setMatCostPerUnit(50);
+                    }
+                  }}
+                  className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 font-bold"
+                >
+                  <option value="kg">Kilogram (kg) — Kopi, Bubuk Minuman, Biji, Bahan Padat</option>
+                  <option value="liter">Liter (L) — Susu Segar, Sirup, Air Galon, Bahan Cair</option>
+                  <option value="pcs">Pcs / Buah — Cup Plastik, Tutup, Sedotan, Kemasan</option>
+                  <option value="gram">Gram (g) — Takaran Kecil / Bumbu Halus</option>
+                  <option value="ml">Mililiter (ml) — Konsentrat / Esens Cair</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Batas Minimum Stok ({matUnit})
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={matMinAlert}
+                    onChange={(e) => setMatMinAlert(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Stok Fisik Awal ({matUnit})
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={matInitialStock}
+                    onChange={(e) => setMatInitialStock(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Harga Beli / Biaya Satuan (Rp/{matUnit})
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={matCostPerUnit}
+                  onChange={(e) => setMatCostPerUnit(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900"
+                />
+              </div>
+
+              {/* Conversion Preview Badge */}
+              {matUnit === 'kg' && (
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+                  💡 <strong>Konversi Takaran Kasir:</strong> {matInitialStock} kg = <strong>{((matInitialStock || 0) * 1000).toLocaleString('id-ID')} gram</strong> @ Rp {Math.round((matCostPerUnit || 0) / 1000).toLocaleString('id-ID')}/g (otomatis disesuaikan ke takaran resep mesin kasir).
+                </div>
+              )}
+              {matUnit === 'liter' && (
+                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] leading-relaxed">
+                  💡 <strong>Konversi Takaran Kasir:</strong> {matInitialStock} Liter = <strong>{((matInitialStock || 0) * 1000).toLocaleString('id-ID')} ml</strong> @ Rp {Math.round((matCostPerUnit || 0) / 1000).toLocaleString('id-ID')}/ml (otomatis disesuaikan ke takaran resep minuman).
+                </div>
+              )}
+              {matUnit === 'pcs' && (
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-[11px] leading-relaxed">
+                  📦 <strong>Satuan Kemasan:</strong> Bahan dihitung per buah / item kemasan.
+                </div>
+              )}
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddMaterialModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingMat}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {isSubmittingMat ? 'Mendaftarkan...' : 'Simpan Bahan Baku'}
                 </button>
               </div>
             </form>

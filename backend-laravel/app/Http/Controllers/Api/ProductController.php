@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Group(
-    name: '08. Manajer (Katalog Menu & Resep BOM)',
-    description: 'Manajemen menu & kategori kopi/makanan, formula resep Bill of Materials (BOM), dan ketersediaan stok.',
+    name: '08. Manajer (Katalog Menu & Resep)',
+    description: 'Manajemen menu & kategori kopi/makanan, formula resep menu, dan ketersediaan stok.',
     weight: 8
 )]
 class ProductController extends Controller
 {
     /**
-     * Daftar Seluruh Menu Kopi / Makanan Beserta Resep BOM
+     * Daftar Seluruh Menu Kopi / Makanan Beserta Resep
      */
     public function index(Request $request): JsonResponse
     {
@@ -54,7 +54,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Tambah Menu Baru Beserta Formula Takaran Resep (BOM)
+     * Tambah Menu Baru Beserta Formula Takaran Resep
      */
     public function store(Request $request): JsonResponse
     {
@@ -117,7 +117,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Perbarui Detail Menu, Harga Jual, dan Komposisi Resep BOM
+     * Perbarui Detail Menu, Harga Jual, dan Komposisi Resep
      */
     public function update(Request $request, int $id): JsonResponse
     {

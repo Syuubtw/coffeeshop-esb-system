@@ -13,7 +13,11 @@ import {
   Printer,
   CheckCircle,
   Coffee,
-  Banknote
+  Banknote,
+  Lock,
+  Unlock,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -74,6 +78,70 @@ export const CashierPos: React.FC = () => {
   const [isSuccessModal, setIsSuccessModal] = useState(false);
   const [lastReceipt, setLastReceipt] = useState<any | null>(null);
   const isFetchingRef = useRef(false);
+
+  // Shift Management State
+  const [shiftInfo, setShiftInfo] = useState<{
+    is_open: boolean;
+    shift: any;
+    cash_sales: number;
+    non_cash_sales: number;
+    total_sales: number;
+    orders_count: number;
+    expected_cash: number;
+  } | null>(null);
+  const [showOpenShiftModal, setShowOpenShiftModal] = useState(false);
+  const [showCloseShiftModal, setShowCloseShiftModal] = useState(false);
+  const [startingCashInput, setStartingCashInput] = useState<number>(500000);
+  const [endingCashInput, setEndingCashInput] = useState<number>(0);
+  const [isSubmittingShift, setIsSubmittingShift] = useState(false);
+
+  const fetchCurrentShift = async () => {
+    try {
+      const res = await api.get('/pos/shift/current');
+      if (res.data?.data) {
+        setShiftInfo(res.data.data);
+      }
+    } catch {
+      // offline / mock fallback
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentShift();
+  }, []);
+
+  const handleOpenShift = async () => {
+    setIsSubmittingShift(true);
+    try {
+      await api.post('/pos/shift/open', { starting_cash: startingCashInput });
+      setShowOpenShiftModal(false);
+      await fetchCurrentShift();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal membuka shift kasir');
+    } finally {
+      setIsSubmittingShift(false);
+    }
+  };
+
+  const handleCloseShift = async () => {
+    setIsSubmittingShift(true);
+    try {
+      const res = await api.post('/pos/shift/close', { actual_ending_cash: endingCashInput });
+      const diff = res.data?.data?.difference ?? 0;
+      const diffMsg = diff === 0
+        ? 'Kas fisik laci pas (Sesuai)!'
+        : diff > 0
+        ? `Kas fisik berlebih +${formatIDR(diff)}`
+        : `Kas fisik selisih kurang -${formatIDR(Math.abs(diff))}`;
+      alert(`Shift kasir berhasil ditutup! ${diffMsg}`);
+      setShowCloseShiftModal(false);
+      await fetchCurrentShift();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menutup shift kasir');
+    } finally {
+      setIsSubmittingShift(false);
+    }
+  };
 
   // Fetch products once on mount
   useEffect(() => {
@@ -210,6 +278,7 @@ export const CashierPos: React.FC = () => {
         bank_name: paymentType === 'CASH' ? 'Uang Tunai' : 'QRIS',
       });
       fetchRecentOrders();
+      fetchCurrentShift();
     } catch {
       setLastReceipt({
         order_number: 'POS-' + Math.floor(100000 + Math.random() * 900000),
@@ -232,6 +301,7 @@ export const CashierPos: React.FC = () => {
     try {
       await api.patch(`/pos/orders/${orderId}/pay`, { payment_method: 'CASH' });
       fetchRecentOrders();
+      fetchCurrentShift();
     } catch {
       // Local fallback
       setTableOrders((prev) =>
@@ -300,12 +370,48 @@ export const CashierPos: React.FC = () => {
           </button>
         </div>
 
-        {/* Live Status indicator */}
+        {/* Live Status indicator & Shift Controls */}
         <div className="flex items-center gap-3 text-xs">
+          {/* Shift Status Button */}
+          {shiftInfo?.is_open ? (
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Shift Aktif • Modal: {formatIDR(shiftInfo.shift?.starting_cash || 0)}
+              </span>
+              <button
+                onClick={() => {
+                  setEndingCashInput(shiftInfo.expected_cash || shiftInfo.shift?.starting_cash || 0);
+                  setShowCloseShiftModal(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold transition cursor-pointer"
+                title="Tutup Shift Kasir Hari Ini & Rekonsiliasi Kas"
+              >
+                <Lock className="w-3.5 h-3.5 text-rose-600" />
+                Tutup Shift
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 font-bold border border-amber-300">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                Belum Buka Shift
+              </span>
+              <button
+                onClick={() => setShowOpenShiftModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs transition cursor-pointer"
+                title="Buka Shift Kasir Baru Hari Ini"
+              >
+                <Unlock className="w-3.5 h-3.5" />
+                Buka Shift Kasir
+              </button>
+            </div>
+          )}
+
           {unpaidTableCount > 0 && (
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold border border-amber-300">
               <Clock className="w-3.5 h-3.5 text-amber-700 animate-spin" />
-              {unpaidTableCount} Meja Menunggu Pembayaran
+              {unpaidTableCount} Meja Menunggu Bayar
             </span>
           )}
           <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
@@ -862,6 +968,213 @@ export const CashierPos: React.FC = () => {
                 className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
               >
                 Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OPEN SHIFT MODAL */}
+      {showOpenShiftModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <Unlock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Buka Shift Kasir (Awal Hari)</h3>
+                  <p className="text-xs text-slate-500">Mulai operasional kasir baru hari ini</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowOpenShiftModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Modal Kas Awal di Laci (Uang Pecahan/Kembalian)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="10000"
+                    value={startingCashInput}
+                    onChange={(e) => setStartingCashInput(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 text-sm font-semibold rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 transition"
+                  />
+                </div>
+              </div>
+
+              {/* Quick Preset Buttons */}
+              <div className="flex gap-2">
+                {[300000, 500000, 1000000].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setStartingCashInput(preset)}
+                    className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                      startingCashInput === preset
+                        ? 'bg-amber-500 text-white border-amber-500'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                    }`}
+                  >
+                    {formatIDR(preset)}
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/60 text-xs text-amber-800 space-y-1">
+                <p className="font-semibold flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  Aturan Buka Kasir Harian:
+                </p>
+                <p className="text-[11px] leading-relaxed">
+                  Shift kasir berlaku untuk 1 hari kalender operasional. Jika pergantian hari terjadi, shift kasir kemarin otomatis ditutup dan kasir memulai shift baru hari ini.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowOpenShiftModal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isSubmittingShift}
+                onClick={handleOpenShift}
+                className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
+              >
+                {isSubmittingShift ? 'Membuka...' : 'Buka Shift Sekarang'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CLOSE SHIFT MODAL & DRAWER RECONCILIATION */}
+      {showCloseShiftModal && shiftInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Tutup Shift & Rekonsiliasi Kas</h3>
+                  <p className="text-xs text-slate-500">Hitung kas fisik laci sebelum tutup kasir hari ini</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCloseShiftModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Shift Summary Cards */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <span className="text-slate-400 block text-[10px]">Modal Awal:</span>
+                <span className="font-bold text-slate-800 font-mono text-sm">
+                  {formatIDR(shiftInfo.shift?.starting_cash || 0)}
+                </span>
+              </div>
+              <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100">
+                <span className="text-emerald-700 block text-[10px]">Penjualan Tunai:</span>
+                <span className="font-bold text-emerald-800 font-mono text-sm">
+                  +{formatIDR(shiftInfo.cash_sales || 0)}
+                </span>
+              </div>
+              <div className="bg-blue-50/60 p-3 rounded-2xl border border-blue-100">
+                <span className="text-blue-700 block text-[10px]">Penjualan QRIS:</span>
+                <span className="font-bold text-blue-800 font-mono text-sm">
+                  {formatIDR(shiftInfo.non_cash_sales || 0)}
+                </span>
+              </div>
+              <div className="bg-amber-50/80 p-3 rounded-2xl border border-amber-200/60">
+                <span className="text-amber-800 block text-[10px] font-bold">Harus Ada di Laci:</span>
+                <span className="font-bold text-amber-900 font-mono text-sm">
+                  {formatIDR(shiftInfo.expected_cash || ((shiftInfo.shift?.starting_cash || 0) + (shiftInfo.cash_sales || 0)))}
+                </span>
+              </div>
+            </div>
+
+            {/* Input Ending Cash */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Hitung Fisik Uang Tunai di Laci Kasir Sekarang:
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={endingCashInput}
+                  onChange={(e) => setEndingCashInput(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 text-sm font-semibold rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 transition"
+                />
+              </div>
+            </div>
+
+            {/* Realtime Difference Pill */}
+            {(() => {
+              const expected = shiftInfo.expected_cash || ((shiftInfo.shift?.starting_cash || 0) + (shiftInfo.cash_sales || 0));
+              const diff = endingCashInput - expected;
+              if (diff === 0) {
+                return (
+                  <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-medium flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Uang fisik pas sesuai dengan perhitungan sistem! (Selisih: Rp 0)</span>
+                  </div>
+                );
+              } else if (diff > 0) {
+                return (
+                  <div className="p-3 rounded-2xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-medium flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Uang fisik berlebih +{formatIDR(diff)} (Surplus)</span>
+                  </div>
+                );
+              } else {
+                return (
+                  <div className="p-3 rounded-2xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-medium flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>Selisih uang kurang -{formatIDR(Math.abs(diff))} (Periksa kembali uang di laci)</span>
+                  </div>
+                );
+              }
+            })()}
+
+            <div className="flex gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowCloseShiftModal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isSubmittingShift}
+                onClick={handleCloseShift}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
+              >
+                {isSubmittingShift ? 'Menutup...' : 'Tutup Shift Sekarang'}
               </button>
             </div>
           </div>

@@ -55,29 +55,30 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => '### Dokumentasi Resmi REST API — CoffeeShop ESB & POS System
+        'description' => '### Dokumentasi Resmi REST API — CoffeeShop System
 Seluruh endpoint telah dikelompokkan berdasarkan **Fungsi Operasional & Hak Akses Role** untuk memudahkan navigasi saat pengujian sistem:
 1. **01. Autentikasi Staf**: Login, sesi, dan Sanctum Bearer Token (Semua Role Staf).
-2. **02. Pelanggan**: Self-service pemesanan QR meja (Mie Gacoan style).
-3. **03. Pembayaran**: Integrasi Midtrans Payment Gateway (Snap & Webhook).
-4. **04. Kasir**: Front-Office POS, transaksi kasir, dan buka/tutup kas laci harian.
+2. **02. Pelanggan**: Self-service pemesanan QR meja mandiri.
+3. **03. Pembayaran**: Integrasi Payment Gateway (Snap & Webhook).
+4. **04. Kasir**: Front-Office Kasir, transaksi pembayaran, dan buka/tutup kas laci harian.
 5. **05. Barista**: KDS Kitchen Display System dapur (Auto-FIFO).
 6. **06. Gudang**: Manajemen stok bahan baku, opname, waste, dan kartu stok.
-7. **07. Gudang (Pengadaan)**: Pengadaan barang ke supplier & approval PO.
-8. **08. Manajer**: Katalog menu, kategori, dan formula resep (BOM).
+7. **07. Gudang (Pengadaan)**: Pengajuan pembelian bahan baku (PO) & persetujuan manajer.
+8. **08. Manajer**: Katalog menu, kategori, dan formula resep menu.
 9. **09. Manajer (Audit)**: Audit selisih opname, void anti-fraud, dan rekonsiliasi kas.
 10. **10. HR & Presensi**: Presensi mandiri (QR/GPS), kiosk tablet, dan rekap karyawan.
-11. **11. Owner (Akuntansi)**: Jurnal otomatis ESB, buku besar, neraca, dan laba rugi.
+11. **11. Owner (Akuntansi)**: Jurnal otomatis terintegrasi, buku besar, neraca, dan laba rugi.
 12. **12. Owner (Statistik)**: Executive dashboard omset, HPP, dan tren penjualan.
 
 ---
 **Petunjuk Otorisasi Token:**
-- Klik **01. Autentikasi Staf** -> Jalankan **POST /api/auth/login** (Email: `admin@coffeeshop.test` | Password: `password`).
-- Salin string `access_token`, lalu tempel pada tombol **Authorize / Bearer Token** di pojok kanan atas.',
+- Masuk ke kelompok **01. Autentikasi Staf** -> Jalankan endpoint **Login Staf & Terbitkan Bearer Token Sanctum** (`POST /api/auth/login`).
+- Masukkan kredensial staf (contoh: Email `admin@coffeeshop.test` | Password `password`).
+- Klik **Send API Request**. Bearer Token akan otomatis terpasang untuk menguji seluruh endpoint lainnya pada dokumentasi ini.',
     ],
 
     'ui' => [
-        'title' => 'CoffeeShop ESB - Dokumentasi REST API',
+        'title' => 'CoffeeShop - Dokumentasi REST API',
     ],
 
     /*

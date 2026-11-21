@@ -20,7 +20,11 @@ import {
   ShoppingCart, 
   TrendingUp,
   MapPin,
-  MessageSquare
+  MessageSquare,
+  UserCheck,
+  UserPlus,
+  Pencil,
+  X
 } from 'lucide-react';
 import api from '../services/api';
 import { exportStyledExcel } from '../utils/exportCsv';
@@ -76,84 +80,32 @@ const FALLBACK_MATERIALS: RawMaterialStock[] = [
 const formatHumanQuantity = (qty: number, m: { name?: string; sku?: string; unit?: string }): { primary: string; secondary?: string } => {
   const name = (m.name || '').toLowerCase();
   const sku = (m.sku || '').toUpperCase();
+  const unit = (m.unit || '').toLowerCase();
 
-  // Susu (ml) -> Liter & Kotak
-  if (name.includes('susu') || name.includes('milk') || sku.includes('DAIRY')) {
+  // 1. Bahan Cair (ml / Liter)
+  if (unit === 'ml' || unit === 'liter' || name.includes('susu') || name.includes('air') || name.includes('sirup') || name.includes('aren') || sku.includes('LIQ') || sku.includes('WATER') || sku.includes('DAIRY')) {
     const liter = (qty / 1000).toFixed(1).replace('.0', '');
     return {
       primary: `${liter} Liter`,
-      secondary: `≈ ${liter} Kotak (1 L)`
+      secondary: `${qty.toLocaleString('id-ID')} ml`
     };
   }
-  // Air Mineral Galon (ml) -> Galon & Liter
-  if (name.includes('galon') || name.includes('air') || sku.includes('WATER')) {
-    const galon = (qty / 19000).toFixed(1).replace('.0', '');
-    const liter = (qty / 1000).toFixed(1).replace('.0', '');
+
+  // 2. Bahan Bubuk / Biji / Padat (gram / kg)
+  if (unit === 'gram' || unit === 'kg' || sku.includes('COFFEE') || sku.includes('ING') || sku.includes('PASTRY') || name.includes('kopi') || name.includes('matcha') || name.includes('cokelat') || name.includes('es batu') || name.includes('teh')) {
+    if (qty >= 1000) {
+      const kg = (qty / 1000).toFixed(1).replace('.0', '');
+      return {
+        primary: `${kg} kg`,
+        secondary: `${qty.toLocaleString('id-ID')} gram`
+      };
+    }
     return {
-      primary: `${galon} Galon`,
-      secondary: `≈ ${liter} Liter`
+      primary: `${qty.toLocaleString('id-ID')} gram`
     };
   }
-  // Sirup (ml) -> Liter & Botol
-  if (name.includes('sirup') || name.includes('syrup')) {
-    const btl = (qty / 750).toFixed(1).replace('.0', '');
-    const liter = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${liter} Liter`,
-      secondary: `≈ ${btl} Botol (750 ml)`
-    };
-  }
-  // Gula Aren Cair (ml) -> Liter & Botol
-  if (name.includes('gula aren') || name.includes('sweet')) {
-    const liter = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${liter} Liter`,
-      secondary: `≈ ${liter} Botol (1 L)`
-    };
-  }
-  // Biji Kopi (gram) -> kg & Bag
-  if (name.includes('kopi') || name.includes('coffee') || sku.includes('COFFEE')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${kg} Bag (1 kg)`
-    };
-  }
-  // Matcha Powder (gram) -> kg & Pouch
-  if (name.includes('matcha') || name.includes('tea')) {
-    const pouch = (qty / 500).toFixed(1).replace('.0', '');
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${pouch} Pouch (500 g)`
-    };
-  }
-  // Cokelat Bubuk (gram) -> kg & Pack
-  if (name.includes('cokelat') || name.includes('choco')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${kg} Pack (1 kg)`
-    };
-  }
-  // Adonan Pastry (gram) -> kg & Pack
-  if (name.includes('pastry') || name.includes('croissant') || sku.includes('PASTRY')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${kg} Pack (1 kg)`
-    };
-  }
-  // Es Batu (gram) -> kg & Karung
-  if (name.includes('es batu') || name.includes('ice')) {
-    const kg = (qty / 1000).toFixed(1).replace('.0', '');
-    const karung = (qty / 10000).toFixed(1).replace('.0', '');
-    return {
-      primary: `${kg} kg`,
-      secondary: `≈ ${karung} Karung (10 kg)`
-    };
-  }
-  // Cup Slop (pcs) -> Slop & pcs
+
+  // 3. Kemasan Cup (Slop & pcs)
   if (name.includes('cup') || sku.includes('CUP')) {
     const slops = Math.floor(qty / 50);
     const sisa = qty % 50;
@@ -163,23 +115,7 @@ const formatHumanQuantity = (qty: number, m: { name?: string; sku?: string; unit
     };
   }
 
-  if (m.unit === 'gram') {
-    if (qty >= 1000) {
-      const kg = (qty / 1000).toFixed(1).replace('.0', '');
-      return { primary: `${kg} kg`, secondary: `${qty.toLocaleString('id-ID')} g` };
-    }
-    return { primary: `${qty.toLocaleString('id-ID')} gram` };
-  }
-
-  if (m.unit === 'ml') {
-    if (qty >= 1000) {
-      const liter = (qty / 1000).toFixed(1).replace('.0', '');
-      return { primary: `${liter} Liter`, secondary: `${qty.toLocaleString('id-ID')} ml` };
-    }
-    return { primary: `${qty.toLocaleString('id-ID')} ml` };
-  }
-
-  return { primary: `${qty.toLocaleString('id-ID')} ${m.unit}` };
+  return { primary: `${qty.toLocaleString('id-ID')} ${m.unit || 'pcs'}` };
 };
 
 const getPackagingSpec = (m: RawMaterialStock): string => {
@@ -201,13 +137,181 @@ const getPackagingSpec = (m: RawMaterialStock): string => {
 };
 
 export const ManagerDashboard: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'approvals' | 'menu_bom' | 'asset_valuation' | 'shifts'>('approvals');
+  const [activeSubTab, setActiveSubTab] = useState<'approvals' | 'menu_bom' | 'asset_valuation' | 'employees' | 'shifts'>('approvals');
   const [materials, setMaterials] = useState<RawMaterialStock[]>(FALLBACK_MATERIALS);
   const [searchMaterial, setSearchMaterial] = useState('');
   const [assetFilter, setAssetFilter] = useState<'ALL' | 'LOW' | 'OUT' | 'SAFE'>('ALL');
   const [products, setProducts] = useState<ProductWithRecipe[]>([]);
   const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
   const [loading, setLoading] = useState(false);
+
+  // Employees & SDM Management State
+  const [employeesList, setEmployeesList] = useState<any[]>([]);
+  const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
+  const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
+  const [searchEmployee, setSearchEmployee] = useState('');
+
+  // New Employee Form State (Tanpa Gaji)
+  const [empName, setEmpName] = useState('');
+  const [empEmail, setEmpEmail] = useState('');
+  const [empPosition, setEmpPosition] = useState<'BARISTA' | 'CASHIER' | 'ADMIN_GUDANG' | 'MANAGER'>('BARISTA');
+  const [empDepartment, setEmpDepartment] = useState('');
+  const [empPhone, setEmpPhone] = useState('');
+  const [empPassword, setEmpPassword] = useState('password');
+  const [isSubmittingEmp, setIsSubmittingEmp] = useState(false);
+
+  // Edit Employee Form State
+  const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
+  const [editEmpName, setEditEmpName] = useState('');
+  const [editEmpEmail, setEditEmpEmail] = useState('');
+  const [editEmpPosition, setEditEmpPosition] = useState<string>('BARISTA');
+  const [editEmpDepartment, setEditEmpDepartment] = useState<string>('BAR');
+  const [editEmpPhone, setEditEmpPhone] = useState('');
+  const [editEmpPassword, setEditEmpPassword] = useState('');
+  const [editEmpStatus, setEditEmpStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
+  const [isUpdatingEmp, setIsUpdatingEmp] = useState(false);
+
+  // New Material Form State (Konsisten kg, liter, pcs, gram, ml)
+  const [matName, setMatName] = useState('');
+  const [matUnit, setMatUnit] = useState<'kg' | 'liter' | 'pcs' | 'gram' | 'ml'>('kg');
+  const [matMinAlert, setMatMinAlert] = useState<number>(2);
+  const [matInitialStock, setMatInitialStock] = useState<number>(5);
+  const [matCostPerUnit, setMatCostPerUnit] = useState<number>(100000);
+  const [isSubmittingMat, setIsSubmittingMat] = useState(false);
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await api.get('/hr/employees');
+      if (res.data?.data) {
+        setEmployeesList(res.data.data);
+      }
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleOpenEditEmployee = (emp: any) => {
+    if (emp.position === 'OWNER') {
+      alert('Akses Ditolak: Akun Pemilik Kedai (Owner) dilindungi dan tidak dapat diubah oleh Store Manager.');
+      return;
+    }
+    setEditingEmployee(emp);
+    setEditEmpName(emp.name || emp.user?.name || '');
+    setEditEmpEmail(emp.email || emp.user?.email || '');
+    setEditEmpPosition(emp.position || 'BARISTA');
+    setEditEmpDepartment(emp.department || 'BAR');
+    setEditEmpPhone(emp.phone || '');
+    setEditEmpPassword('');
+    setEditEmpStatus(emp.employment_status || 'ACTIVE');
+  };
+
+  const handleUpdateEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEmployee || !editEmpName || !editEmpEmail) {
+      alert('Nama dan Email wajib diisi!');
+      return;
+    }
+    setIsUpdatingEmp(true);
+    try {
+      const payload: any = {
+        name: editEmpName,
+        email: editEmpEmail,
+        position: editEmpPosition,
+        department: editEmpDepartment,
+        phone: editEmpPhone || null,
+        employment_status: editEmpStatus,
+      };
+      if (editEmpPassword.trim().length >= 6) {
+        payload.password = editEmpPassword.trim();
+      }
+      const res = await api.put(`/hr/employees/${editingEmployee.id}`, payload);
+      alert(res.data.message || 'Data karyawan berhasil diperbarui!');
+      setEditingEmployee(null);
+      fetchEmployees();
+      fetchLiveStock('shifts');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal memperbarui data karyawan');
+    } finally {
+      setIsUpdatingEmp(false);
+    }
+  };
+
+  const handleAddEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!empName || !empEmail) {
+      alert('Nama dan Email wajib diisi!');
+      return;
+    }
+    setIsSubmittingEmp(true);
+    try {
+      const res = await api.post('/hr/employees', {
+        name: empName,
+        email: empEmail,
+        position: empPosition,
+        department: empDepartment || undefined,
+        phone: empPhone || null,
+        password: empPassword || 'password',
+      });
+      alert(res.data.message || 'Karyawan baru berhasil didaftarkan!');
+      setShowAddEmployeeModal(false);
+      setEmpName('');
+      setEmpEmail('');
+      setEmpPhone('');
+      setEmpDepartment('');
+      fetchEmployees();
+      fetchLiveStock('shifts');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menambahkan karyawan');
+    } finally {
+      setIsSubmittingEmp(false);
+    }
+  };
+
+  const handleAddMaterial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!matName) {
+      alert('Nama bahan baku wajib diisi!');
+      return;
+    }
+    setIsSubmittingMat(true);
+    try {
+      let finalUnit: string = matUnit;
+      let finalStock = Number(matInitialStock) || 0;
+      let finalMin = Number(matMinAlert) || 0;
+      let finalCost = Number(matCostPerUnit) || 0;
+
+      if (matUnit === 'kg') {
+        finalUnit = 'gram';
+        finalStock = finalStock * 1000;
+        finalMin = finalMin * 1000;
+        finalCost = finalCost > 0 ? Math.round(finalCost / 1000) : 0;
+      } else if (matUnit === 'liter') {
+        finalUnit = 'ml';
+        finalStock = finalStock * 1000;
+        finalMin = finalMin * 1000;
+        finalCost = finalCost > 0 ? Math.round(finalCost / 1000) : 0;
+      }
+
+      const res = await api.post('/inventory/materials', {
+        name: matName,
+        unit: finalUnit,
+        min_stock_alert: finalMin,
+        current_stock: finalStock,
+        avg_cost_per_unit: finalCost,
+      });
+      alert(res.data.message || 'Bahan baku baru berhasil didaftarkan ke gudang!');
+      setShowAddMaterialModal(false);
+      setMatName('');
+      setMatInitialStock(5);
+      setMatMinAlert(2);
+      setMatCostPerUnit(100000);
+      fetchLiveStock('asset_valuation');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menambahkan bahan baku');
+    } finally {
+      setIsSubmittingMat(false);
+    }
+  };
 
   // Approvals Hub (Maker vs Checker) State
   const [pendingPurchaseOrders, setPendingPurchaseOrders] = useState<any[]>([]);
@@ -252,6 +356,7 @@ export const ManagerDashboard: React.FC = () => {
       } catch {
         // Fallback intact
       }
+      fetchEmployees();
     };
     loadStaticData();
   }, []);
@@ -309,6 +414,11 @@ export const ManagerDashboard: React.FC = () => {
         const resAtt = await api.get('/hr/attendance/realtime');
         if (resAtt.data?.data) {
           setAttendanceData(resAtt.data.data);
+        }
+      } else if (currentTab === 'employees') {
+        const resEmp = await api.get('/hr/employees');
+        if (resEmp.data?.data) {
+          setEmployeesList(resEmp.data.data);
         }
       } else if (currentTab === 'menu_bom') {
         const resProd = await api.get('/menu/products');
@@ -551,6 +661,18 @@ export const ManagerDashboard: React.FC = () => {
     }
   };
 
+  const filteredEmployees = useMemo(() => {
+    return employeesList.filter((emp) => {
+      const q = searchEmployee.toLowerCase();
+      return (
+        emp.name?.toLowerCase().includes(q) ||
+        emp.employee_code?.toLowerCase().includes(q) ||
+        emp.position?.toLowerCase().includes(q) ||
+        emp.email?.toLowerCase().includes(q)
+      );
+    });
+  }, [employeesList, searchEmployee]);
+
   const lowStockCount = materials.filter(m => m.current_stock <= m.min_stock_alert).length;
   const pendingApprovalsCount = pendingPurchaseOrders.length + pendingOpnames.length;
 
@@ -611,6 +733,17 @@ export const ManagerDashboard: React.FC = () => {
                   {lowStockCount}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => {
+                setActiveSubTab('employees');
+                fetchEmployees();
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
+                activeSubTab === 'employees' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5 text-purple-600" /> Data Karyawan ({employeesList.length || 7})
             </button>
             <button
               onClick={() => setActiveSubTab('shifts')}
@@ -1061,40 +1194,49 @@ export const ManagerDashboard: React.FC = () => {
               </button>
             </div>
 
-            {/* Quick Status Filter Pills */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs text-slate-500 font-semibold mr-1">Filter Status:</span>
+            {/* Quick Status Filter Pills & Action */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs text-slate-500 font-semibold mr-1">Filter Status:</span>
+                <button
+                  onClick={() => setAssetFilter('ALL')}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    assetFilter === 'ALL' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Semua Bahan ({materials.length})
+                </button>
+                <button
+                  onClick={() => setAssetFilter('SAFE')}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    assetFilter === 'SAFE' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                  }`}
+                >
+                  🟢 Stok Aman ({materials.filter(m => m.current_stock > m.min_stock_alert).length})
+                </button>
+                <button
+                  onClick={() => setAssetFilter('LOW')}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    assetFilter === 'LOW' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                  }`}
+                >
+                  🟡 Menipis ({materials.filter(m => m.current_stock > 0 && m.current_stock <= m.min_stock_alert).length})
+                </button>
+                <button
+                  onClick={() => setAssetFilter('OUT')}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    assetFilter === 'OUT' ? 'bg-rose-600 text-white shadow-xs' : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
+                  }`}
+                >
+                  🔴 Stok Habis ({materials.filter(m => m.current_stock <= 0).length})
+                </button>
+              </div>
+
               <button
-                onClick={() => setAssetFilter('ALL')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  assetFilter === 'ALL' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                onClick={() => setShowAddMaterialModal(true)}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs shrink-0"
               >
-                Semua Bahan ({materials.length})
-              </button>
-              <button
-                onClick={() => setAssetFilter('SAFE')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  assetFilter === 'SAFE' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                }`}
-              >
-                🟢 Stok Aman ({materials.filter(m => m.current_stock > m.min_stock_alert).length})
-              </button>
-              <button
-                onClick={() => setAssetFilter('LOW')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  assetFilter === 'LOW' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
-                }`}
-              >
-                🟡 Menipis ({materials.filter(m => m.current_stock > 0 && m.current_stock <= m.min_stock_alert).length})
-              </button>
-              <button
-                onClick={() => setAssetFilter('OUT')}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  assetFilter === 'OUT' ? 'bg-rose-600 text-white shadow-xs' : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
-                }`}
-              >
-                🔴 Stok Habis ({materials.filter(m => m.current_stock <= 0).length})
+                <Plus className="w-3.5 h-3.5" /> + Tambah Bahan Baku Baru
               </button>
             </div>
 
@@ -1183,6 +1325,200 @@ export const ManagerDashboard: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* SUBTAB 4: DATA KARYAWAN & MANAJEMEN SDM */}
+      {activeSubTab === 'employees' && (
+        <div className="space-y-6">
+          {/* Header Card */}
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-bold text-slate-900 text-base">Data Karyawan & Manajemen SDM</h2>
+                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
+                  <UserCheck className="w-3.5 h-3.5 text-purple-600" />
+                  Master SDM
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Kelola profil karyawan, jabatan kerja, divisi, akses login operasional, dan status aktif staf kedai.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAddEmployeeModal(true)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-amber-400" /> + Tambah Karyawan Baru
+              </button>
+              <button
+                onClick={fetchEmployees}
+                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition cursor-pointer"
+                title="Refresh Data Karyawan"
+              >
+                <RefreshCcw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Karyawan</span>
+              <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
+                {employeesList.length}
+              </div>
+              <span className="text-[11px] text-slate-400">Staf Terdaftar Aktif</span>
+            </div>
+
+            <div className="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-4 shadow-2xs">
+              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                ☕ Tim Barista
+              </span>
+              <div className="text-2xl font-bold font-mono text-amber-900 mt-1">
+                {employeesList.filter(e => e.position === 'BARISTA').length}
+              </div>
+              <span className="text-[11px] text-amber-700/80">Peracik Minuman Kopi</span>
+            </div>
+
+            <div className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-4 shadow-2xs">
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+                💼 Kasir & Admin Gudang
+              </span>
+              <div className="text-2xl font-bold font-mono text-emerald-900 mt-1">
+                {employeesList.filter(e => ['CASHIER', 'ADMIN_GUDANG'].includes(e.position)).length}
+              </div>
+              <span className="text-[11px] text-emerald-700/80">Operasional Depan & Logistik</span>
+            </div>
+
+            <div className="bg-purple-50/50 border border-purple-200/80 rounded-2xl p-4 shadow-2xs">
+              <span className="text-xs font-bold text-purple-800 uppercase tracking-wider flex items-center gap-1">
+                👔 Store Manager
+              </span>
+              <div className="text-2xl font-bold font-mono text-purple-900 mt-1">
+                {employeesList.filter(e => e.position === 'MANAGER').length}
+              </div>
+              <span className="text-[11px] text-purple-700/80">Manajer Kedai Operasional</span>
+            </div>
+          </div>
+
+          {/* Search Box */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Cari nama karyawan, kode staf, atau posisi..."
+                value={searchEmployee}
+                onChange={(e) => setSearchEmployee(e.target.value)}
+                className="w-full bg-white border border-slate-200 pl-10 pr-4 py-2 text-xs rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500 shadow-2xs"
+              />
+            </div>
+            <span className="text-xs text-slate-400 font-mono">
+              Menampilkan {filteredEmployees.length} dari {employeesList.length} karyawan
+            </span>
+          </div>
+
+          {/* Employee Table */}
+          <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                    <th className="py-3.5 px-4">Karyawan</th>
+                    <th className="py-3.5 px-4">Kode Staf</th>
+                    <th className="py-3.5 px-4">Posisi & Bagian</th>
+                    <th className="py-3.5 px-4">Email Login</th>
+                    <th className="py-3.5 px-4">No. Telepon / WA</th>
+                    <th className="py-3.5 px-4 text-center">Status Akun</th>
+                    <th className="py-3.5 px-4 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredEmployees.map((emp) => (
+                    <tr 
+                      key={emp.id} 
+                      className="hover:bg-amber-50/30 transition cursor-pointer group"
+                      onClick={() => handleOpenEditEmployee(emp)}
+                      title="Klik untuk mengubah data karyawan ini"
+                    >
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-xs ${
+                            emp.position === 'OWNER' ? 'bg-amber-100 text-amber-800' :
+                            emp.position === 'MANAGER' ? 'bg-purple-100 text-purple-800' :
+                            emp.position === 'CASHIER' ? 'bg-emerald-100 text-emerald-800' :
+                            emp.position === 'ADMIN_GUDANG' ? 'bg-blue-100 text-blue-800' :
+                            'bg-orange-100 text-orange-800'
+                          }`}>
+                            {emp.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-900 group-hover:text-amber-600 transition flex items-center gap-1.5">
+                              {emp.name}
+                            </div>
+                            <div className="text-[11px] text-slate-400 font-mono">ID: #{emp.id}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
+                        {emp.employee_code}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                          emp.position === 'OWNER' ? 'bg-amber-100 text-amber-800' :
+                          emp.position === 'MANAGER' ? 'bg-purple-100 text-purple-800' :
+                          emp.position === 'CASHIER' ? 'bg-emerald-100 text-emerald-800' :
+                          emp.position === 'ADMIN_GUDANG' ? 'bg-blue-100 text-blue-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {emp.position === 'OWNER' ? '👑 Owner' :
+                           emp.position === 'MANAGER' ? '👔 Store Manager' :
+                           emp.position === 'CASHIER' ? '💵 Kasir Utama' :
+                           emp.position === 'ADMIN_GUDANG' ? '📦 Admin Gudang' :
+                           '☕ Barista'}
+                        </span>
+                        <span className="block text-[10px] text-slate-400 mt-0.5">{emp.department || '-'}</span>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-slate-600">
+                        {emp.email}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-slate-700">
+                        {emp.phone || '-'}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        {emp.employment_status === 'INACTIVE' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Nonaktif
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                        {emp.position === 'OWNER' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 text-[10px] font-bold border border-purple-200" title="Akun Pemilik Kedai (Owner) dilindungi">
+                            🔒 Akun Owner
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleOpenEditEmployee(emp)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
+                          >
+                            <Pencil className="w-3 h-3 text-slate-500" /> Ubah
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SUBTAB 5: PRESENSI & KEHADIRAN REAL-TIME SEMUA KARYAWAN */}
       {activeSubTab === 'shifts' && (
@@ -1756,6 +2092,425 @@ export const ManagerDashboard: React.FC = () => {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   {isSubmittingMenu ? 'Menyimpan...' : 'Simpan & Terbitkan Menu'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH KARYAWAN BARU */}
+      {showAddEmployeeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Tambah Karyawan Baru (Registrasi SDM)</h3>
+                  <p className="text-xs text-slate-500">Sistem otomatis membuat kode staf, akun login, dan QR token</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddEmployeeModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddEmployee} className="space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Nama Lengkap Karyawan <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Rizky Ramadhan"
+                    value={empName}
+                    onChange={(e) => setEmpName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Email Akun Login <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="rizky@coffeeshop.test"
+                    value={empEmail}
+                    onChange={(e) => setEmpEmail(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Jabatan / Posisi <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={empPosition}
+                    onChange={(e) => setEmpPosition(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-bold"
+                  >
+                    <option value="BARISTA">☕ Barista (Peracik Kopi)</option>
+                    <option value="CASHIER">💵 Kasir Utama (Front Office)</option>
+                    <option value="ADMIN_GUDANG">📦 Admin Gudang & Logistik</option>
+                    <option value="MANAGER">👔 Store Manager (Manajer Kedai)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    No. Handphone / WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="08123456789x"
+                    value={empPhone}
+                    onChange={(e) => setEmpPhone(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Password Awal Login
+                  </label>
+                  <input
+                    type="text"
+                    value={empPassword}
+                    onChange={(e) => setEmpPassword(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddEmployeeModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEmp}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-amber-400" />
+                  {isSubmittingEmp ? 'Mendaftarkan...' : 'Simpan & Daftarkan Karyawan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL UBAH DATA KARYAWAN */}
+      {editingEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <Pencil className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Ubah Data Karyawan</h3>
+                  <p className="text-xs text-slate-500">Kode Staf: <span className="font-mono font-bold text-amber-800">{editingEmployee.employee_code}</span></p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingEmployee(null)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEmployee} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nama Lengkap Karyawan <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editEmpName}
+                  onChange={(e) => setEditEmpName(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-semibold"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Posisi / Jabatan Kerja <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={editEmpPosition}
+                    onChange={(e) => setEditEmpPosition(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-bold"
+                  >
+                    <option value="BARISTA">☕ Barista (Peracik Kopi)</option>
+                    <option value="CASHIER">💵 Kasir Utama (Front Office)</option>
+                    <option value="ADMIN_GUDANG">📦 Admin Gudang & Logistik</option>
+                    <option value="MANAGER">👔 Store Manager (Manajer Kedai)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Divisi / Bagian
+                  </label>
+                  <input
+                    type="text"
+                    value={editEmpDepartment}
+                    onChange={(e) => setEditEmpDepartment(e.target.value)}
+                    placeholder="Contoh: BAR, OPERATIONAL, LOGISTICS"
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Email Akun Login <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={editEmpEmail}
+                    onChange={(e) => setEditEmpEmail(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    No. Handphone / WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="08123456789x"
+                    value={editEmpPhone}
+                    onChange={(e) => setEditEmpPhone(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Reset Password Login
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Kosongkan jika tidak diubah"
+                    value={editEmpPassword}
+                    onChange={(e) => setEditEmpPassword(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Status Akun Staf
+                  </label>
+                  <select
+                    value={editEmpStatus}
+                    onChange={(e) => setEditEmpStatus(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-bold"
+                  >
+                    <option value="ACTIVE">🟢 Aktif Bekerja</option>
+                    <option value="INACTIVE">🔴 Nonaktif</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingEmployee(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingEmp}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-amber-400" />
+                  {isUpdatingEmp ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH BAHAN BAKU BARU */}
+      {showAddMaterialModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Tambah Bahan Baku Baru</h3>
+                  <p className="text-xs text-slate-500">Kode SKU otomatis di-generate oleh sistem</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddMaterialModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddMaterial} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nama Bahan Baku <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Susu Segar Diamond, Kopi Arabika Gayo, Sirup Hazelnut..."
+                  value={matName}
+                  onChange={(e) => setMatName(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Satuan Ukur Bahan <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={matUnit}
+                  onChange={(e) => {
+                    const u = e.target.value as any;
+                    setMatUnit(u);
+                    if (u === 'kg') {
+                      setMatMinAlert(2);
+                      setMatInitialStock(5);
+                      setMatCostPerUnit(120000);
+                    } else if (u === 'liter') {
+                      setMatMinAlert(2);
+                      setMatInitialStock(10);
+                      setMatCostPerUnit(20000);
+                    } else if (u === 'pcs') {
+                      setMatMinAlert(100);
+                      setMatInitialStock(500);
+                      setMatCostPerUnit(1500);
+                    } else {
+                      setMatMinAlert(1000);
+                      setMatInitialStock(2000);
+                      setMatCostPerUnit(50);
+                    }
+                  }}
+                  className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-amber-500 font-bold"
+                >
+                  <option value="kg">Kilogram (kg) — Kopi, Bubuk Minuman, Biji, Bahan Padat</option>
+                  <option value="liter">Liter (L) — Susu Segar, Sirup, Air Galon, Bahan Cair</option>
+                  <option value="pcs">Pcs / Buah — Cup Plastik, Tutup, Sedotan, Kemasan</option>
+                  <option value="gram">Gram (g) — Takaran Kecil / Bumbu Halus</option>
+                  <option value="ml">Mililiter (ml) — Konsentrat / Esens Cair</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Batas Minimum Stok ({matUnit})
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={matMinAlert}
+                    onChange={(e) => setMatMinAlert(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Stok Fisik Awal ({matUnit})
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={matInitialStock}
+                    onChange={(e) => setMatInitialStock(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Harga Beli / Biaya Satuan (Rp/{matUnit})
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={matCostPerUnit}
+                  onChange={(e) => setMatCostPerUnit(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900"
+                />
+              </div>
+
+              {/* Conversion Preview Badge */}
+              {matUnit === 'kg' && (
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+                  💡 <strong>Konversi Takaran Kasir:</strong> {matInitialStock} kg = <strong>{((matInitialStock || 0) * 1000).toLocaleString('id-ID')} gram</strong> @ Rp {Math.round((matCostPerUnit || 0) / 1000).toLocaleString('id-ID')}/g (otomatis disesuaikan ke takaran resep mesin kasir).
+                </div>
+              )}
+              {matUnit === 'liter' && (
+                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] leading-relaxed">
+                  💡 <strong>Konversi Takaran Kasir:</strong> {matInitialStock} Liter = <strong>{((matInitialStock || 0) * 1000).toLocaleString('id-ID')} ml</strong> @ Rp {Math.round((matCostPerUnit || 0) / 1000).toLocaleString('id-ID')}/ml (otomatis disesuaikan ke takaran resep minuman).
+                </div>
+              )}
+              {matUnit === 'pcs' && (
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-[11px] leading-relaxed">
+                  📦 <strong>Satuan Kemasan:</strong> Bahan dihitung per buah / item kemasan.
+                </div>
+              )}
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddMaterialModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingMat}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {isSubmittingMat ? 'Mendaftarkan...' : 'Simpan Bahan Baku'}
                 </button>
               </div>
             </form>

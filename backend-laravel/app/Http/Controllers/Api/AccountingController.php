@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 #[Group(
     name: '11. Owner (Akuntansi & Laba Rugi)',
-    description: 'Laporan keuangan back-office: bagan akun standar (COA), jurnal umum otomatis berbasis ESB, neraca saldo, dan laporan laba rugi (P&L).',
+    description: 'Laporan keuangan back-office: bagan akun standar (COA), jurnal umum otomatis terintegrasi, neraca saldo, dan laporan laba rugi (P&L).',
     weight: 11
 )]
 class AccountingController extends Controller
@@ -50,7 +50,7 @@ class AccountingController extends Controller
     }
 
     /**
-     * Daftar Jurnal Umum & Buku Besar Otomatis ESB
+     * Daftar Jurnal Umum & Buku Besar Otomatis
      */
     public function getJournalEntries(Request $request): JsonResponse
     {

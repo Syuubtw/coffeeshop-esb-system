@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="100%" height="100%" style="background:#0B1120; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <defs>
+    <filter id="shadow-dfd" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <marker id="dfd-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="dfd-arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10B981"/>
+    </marker>
+    <marker id="dfd-arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="50" y="25" width="1500" height="70" rx="12" fill="#1E293B" filter="url(#shadow-dfd)"/>
+  <text x="80" y="68" fill="#F8FAFC" font-size="24" font-weight="bold">DATA FLOW DIAGRAM (DFD) LEVEL 0 — DIAGRAM KONTEKS</text>
+  <text x="1220" y="67" fill="#38BDF8" font-size="14" font-weight="600">Sistem Sistem Pemesanan CoffeeShop</text>
+
+  <!-- Central Process: 0.0 SISTEM -->
+  <g transform="translate(620, 420)" filter="url(#shadow-dfd)">
+    <circle cx="180" cy="130" r="130" fill="#1E293B" stroke="#38BDF8" stroke-width="4"/>
+    <circle cx="180" cy="130" r="118" fill="#0F172A" stroke="#0284C7" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="180" y="105" fill="#38BDF8" font-size="20" font-weight="bold" text-anchor="middle">0.0</text>
+    <text x="180" y="130" fill="#F8FAFC" font-size="16" font-weight="bold" text-anchor="middle">SISTEM INFORMASI</text>
+    <text x="180" y="152" fill="#F8FAFC" font-size="16" font-weight="bold" text-anchor="middle">PEMESANAN COFFEESHOP</text>
+    <text x="180" y="174" fill="#94A3B8" font-size="12" text-anchor="middle">BERBASIS WEB QR CODE</text>
+  </g>
+
+  <!-- Terminator 1: PELANGGAN (Left) -->
+  <g transform="translate(60, 420)" filter="url(#shadow-dfd)">
+    <rect width="250" height="130" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 240 0 Q 250 0 250 10 L 250 35 L 0 35 Z" fill="#0284C7"/>
+    <text x="125" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">PELANGGAN (CUSTOMER)</text>
+    <text x="15" y="60" fill="#94A3B8" font-size="12">• Pemindaian QR Meja</text>
+    <text x="15" y="82" fill="#94A3B8" font-size="12">• Pilih Menu &amp; Varian Rasa</text>
+    <text x="15" y="104" fill="#94A3B8" font-size="12">• Pantau Status Pesanan</text>
+  </g>
+
+  <!-- Terminator 2: KASIR (Top-Left) -->
+  <g transform="translate(200, 140)" filter="url(#shadow-dfd)">
+    <rect width="250" height="120" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 240 0 Q 250 0 250 10 L 250 35 L 0 35 Z" fill="#059669"/>
+    <text x="125" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">KASIR (CASHIER)</text>
+    <text x="15" y="60" fill="#94A3B8" font-size="12">• Buka/Tutup Shift Kas Laci</text>
+    <text x="15" y="82" fill="#94A3B8" font-size="12">• Konfirmasi Bayar Tunai/QRIS</text>
+    <text x="15" y="104" fill="#94A3B8" font-size="12">• Cetak Struk Bukti Bayar</text>
+  </g>
+
+  <!-- Terminator 3: BARISTA / DAPUR (Top-Right) -->
+  <g transform="translate(1150, 140)" filter="url(#shadow-dfd)">
+    <rect width="260" height="120" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 35 L 0 35 Z" fill="#D97706"/>
+    <text x="130" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">BARISTA / DAPUR (KDS)</text>
+    <text x="15" y="60" fill="#94A3B8" font-size="12">• Terima Tiket Antrean Pesanan</text>
+    <text x="15" y="82" fill="#94A3B8" font-size="12">• Lihat Catatan Khusus Menu</text>
+    <text x="15" y="104" fill="#94A3B8" font-size="12">• Ubah Status: Sedang Diracik / Siap</text>
+  </g>
+
+  <!-- Terminator 4: STAF GUDANG &amp; PENGADAAN (Right) -->
+  <g transform="translate(1250, 430)" filter="url(#shadow-dfd)">
+    <rect width="270" height="130" rx="10" fill="#1E293B" stroke="#EC4899" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 260 0 Q 270 0 270 10 L 270 35 L 0 35 Z" fill="#DB2777"/>
+    <text x="135" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">STAF GUDANG (PURCHASING)</text>
+    <text x="15" y="60" fill="#94A3B8" font-size="12">• Catat Mutasi Bahan Baku</text>
+    <text x="15" y="82" fill="#94A3B8" font-size="12">• Pengadaan Purchase Order</text>
+    <text x="15" y="104" fill="#94A3B8" font-size="12">• Input Selisih Stok Opname</text>
+  </g>
+
+  <!-- Terminator 5: MANAJER / PEMILIK (Bottom-Right) -->
+  <g transform="translate(1150, 780)" filter="url(#shadow-dfd)">
+    <rect width="260" height="130" rx="10" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 250 0 Q 260 0 260 10 L 260 35 L 0 35 Z" fill="#7C3AED"/>
+    <text x="130" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">MANAJER / PEMILIK (OWNER)</text>
+    <text x="15" y="60" fill="#94A3B8" font-size="12">• Kelola Menu, Harga &amp; Resep Menu</text>
+    <text x="15" y="82" fill="#94A3B8" font-size="12">• Pantau Omset &amp; Laporan Laba Rugi</text>
+    <text x="15" y="104" fill="#94A3B8" font-size="12">• Evaluasi Jurnal &amp; Audit Log</text>
+  </g>
+
+  <!-- Terminator 6: KARYAWAN / HRD (Bottom-Left) -->
+  <g transform="translate(200, 780)" filter="url(#shadow-dfd)">
+    <rect width="250" height="120" rx="10" fill="#1E293B" stroke="#6366F1" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 240 0 Q 250 0 250 10 L 250 35 L 0 35 Z" fill="#4F46E5"/>
+    <text x="125" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">KARYAWAN (STAFF)</text>
+    <text x="15" y="60" fill="#94A3B8" font-size="12">• Presensi Datang &amp; Pulang (QR/GPS)</text>
+    <text x="15" y="82" fill="#94A3B8" font-size="12">• Pantau Jadwal Shift Kerja</text>
+    <text x="15" y="104" fill="#94A3B8" font-size="12">• Terima Rincian Slip Gaji</text>
+  </g>
+
+  <!-- ARROWS &amp; DATA FLOWS -->
+  <!-- 1. Pelanggan <-> Sistem -->
+  <!-- Inflow: Token QR, Order -->
+  <path d="M 310 460 L 630 460" stroke="#38BDF8" stroke-width="2.5" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="330" y="450" fill="#38BDF8" font-size="11" font-weight="600">Scan QR Token, Data Pesanan &amp; Kustomisasi</text>
+  <!-- Outflow: Menu &amp; Tracking -->
+  <path d="M 630 520 L 310 520" stroke="#38BDF8" stroke-width="2.5" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="330" y="540" fill="#E2E8F0" font-size="11">Katalog Menu Aktif, Info Meja &amp; Status Pesanan</text>
+
+  <!-- 2. Kasir <-> Sistem -->
+  <path d="M 450 210 L 670 440" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#dfd-arrow-green)"/>
+  <text x="440" y="300" fill="#10B981" font-size="11" font-weight="600">Buka Kas, Bayar Tunai/QRIS</text>
+  <path d="M 690 410 L 450 180" stroke="#10B981" stroke-width="2" fill="none" marker-end="url(#dfd-arrow-green)"/>
+  <text x="470" y="260" fill="#E2E8F0" font-size="11">Daftar Tagihan Meja &amp; Struk</text>
+
+  <!-- 3. Barista <-> Sistem -->
+  <path d="M 870 410 L 1150 210" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#dfd-arrow-amber)"/>
+  <text x="960" y="290" fill="#E2E8F0" font-size="11">Tiket Antrean Pesanan (KDS)</text>
+  <path d="M 1150 240 L 910 430" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#dfd-arrow-amber)"/>
+  <text x="960" y="340" fill="#F59E0B" font-size="11" font-weight="600">Update Status Siap Saji</text>
+
+  <!-- 4. Gudang <-> Sistem -->
+  <path d="M 1250 480 L 980 480" stroke="#EC4899" stroke-width="2" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="1005" y="470" fill="#EC4899" font-size="11" font-weight="600">Penerimaan PO &amp; Waste Log</text>
+  <path d="M 980 520 L 1250 520" stroke="#EC4899" stroke-width="2" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="1010" y="540" fill="#E2E8F0" font-size="11">Alert Stok Habis &amp; PO Gudang</text>
+
+  <!-- 5. Manajer <-> Sistem -->
+  <path d="M 1150 820 L 890 620" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="960" y="700" fill="#8B5CF6" font-size="11" font-weight="600">Input Menu, Resep Menu &amp; Harga</text>
+  <path d="M 915 640 L 1150 850" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="960" y="760" fill="#E2E8F0" font-size="11">Laporan Omset, Laba Rugi &amp; Jurnal</text>
+
+  <!-- 6. Karyawan <-> Sistem -->
+  <path d="M 450 820 L 670 630" stroke="#6366F1" stroke-width="2" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="460" y="720" fill="#6366F1" font-size="11" font-weight="600">Presensi Masuk/Pulang</text>
+  <path d="M 640 650 L 450 850" stroke="#6366F1" stroke-width="2" fill="none" marker-end="url(#dfd-arrow)"/>
+  <text x="460" y="780" fill="#E2E8F0" font-size="11">Jadwal Shift &amp; Slip Gaji</text>
+
+  <!-- Legend -->
+  <rect x="50" y="960" width="1500" height="90" rx="10" fill="#1E293B" stroke="#334155"/>
+  <text x="80" y="995" fill="#F8FAFC" font-size="15" font-weight="bold">NOTASI DIAGRAM KONTEKS (DFD LEVEL 0):</text>
+  <text x="80" y="1025" fill="#94A3B8" font-size="13">• Lingkaran Besar = Batasan Proses Sistem Utama (0.0)  |  Persegi Panjang = Entitas Eksternal (Terminator Luar)</text>
+  <text x="80" y="1045" fill="#94A3B8" font-size="13">• Tanda Panah = Aliran Data Masukan (Input) dan Aliran Data Keluaran (Output Informasi)</text>
+</svg>

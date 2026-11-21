@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── POS (Cashier, Store Manager, Owner) ──
     Route::prefix('pos')->middleware('role:cashier,store_manager,super_admin')->group(function () {
+        Route::get('/shift/current', [PosController::class, 'currentShift']);
         Route::post('/shift/open', [PosController::class, 'openShift']);
         Route::post('/shift/close', [PosController::class, 'closeShift']);
         Route::post('/orders', [PosController::class, 'storeOrder']);
@@ -91,6 +92,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // ── INVENTORY & RAW MATERIALS (Admin Gudang, Store Manager, Owner) ──
     Route::prefix('inventory')->middleware('role:warehouse_admin,store_manager,super_admin')->group(function () {
         Route::get('/materials', [InventoryController::class, 'index']);
+        Route::post('/materials', [InventoryController::class, 'store']);
+        Route::put('/materials/{id}', [InventoryController::class, 'update']);
         Route::post('/stock-in', [InventoryController::class, 'stockIn']);
         Route::post('/adjustment', [InventoryController::class, 'stockAdjustment']);
         Route::post('/waste', [InventoryController::class, 'reportWaste']);
@@ -111,6 +114,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Manager / Owner — lihat & kelola presensi seluruh karyawan
         Route::middleware('role:store_manager,super_admin')->group(function () {
+            Route::get('/employees', [HrPayrollController::class, 'getEmployees']);
+            Route::post('/employees', [HrPayrollController::class, 'storeEmployee']);
+            Route::put('/employees/{id}', [HrPayrollController::class, 'updateEmployee']);
             Route::get('/attendance/realtime', [HrPayrollController::class, 'getLiveAttendance']);
             Route::get('/attendance/live', [HrPayrollController::class, 'getLiveAttendance']);
             Route::get('/attendance/monthly', [HrPayrollController::class, 'getMonthlyAttendance']);

@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="100%" height="100%" style="background:#090E1A; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <defs>
+    <filter id="shadow-dfd2" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <marker id="arrow-lvl2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrow-lvl2-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="50" y="25" width="1500" height="70" rx="12" fill="#1E293B" filter="url(#shadow-dfd2)"/>
+  <text x="80" y="68" fill="#F8FAFC" font-size="24" font-weight="bold">DATA FLOW DIAGRAM (DFD) LEVEL 2 — PROSES 1.0 PEMESANAN MANDIRI MEJA</text>
+  <text x="1240" y="67" fill="#38BDF8" font-size="14" font-weight="600">Fokus Inti Penelitian Skripsi</text>
+
+  <!-- Terminator Pelanggan (Left) -->
+  <g transform="translate(60, 420)" filter="url(#shadow-dfd2)">
+    <rect width="200" height="180" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 190 0 Q 200 0 200 10 L 200 35 L 0 35 Z" fill="#0284C7"/>
+    <text x="100" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">PELANGGAN</text>
+    <text x="15" y="65" fill="#94A3B8" font-size="12">1. Scan QR Meja</text>
+    <text x="15" y="90" fill="#94A3B8" font-size="12">2. Pilih Menu &amp; Opsi</text>
+    <text x="15" y="115" fill="#94A3B8" font-size="12">3. Kelola Keranjang</text>
+    <text x="15" y="140" fill="#94A3B8" font-size="12">4. Submit Pesanan</text>
+    <text x="15" y="165" fill="#94A3B8" font-size="12">5. Pantau Status</text>
+  </g>
+
+  <!-- Terminator Barista Dapur (Right) -->
+  <g transform="translate(1340, 740)" filter="url(#shadow-dfd2)">
+    <rect width="200" height="120" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <path d="M 0 10 Q 0 0 10 0 L 190 0 Q 200 0 200 10 L 200 35 L 0 35 Z" fill="#D97706"/>
+    <text x="100" y="24" fill="#FFF" font-size="14" font-weight="bold" text-anchor="middle">BARISTA (KDS)</text>
+    <text x="15" y="65" fill="#94A3B8" font-size="12">• Tiket Pesanan Masuk</text>
+    <text x="15" y="90" fill="#94A3B8" font-size="12">• Racik Menu Sesuai Opsi</text>
+  </g>
+
+  <!-- SUB-PROSES 1.1: Verifikasi Token QR Meja -->
+  <g transform="translate(360, 140)" filter="url(#shadow-dfd2)">
+    <rect width="280" height="90" rx="45" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+    <text x="140" y="42" fill="#38BDF8" font-size="15" font-weight="bold" text-anchor="middle">1.1</text>
+    <text x="140" y="64" fill="#F8FAFC" font-size="13" font-weight="bold" text-anchor="middle">Verifikasi Token QR Meja</text>
+  </g>
+
+  <!-- SUB-PROSES 1.2: Penelusuran Katalog &amp; Varian -->
+  <g transform="translate(360, 310)" filter="url(#shadow-dfd2)">
+    <rect width="280" height="90" rx="45" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+    <text x="140" y="42" fill="#10B981" font-size="15" font-weight="bold" text-anchor="middle">1.2</text>
+    <text x="140" y="64" fill="#F8FAFC" font-size="13" font-weight="bold" text-anchor="middle">Katalog Menu &amp; Kustomisasi</text>
+  </g>
+
+  <!-- SUB-PROSES 1.3: Keranjang &amp; Kalkulasi Biaya -->
+  <g transform="translate(360, 480)" filter="url(#shadow-dfd2)">
+    <rect width="280" height="90" rx="45" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+    <text x="140" y="42" fill="#F59E0B" font-size="15" font-weight="bold" text-anchor="middle">1.3</text>
+    <text x="140" y="64" fill="#F8FAFC" font-size="13" font-weight="bold" text-anchor="middle">Kalkulasi Keranjang Belanja</text>
+  </g>
+
+  <!-- SUB-PROSES 1.4: Pembuatan Transaksi Pesanan -->
+  <g transform="translate(850, 480)" filter="url(#shadow-dfd2)">
+    <rect width="280" height="90" rx="45" fill="#1E293B" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="140" y="42" fill="#8B5CF6" font-size="15" font-weight="bold" text-anchor="middle">1.4</text>
+    <text x="140" y="64" fill="#F8FAFC" font-size="13" font-weight="bold" text-anchor="middle">Transaksi Penyimpanan Pesanan</text>
+  </g>
+
+  <!-- SUB-PROSES 1.5: Distribusi Antrean &amp; Tracking -->
+  <g transform="translate(850, 750)" filter="url(#shadow-dfd2)">
+    <rect width="280" height="90" rx="45" fill="#1E293B" stroke="#EC4899" stroke-width="2"/>
+    <text x="140" y="42" fill="#EC4899" font-size="15" font-weight="bold" text-anchor="middle">1.5</text>
+    <text x="140" y="64" fill="#F8FAFC" font-size="13" font-weight="bold" text-anchor="middle">Distribusi Antrean &amp; Tracking</text>
+  </g>
+
+  <!-- DATA STORES -->
+  <!-- D1: dining_tables -->
+  <g transform="translate(850, 155)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#38BDF8" stroke-width="1.5"/>
+    <line x1="900" y1="155" x2="900" y2="215" stroke="#38BDF8" stroke-width="1.5"/>
+    <text x="875" y="190" fill="#38BDF8" font-size="14" font-weight="bold" text-anchor="middle">D1</text>
+    <text x="980" y="190" fill="#E2E8F0" font-size="13" text-anchor="middle">dining_tables</text>
+  </g>
+
+  <!-- D2: products &amp; modifiers -->
+  <g transform="translate(850, 325)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#10B981" stroke-width="1.5"/>
+    <line x1="900" y1="325" x2="900" y2="385" stroke="#10B981" stroke-width="1.5"/>
+    <text x="875" y="360" fill="#10B981" font-size="14" font-weight="bold" text-anchor="middle">D3</text>
+    <text x="980" y="360" fill="#E2E8F0" font-size="13" text-anchor="middle">products &amp; modifiers</text>
+  </g>
+
+  <!-- D3: orders &amp; order_items -->
+  <g transform="translate(850, 620)">
+    <rect width="240" height="60" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5"/>
+    <line x1="900" y1="620" x2="900" y2="680" stroke="#8B5CF6" stroke-width="1.5"/>
+    <text x="875" y="655" fill="#8B5CF6" font-size="14" font-weight="bold" text-anchor="middle">D2</text>
+    <text x="980" y="655" fill="#E2E8F0" font-size="13" text-anchor="middle">orders &amp; order_items</text>
+  </g>
+
+  <!-- FLOW ARROWS -->
+  <!-- 1. Pelanggan -> 1.1 -->
+  <path d="M 260 450 L 310 450 L 310 185 L 360 185" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow-lvl2)"/>
+  <text x="270" y="270" fill="#38BDF8" font-size="11">QR Token Meja</text>
+
+  <!-- 1.1 <-> D1 -->
+  <line x1="640" y1="185" x2="850" y2="185" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-lvl2)"/>
+  <text x="690" y="175" fill="#38BDF8" font-size="11">Validasi qr_token</text>
+
+  <!-- 1.1 -> 1.2 -->
+  <line x1="500" y1="230" x2="500" y2="310" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrow-lvl2)"/>
+  <text x="510" y="275" fill="#E2E8F0" font-size="11">Meja Valid</text>
+
+  <!-- 1.2 <-> D3 -->
+  <line x1="640" y1="355" x2="850" y2="355" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-lvl2)"/>
+  <text x="690" y="345" fill="#10B981" font-size="11">Ambil Daftar Menu Aktif</text>
+
+  <!-- 1.2 -> 1.3 -->
+  <line x1="500" y1="400" x2="500" y2="480" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-lvl2)"/>
+  <text x="510" y="445" fill="#E2E8F0" font-size="11">Item Terpilih &amp; Opsi</text>
+
+  <!-- 1.3 -> 1.4 -->
+  <line x1="640" y1="525" x2="850" y2="525" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-lvl2)"/>
+  <text x="670" y="515" fill="#F59E0B" font-size="11" font-weight="bold">Submit Pesanan (POST /api/qr/order)</text>
+
+  <!-- 1.4 -> D1 &amp; D2 -->
+  <path d="M 990 480 L 990 220" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow-lvl2)"/>
+  <text x="1000" y="270" fill="#38BDF8" font-size="11">Update: occupied</text>
+  <line x1="990" y1="570" x2="990" y2="620" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow-lvl2)"/>
+  <text x="1000" y="600" fill="#8B5CF6" font-size="11">Simpan Order &amp; Items</text>
+
+  <!-- 1.4 -> 1.5 -->
+  <path d="M 920 570 L 920 750" stroke="#EC4899" stroke-width="2" fill="none" marker-end="url(#arrow-lvl2)"/>
+  <text x="930" y="700" fill="#EC4899" font-size="11">Nomor Order</text>
+
+  <!-- 1.5 -> Barista KDS -->
+  <line x1="1130" y1="795" x2="1340" y2="795" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrow-lvl2-amber)"/>
+  <text x="1150" y="785" fill="#F59E0B" font-size="11" font-weight="bold">Tiket Antrean Baru (KDS)</text>
+
+  <!-- 1.5 -> Pelanggan (Tracking) -->
+  <path d="M 850 810 L 210 810 L 210 600" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arrow-lvl2)"/>
+  <text x="350" y="800" fill="#38BDF8" font-size="11" font-weight="bold">Pelacakan Waktu Nyata (Pending -&gt; Processing -&gt; Ready)</text>
+
+  <!-- Footer Legend -->
+  <rect x="50" y="960" width="1500" height="90" rx="10" fill="#1E293B" stroke="#334155"/>
+  <text x="80" y="995" fill="#F8FAFC" font-size="15" font-weight="bold">RINCIAN ALIRAN DATA DFD LEVEL 2 (MODUL PEMESANAN MANDIRI):</text>
+  <text x="80" y="1025" fill="#94A3B8" font-size="13">• Menjelaskan interaksi mikro dari pemindaian token QR hingga pesanan masuk ke KDS barista dan layar lacak pelanggan.</text>
+</svg>

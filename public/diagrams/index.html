@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galeri Diagram Skripsi - Sistem Pemesanan CoffeeShop</title>
+  <style>
+    :root {
+      --bg: #0F172A;
+      --card-bg: #1E293B;
+      --accent: #38BDF8;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      padding: 24px;
+    }
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 { font-size: 22px; font-weight: 700; color: #FFF; }
+    p.subtitle { color: var(--accent); font-size: 14px; margin-top: 4px; }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .tab-btn.active {
+      background: #0284C7;
+      border-color: #38BDF8;
+      color: #FFF;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .diagram-title { font-size: 18px; font-weight: 600; color: #FFF; }
+    .btn-group { display: flex; gap: 10px; }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: 0.2s;
+      border: none;
+    }
+    .btn-primary { background: #0284C7; color: #FFF; }
+    .btn-primary:hover { background: #0369A1; }
+    .btn-secondary { background: #334155; color: #E2E8F0; }
+    .btn-secondary:hover { background: #475569; }
+    .diagram-container {
+      background: #090D16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow: auto;
+      text-align: center;
+      max-height: 75vh;
+    }
+    .diagram-container img, .diagram-container svg {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+    .info-box {
+      margin-top: 18px;
+      padding: 14px 18px;
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #E2E8F0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Galeri Diagram Perancangan Sistem &amp; Basis Data Skripsi</h1>
+      <p class="subtitle">Sistem Pemesanan CoffeeShop • Penulis: Faiz Rifki Syuhada (NIM: 235610032) • UTDI Yogyakarta</p>
+    </div>
+    <div style="font-size:13px; color:var(--muted); text-align:right;">
+      Format Vektor SVG &amp; PNG Siap Cetak (300 DPI)<br>Dapat Langsung Ditempel ke Microsoft Word
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)">1. Struktur Basis Data (Schema)</button>
+    <button class="tab-btn" onclick="showTab(2)">2. Entity-Relationship Diagram (ERD)</button>
+    <button class="tab-btn" onclick="showTab(3)">3. DFD Level 0 (Diagram Konteks)</button>
+    <button class="tab-btn" onclick="showTab(4)">4. DFD Level 1 (Dekomposisi Utama)</button>
+    <button class="tab-btn" onclick="showTab(5)">5. DFD Level 2 (Pemesanan Mandiri)</button>
+  </div>
+
+  <div class="card">
+    <div class="action-bar">
+      <div>
+        <div class="diagram-title" id="diagram-title">1. Struktur Basis Data Relasional (Physical Data Model)</div>
+        <div style="color:var(--muted); font-size:12px; margin-top:3px;" id="diagram-desc">Skema relasi tabel MySQL 8.0 lengkap dengan primary key, foreign key, tipe data, dan cardinalitas.</div>
+      </div>
+      <div class="btn-group">
+        <a id="btn-download-svg" href="1_struktur_database.svg" download="1_struktur_database.svg" class="btn btn-secondary">
+          ⬇ Unduh SVG (Vektor Asli)
+        </a>
+        <button onclick="downloadAsPNG()" class="btn btn-primary">
+          🖼 Unduh PNG (Resolusi Tinggi Word)
+        </button>
+      </div>
+    </div>
+
+    <div class="diagram-container" id="diagram-view">
+      <img id="current-diagram-img" src="1_struktur_database.svg" alt="Diagram">
+    </div>
+
+    <div class="info-box" id="diagram-info">
+      <strong>Panduan Skripsi:</strong> Diagram ini ditempatkan pada <strong>Bab III (Subbab 3.4.4 Perancangan Basis Data)</strong> atau <strong>Bab IV (Subbab 4.1.2 Implementasi Basis Data Relasional)</strong>. Format SVG dapat langsung di-insert ke Microsoft Word melalui menu <em>Insert &gt; Pictures &gt; This Device</em> dan gambar akan tetap tajam tanpa pecah saat dicetak.
+    </div>
+  </div>
+
+  <!-- Hidden canvas for PNG export -->
+  <canvas id="export-canvas" style="display:none;"></canvas>
+
+  <script>
+    const diagrams = {
+      1: {
+        file: '1_struktur_database.svg',
+        title: '1. Struktur Basis Data Relasional (Physical Data Model)',
+        desc: 'Menampilkan seluruh skema 16 tabel bisnis terstruktur dalam 4 modul: Pemesanan Meja, Menu & Resep, Gudang & Pengadaan, serta SDM & Akuntansi.',
+        info: '<strong>Panduan Skripsi:</strong> Masukkan ke Bab III (Subbab 3.4.4 Perancangan Basis Data) atau Bab IV (Subbab 4.1.2 Implementasi Basis Data Relasional).'
+      },
+      2: {
+        file: '2_erd_coffeeshop.svg',
+        title: '2. Entity-Relationship Diagram (ERD)',
+        desc: 'Model konseptual & logikal entitas DINING_TABLE, ORDER, ORDER_ITEM, PRODUCT, CATEGORY, RECIPE, RAW_MATERIAL, USER, dan EMPLOYEE.',
+        info: '<strong>Panduan Skripsi:</strong> Masukkan ke Bab III (Subbab 3.4.3 Perancangan Model Sistem - Entity Relationship Diagram).'
+      },
+      3: {
+        file: '3_dfd_level_0_konteks.svg',
+        title: '3. Data Flow Diagram (DFD) Level 0 — Diagram Konteks',
+        desc: 'Diagram konteks menyeluruh dengan 6 entitas luar (Pelanggan, Kasir, Barista Dapur, Gudang, Manajer/Owner, Karyawan) dan aliran data masuk/keluar.',
+        info: '<strong>Panduan Skripsi:</strong> Masukkan ke Bab III (Subbab 3.4.3 Perancangan Model Sistem - Diagram Konteks / DFD Level 0).'
+      },
+      4: {
+        file: '4_dfd_level_1.svg',
+        title: '4. Data Flow Diagram (DFD) Level 1 — Dekomposisi Sistem',
+        desc: 'Dekomposisi fungsional menjadi 7 proses utama (Pemesanan Meja, Kasir, Dapur, Inventori, Presensi, Akuntansi, Pelaporan) dan 6 Data Store.',
+        info: '<strong>Panduan Skripsi:</strong> Masukkan ke Bab III (Subbab 3.4.3 Perancangan Model Sistem - DFD Level 1).'
+      },
+      5: {
+        file: '5_dfd_level_2_pemesanan.svg',
+        title: '5. Data Flow Diagram (DFD) Level 2 — Proses 1.0 Pemesanan Mandiri Meja',
+        desc: 'Rincian mikro proses inti tugas akhir: 1.1 Verifikasi Token, 1.2 Katalog & Varian, 1.3 Kalkulasi Keranjang, 1.4 Transaksi Simpan, 1.5 Distribusi KDS.',
+        info: '<strong>Panduan Skripsi:</strong> Masukkan ke Bab III (Subbab 3.4.3 Perancangan Model Sistem - DFD Level 2 Proses 1.0 Pemesanan Mandiri Meja).'
+      }
+    };
+
+    let currentTab = 1;
+
+    function showTab(tabIndex) {
+      currentTab = tabIndex;
+      const data = diagrams[tabIndex];
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === (tabIndex - 1));
+      });
+      document.getElementById('diagram-title').innerText = data.title;
+      document.getElementById('diagram-desc').innerText = data.desc;
+      document.getElementById('diagram-info').innerHTML = data.info;
+      document.getElementById('btn-download-svg').href = data.file;
+      document.getElementById('btn-download-svg').setAttribute('download', data.file);
+      document.getElementById('current-diagram-img').src = data.file;
+    }
+
+    function downloadAsPNG() {
+      const data = diagrams[currentTab];
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = data.file;
+      img.onload = function() {
+        const canvas = document.getElementById('export-canvas');
+        // Render at high resolution (2x native SVG dimensions)
+        const scale = 2;
+        canvas.width = img.naturalWidth * scale || 3200;
+        canvas.height = img.naturalHeight * scale || 2400;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0F172A';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob(function(blob) {
+          const a = document.createElement('a');
+          a.download = data.file.replace('.svg', '.png');
+          a.href = URL.createObjectURL(blob);
+          a.click();
+        }, 'image/png');
+      };
+    }
+  </script>
+</body>
+</html>
