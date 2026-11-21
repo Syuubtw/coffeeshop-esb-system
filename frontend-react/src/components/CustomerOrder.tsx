@@ -17,6 +17,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import api from '../services/api';
+import { formatTableDisplayName } from '../utils/tableHelper';
 
 interface CustomerMenuItem {
   id: number;
@@ -372,7 +373,7 @@ export const CustomerOrder: React.FC = () => {
 
             <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 border border-amber-400/30 text-amber-300 rounded-full font-bold font-mono text-xs shadow-xs">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              Meja {tableNumber}
+              {formatTableDisplayName(tableNumber)}
             </div>
           </div>
 
@@ -675,7 +676,7 @@ export const CustomerOrder: React.FC = () => {
               <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-amber-600" />
-                  <h3 className="font-bold text-base text-slate-900">Keranjang Meja {tableNumber}</h3>
+                  <h3 className="font-bold text-base text-slate-900">Keranjang {formatTableDisplayName(tableNumber)}</h3>
                 </div>
                 <button onClick={() => setIsCartOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-700">
                   <X className="w-5 h-5" />
@@ -874,7 +875,7 @@ export const CustomerOrder: React.FC = () => {
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-left space-y-2">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Meja:</span>
-                  <span className="font-bold text-slate-900">{orderSuccess.table_number || tableNumber}</span>
+                  <span className="font-bold text-slate-900">{formatTableDisplayName(orderSuccess.table_number || tableNumber)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Nama Pelanggan:</span>
@@ -900,7 +901,7 @@ export const CustomerOrder: React.FC = () => {
               ) : (
                 <div className="p-3 bg-amber-50 text-amber-800 text-[11px] rounded-xl flex items-center gap-2 text-left">
                   <Clock className="w-4 h-4 shrink-0 text-amber-600" />
-                  <span>Silakan ke kasir dan sebutkan <b>Meja {orderSuccess.table_number || tableNumber}</b> untuk menyelesaikan pembayaran.</span>
+                  <span>Silakan ke kasir dan sebutkan <b>{formatTableDisplayName(orderSuccess.table_number || tableNumber)}</b> untuk menyelesaikan pembayaran.</span>
                 </div>
               )}
             </div>

@@ -20,6 +20,7 @@ import {
   X
 } from 'lucide-react';
 import api from '../services/api';
+import { formatTableDisplayName } from '../utils/tableHelper';
 
 interface ProductItem {
   id: number;
@@ -533,7 +534,7 @@ export const CashierPos: React.FC = () => {
                   <h2 className="font-bold text-slate-900 text-sm">Daftar Pesanan Struk</h2>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  {orderType === 'DINE_IN' ? `Meja: ${selectedTable}` : 'Bungkus / Bawa Pulang'}
+                  {orderType === 'DINE_IN' ? formatTableDisplayName(selectedTable) : 'Bungkus / Bawa Pulang'}
                 </p>
               </div>
 
@@ -569,7 +570,16 @@ export const CashierPos: React.FC = () => {
                   <option value="TB-03">Meja 03</option>
                   <option value="TB-04">Meja 04</option>
                   <option value="TB-05">Meja 05</option>
-                  <option value="TB-VIP">Ruang VIP</option>
+                  <option value="TB-06">Meja 06</option>
+                  <option value="TB-07">Meja 07</option>
+                  <option value="TB-08">Meja 08</option>
+                  <option value="TB-09">Meja 09</option>
+                  <option value="TB-10">Meja 10</option>
+                  <option value="TB-11">Meja 11</option>
+                  <option value="TB-12">Meja 12</option>
+                  <option value="TB-VIP-01">Ruang VIP</option>
+                  <option value="TB-BAR-01">Meja Bar</option>
+                  <option value="TB-OUT-01">Outdoor</option>
                 </select>
               ) : (
                 <div className="bg-slate-200/70 text-slate-500 text-[11px] font-semibold rounded-xl flex items-center justify-center">
@@ -786,7 +796,7 @@ export const CashierPos: React.FC = () => {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono font-bold text-xs tracking-wide">
-                              {ord.dining_table ? `Meja ${ord.dining_table.table_number}` : 'Bungkus'}
+                              {ord.dining_table ? formatTableDisplayName(ord.dining_table.table_number) : 'Bungkus'}
                             </span>
                             {isQrTable && (
                               <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
@@ -939,7 +949,7 @@ export const CashierPos: React.FC = () => {
               <div className="flex justify-between text-slate-500">
                 <span>Penyajian / Meja:</span>
                 <span className="font-semibold text-slate-800">
-                  {lastReceipt.dining_table?.table_number ? `Meja ${lastReceipt.dining_table.table_number}` : (lastReceipt.table_number || 'Minum di Tempat')}
+                  {lastReceipt.dining_table?.table_number ? formatTableDisplayName(lastReceipt.dining_table.table_number) : (formatTableDisplayName(lastReceipt.table_number) || 'Minum di Tempat')}
                 </span>
               </div>
               <div className="flex justify-between text-slate-500">

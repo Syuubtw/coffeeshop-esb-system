@@ -7,6 +7,7 @@ import {
   Timer
 } from 'lucide-react';
 import api from '../services/api';
+import { formatTableDisplayName } from '../utils/tableHelper';
 
 interface KdsOrderItem {
   id: number;
@@ -175,7 +176,7 @@ export const BaristaKds: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-sm bg-white/20 px-2 py-0.5 rounded-md">
-                          {ord.dining_table ? `Meja ${ord.dining_table.table_number}` : 'Bungkus'}
+                          {ord.dining_table ? formatTableDisplayName(ord.dining_table.table_number) : 'Bungkus'}
                         </span>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">
                           {ord.order_source === 'QR_TABLE' ? '📱 Pesanan Meja' : '🖥️ Kasir Langsung'}

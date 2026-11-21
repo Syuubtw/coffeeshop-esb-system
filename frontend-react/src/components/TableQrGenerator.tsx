@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { getQrCodeUrl } from '../utils/qrCode';
+import { formatTableDisplayName } from '../utils/tableHelper';
 
 interface DiningTable {
   id: number;
@@ -429,10 +430,13 @@ export const TableQrGenerator: React.FC = () => {
                     <span>COFFEE SHOP</span>
                   </div>
 
-                  {/* Big Table Name */}
+                  {/* Big Friendly Table Name */}
                   <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight my-0.5">
-                    {t.table_number}
+                    {formatTableDisplayName(t.table_number)}
                   </h2>
+                  <span className="text-[11px] font-mono text-slate-400 font-bold tracking-wider block mb-1">
+                    ({t.table_number})
+                  </span>
 
                   {/* Sub Instruction */}
                   <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
