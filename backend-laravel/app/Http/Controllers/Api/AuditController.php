@@ -212,7 +212,7 @@ class AuditController extends Controller
      */
     public function getCashDrawerReconciliation(Request $request): JsonResponse
     {
-        $shifts = CashierShift::with(['cashier', 'orders'])
+        $shifts = CashierShift::with(['cashier', 'user', 'orders'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get()
@@ -222,17 +222,19 @@ class AuditController extends Controller
                     ->where('payment_status', 'PAID')
                     ->sum('grand_total');
 
-                $expectedEndingCash = (float) $s->start_cash + (float) $cashOrdersTotal;
-                $actualEndingCash = $s->end_cash !== null ? (float) $s->end_cash : null;
+                $startingCash = (float) ($s->starting_cash ?? $s->start_cash ?? 0);
+                $expectedEndingCash = (float) ($s->expected_ending_cash ?? ($startingCash + (float) $cashOrdersTotal));
+                $actualEndingCash = $s->actual_ending_cash !== null ? (float) $s->actual_ending_cash : ($s->end_cash !== null ? (float) $s->end_cash : null);
                 $difference = $actualEndingCash !== null ? ($actualEndingCash - $expectedEndingCash) : 0;
+                $cashierUser = $s->cashier ?? $s->user;
 
                 return [
                     'id' => $s->id,
-                    'cashier_name' => $s->cashier->name ?? 'Kasir Frontline',
+                    'cashier_name' => $cashierUser->name ?? 'Kasir Frontline',
                     'opened_at' => $s->opened_at,
                     'closed_at' => $s->closed_at,
-                    'status' => $s->status,
-                    'start_cash' => (float) $s->start_cash,
+                    'status' => $s->closed_at ? 'CLOSED' : 'OPEN',
+                    'start_cash' => $startingCash,
                     'cash_sales_total' => (float) $cashOrdersTotal,
                     'expected_ending_cash' => $expectedEndingCash,
                     'actual_ending_cash' => $actualEndingCash,

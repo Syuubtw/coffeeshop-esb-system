@@ -36,8 +36,28 @@ class CashierShift extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function cashier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function getStartCashAttribute()
+    {
+        return $this->starting_cash;
+    }
+
+    public function getEndCashAttribute()
+    {
+        return $this->actual_ending_cash;
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return $this->closed_at ? 'CLOSED' : 'OPEN';
     }
 }

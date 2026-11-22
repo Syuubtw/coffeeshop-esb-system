@@ -27,6 +27,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ==========================================
+// 0. HEALTH CHECK & ROOT API INFO
+// ==========================================
+Route::get('/', function () {
+    return response()->json([
+        'status' => 'online',
+        'message' => 'CoffeeShop ESB RESTful API siap digunakan.',
+        'documentation' => url('/docs/api'),
+        'auth_status' => url('/api/auth/status'),
+        'server_time' => now()->toIso8601String(),
+    ]);
+});
+
+// ==========================================
 // 1. PUBLIC & AUTHENTICATION ENDPOINTS
 // ==========================================
 Route::prefix('auth')->group(function () {
