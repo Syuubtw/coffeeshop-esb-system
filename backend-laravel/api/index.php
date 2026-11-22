@@ -15,5 +15,8 @@ foreach ($tmpDirs as $dir) {
     }
 }
 
+// Normalize SCRIPT_NAME so Symfony/Laravel doesn't treat /api as subdirectory baseUrl
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+
 // Forward to public/index.php
 require __DIR__ . '/../public/index.php';
