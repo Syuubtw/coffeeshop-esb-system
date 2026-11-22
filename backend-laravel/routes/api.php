@@ -39,6 +39,25 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/debug-db', function () {
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $db = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
+        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+        return response()->json([
+            'status' => 'connected',
+            'database' => $db,
+            'tables_count' => count($tables),
+            'tables' => $tables,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 200);
+    }
+});
+
 // ==========================================
 // 1. PUBLIC & AUTHENTICATION ENDPOINTS
 // ==========================================
