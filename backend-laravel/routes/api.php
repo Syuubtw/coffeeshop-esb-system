@@ -53,6 +53,10 @@ Route::get('/debug-db', function () {
     } catch (\Throwable $e) {
         return response()->json([
             'status' => 'error',
+            'env_user' => env('DB_USERNAME'),
+            'config_user' => config('database.connections.mysql.username'),
+            'env_host' => env('DB_HOST'),
+            'env_database' => env('DB_DATABASE'),
             'message' => $e->getMessage(),
         ], 200);
     }
