@@ -59,15 +59,18 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA') ?: (
-                    env('DB_HOST') && !in_array(env('DB_HOST'), ['127.0.0.1', 'localhost'])
-                        ? (file_exists('/etc/pki/tls/certs/ca-bundle.crt')
-                            ? '/etc/pki/tls/certs/ca-bundle.crt'
-                            : (file_exists(database_path('cacert.pem')) ? database_path('cacert.pem') : null))
-                        : null
-                ),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? (
+                env('DB_HOST') && !in_array(env('DB_HOST'), ['127.0.0.1', 'localhost'])
+                    ? array_filter([
+                        PDO::MYSQL_ATTR_SSL_CA => file_exists(database_path('cacert.pem'))
+                            ? database_path('cacert.pem')
+                            : (file_exists('/etc/pki/tls/certs/ca-bundle.crt')
+                                ? '/etc/pki/tls/certs/ca-bundle.crt'
+                                : (file_exists('/etc/ssl/certs/ca-certificates.crt') ? '/etc/ssl/certs/ca-certificates.crt' : null)),
+                        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+                    ], fn ($val) => $val !== null)
+                    : []
+            ) : [],
         ],
 
         'mariadb' => [
@@ -85,15 +88,18 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA') ?: (
-                    env('DB_HOST') && !in_array(env('DB_HOST'), ['127.0.0.1', 'localhost'])
-                        ? (file_exists('/etc/pki/tls/certs/ca-bundle.crt')
-                            ? '/etc/pki/tls/certs/ca-bundle.crt'
-                            : (file_exists(database_path('cacert.pem')) ? database_path('cacert.pem') : null))
-                        : null
-                ),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? (
+                env('DB_HOST') && !in_array(env('DB_HOST'), ['127.0.0.1', 'localhost'])
+                    ? array_filter([
+                        PDO::MYSQL_ATTR_SSL_CA => file_exists(database_path('cacert.pem'))
+                            ? database_path('cacert.pem')
+                            : (file_exists('/etc/pki/tls/certs/ca-bundle.crt')
+                                ? '/etc/pki/tls/certs/ca-bundle.crt'
+                                : (file_exists('/etc/ssl/certs/ca-certificates.crt') ? '/etc/ssl/certs/ca-certificates.crt' : null)),
+                        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+                    ], fn ($val) => $val !== null)
+                    : []
+            ) : [],
         ],
 
         'pgsql' => [
