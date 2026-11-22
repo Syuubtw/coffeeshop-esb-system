@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,8 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Allow public access to Scramble API Documentation on production/Vercel
-        Gate::define('viewApiDocs', function () {
+        // Allow public access to Scramble API Documentation for guests and users
+        Gate::define('viewApiDocs', function (?User $user = null) {
             return true;
         });
     }
