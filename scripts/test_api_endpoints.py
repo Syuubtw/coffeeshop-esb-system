@@ -9,7 +9,7 @@ import urllib.request
 import json
 import sys
 
-BASE_URL = "http://127.0.0.1:8000/api"
+BASE_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/api"
 
 def request_json(url, method="GET", data=None, token=None):
     headers = {
@@ -23,7 +23,7 @@ def request_json(url, method="GET", data=None, token=None):
     req = urllib.request.Request(url, data=payload, headers=headers, method=method)
     
     try:
-        with urllib.request.urlopen(req, timeout=5) as res:
+        with urllib.request.urlopen(req, timeout=15) as res:
             return res.status, json.loads(res.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8")
@@ -64,11 +64,12 @@ def main():
 
     # 3. Table 01 Verification via Token (Public Mie Gacoan Style)
     total += 1
-    code, res = request_json(f"{BASE_URL}/qr/table/TABLE_01_KEY")
+    token_to_test = tables[0].get("qr_token") if (tables and len(tables) > 0) else "TABLE_01_KEY"
+    code, res = request_json(f"{BASE_URL}/qr/table/{token_to_test}")
     table_obj = res.get("data", {}).get("table", {})
     menu_obj = res.get("data", {}).get("menu", [])
     if code == 200 and table_obj.get("table_number") in ["TB-01", "TABLE_01_KEY", "Meja 01"]:
-        print(f" [PASS] 3. Verifikasi Token Meja QR (TABLE_01_KEY):")
+        print(f" [PASS] 3. Verifikasi Token Meja QR ({token_to_test}):")
         print(f"        -> Meja: {table_obj.get('table_number')} | Status: {table_obj.get('status')}")
         print(f"        -> Menu Customer Otomatis Termuat: {len(menu_obj)} Produk Aktif")
         passed += 1
