@@ -46,7 +46,17 @@ Thumbs.db
 *.docx
 DAFTAR_AKUN_DASHBOARD.md
 
+# Python Bytecode & Cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Vercel local cache
+.vercel/
+**/.vercel/
+
 # Local database tools
 public/db.php
-*.log
 
