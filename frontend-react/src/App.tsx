@@ -85,11 +85,11 @@ export function App() {
           }
         />
 
-        {/* Store Manager Back Office — Store Manager & Owner Master View */}
+        {/* Store Manager Back Office — Khusus Store Manager */}
         <Route
           path="/manager"
           element={
-            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
+            <ProtectedRoute allowedRoles={['store_manager']}>
               <StaffLayout>
                 <ManagerDashboard />
               </StaffLayout>
@@ -97,11 +97,11 @@ export function App() {
           }
         />
 
-        {/* Admin Gudang & Logistik — Warehouse Admin, Store Manager, Owner */}
+        {/* Admin Gudang & Logistik — Khusus Warehouse Admin & Store Manager */}
         <Route
           path="/warehouse"
           element={
-            <ProtectedRoute allowedRoles={['warehouse_admin', 'store_manager', 'super_admin']}>
+            <ProtectedRoute allowedRoles={['warehouse_admin', 'store_manager']}>
               <StaffLayout>
                 <WarehouseDashboard />
               </StaffLayout>
@@ -109,7 +109,7 @@ export function App() {
           }
         />
 
-        {/* Owner Executive Dashboard — Owner ONLY */}
+        {/* Owner Executive Dashboard — Khusus Pemilik Kedai (Owner ONLY) */}
         <Route
           path="/admin"
           element={
@@ -121,11 +121,11 @@ export function App() {
           }
         />
 
-        {/* Presensi QR Kiosk — KHUSUS Store Manager & Owner */}
+        {/* Presensi QR Kiosk — Khusus Store Manager */}
         <Route
           path="/attendance"
           element={
-            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
+            <ProtectedRoute allowedRoles={['store_manager']}>
               <StaffLayout>
                 <AttendanceKiosk />
               </StaffLayout>
@@ -133,11 +133,11 @@ export function App() {
           }
         />
 
-        {/* QR Meja Pelanggan Studio — Store Manager & Owner */}
+        {/* QR Meja Pelanggan Studio — Khusus Store Manager */}
         <Route
           path="/table-qr"
           element={
-            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
+            <ProtectedRoute allowedRoles={['store_manager']}>
               <StaffLayout>
                 <TableQrGenerator />
               </StaffLayout>

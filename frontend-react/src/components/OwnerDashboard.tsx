@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   DollarSign, 
   ShoppingBag, 
@@ -95,8 +96,31 @@ const getAvailableRollingMonths = () => {
 };
 
 export const OwnerDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAuditFromUrl = location.search.includes('tab=audit');
   // Top Level Navigation: Laporan Penjualan & Pemeriksaan Kasir
-  const [activeOwnerTab, setActiveOwnerTab] = useState<'FINANCIAL' | 'AUDIT'>('FINANCIAL');
+  const [activeOwnerTab, setActiveOwnerTab] = useState<'FINANCIAL' | 'AUDIT'>(
+    isAuditFromUrl ? 'AUDIT' : 'FINANCIAL'
+  );
+
+  useEffect(() => {
+    if (location.search.includes('tab=audit')) {
+      setActiveOwnerTab('AUDIT');
+    } else {
+      setActiveOwnerTab('FINANCIAL');
+    }
+  }, [location.search]);
+
+  const handleTabChange = (tab: 'FINANCIAL' | 'AUDIT') => {
+    setActiveOwnerTab(tab);
+    if (tab === 'AUDIT') {
+      navigate('/admin?tab=audit', { replace: true });
+    } else {
+      navigate('/admin', { replace: true });
+    }
+  };
 
   // Audit Subtab
   const [auditSubTab, setAuditSubTab] = useState<'LOGS' | 'RECONCILIATION' | 'VOID'>('LOGS');
@@ -539,7 +563,7 @@ export const OwnerDashboard: React.FC = () => {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60 text-xs font-semibold">
             <button
-              onClick={() => setActiveOwnerTab('FINANCIAL')}
+              onClick={() => handleTabChange('FINANCIAL')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer font-bold ${
                 activeOwnerTab === 'FINANCIAL' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
               }`}
@@ -547,7 +571,7 @@ export const OwnerDashboard: React.FC = () => {
               <TrendingUp className="w-3.5 h-3.5 text-blue-600" /> Laporan Penjualan
             </button>
             <button
-              onClick={() => setActiveOwnerTab('AUDIT')}
+              onClick={() => handleTabChange('AUDIT')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer font-bold ${
                 activeOwnerTab === 'AUDIT' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
               }`}

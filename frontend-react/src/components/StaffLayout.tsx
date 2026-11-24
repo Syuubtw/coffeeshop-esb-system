@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Coffee, Bell, LogOut, ShieldCheck, Package, Clock, QrCode } from 'lucide-react';
+import { ShoppingBag, Coffee, Bell, LogOut, ShieldCheck, Package, Clock, QrCode, TrendingUp } from 'lucide-react';
 
 interface StaffLayoutProps {
   children: React.ReactNode;
@@ -57,13 +57,25 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
             </div>
           </div>
 
-          {/* NAV: Owner (super_admin) */}
+          {/* NAV: Owner (super_admin) — HANYA LAPORAN BISNIS & AUDIT KAS */}
           {isSuperAdmin && (
             <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
-              <NavButton path="/admin" label="Laporan Penjualan" icon={<ShieldCheck className="w-3.5 h-3.5 text-purple-600" />} location={location} navigate={navigate} />
-              <NavButton path="/manager" label="Menu & Resep" icon={<ShieldCheck className="w-3.5 h-3.5 text-blue-600" />} location={location} navigate={navigate} />
-              <NavButton path="/warehouse" label="Gudang Bahan Baku" icon={<Package className="w-3.5 h-3.5 text-indigo-600" />} location={location} navigate={navigate} />
-              <NavButton path="/attendance" label="Absensi Karyawan" icon={<Clock className="w-3.5 h-3.5 text-emerald-600" />} location={location} navigate={navigate} />
+              <NavButton 
+                path="/admin" 
+                label="Laporan Penjualan" 
+                icon={<TrendingUp className="w-3.5 h-3.5 text-blue-600" />} 
+                isActive={location.pathname === '/admin' && !location.search.includes('tab=audit')}
+                location={location} 
+                navigate={navigate} 
+              />
+              <NavButton 
+                path="/admin?tab=audit" 
+                label="Pemeriksaan Kasir & Kas" 
+                icon={<ShieldCheck className="w-3.5 h-3.5 text-purple-600" />} 
+                isActive={location.pathname === '/admin' && location.search.includes('tab=audit')}
+                location={location} 
+                navigate={navigate} 
+              />
             </nav>
           )}
 
@@ -153,18 +165,22 @@ interface NavButtonProps {
   icon: React.ReactNode;
   location: { pathname: string };
   navigate: (path: string) => void;
+  isActive?: boolean;
 }
 
-const NavButton: React.FC<NavButtonProps> = ({ path, label, icon, location, navigate }) => (
-  <button
-    onClick={() => navigate(path)}
-    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-      location.pathname === path
-        ? 'bg-white text-slate-900 shadow-xs'
-        : 'text-slate-500 hover:text-slate-900'
-    }`}
-  >
-    {icon}
-    {label}
-  </button>
-);
+const NavButton: React.FC<NavButtonProps> = ({ path, label, icon, location, navigate, isActive }) => {
+  const active = isActive !== undefined ? isActive : location.pathname === path;
+  return (
+    <button
+      onClick={() => navigate(path)}
+      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+        active
+          ? 'bg-white text-slate-900 shadow-xs'
+          : 'text-slate-500 hover:text-slate-900'
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+};
