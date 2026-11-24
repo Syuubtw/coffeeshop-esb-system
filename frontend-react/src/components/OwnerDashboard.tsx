@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   DollarSign, 
   ShoppingBag, 
@@ -9,12 +8,7 @@ import {
   Search,
   TrendingUp,
   ShieldCheck,
-  Scale,
-  AlertTriangle,
   Clock,
-  ArrowUpRight,
-  ArrowDownRight,
-  ShieldAlert,
   Download,
   Coffee,
   Smartphone,
@@ -57,31 +51,6 @@ interface Transaction {
   }>;
 }
 
-interface AuditLogItem {
-  id: number;
-  user_name: string;
-  user_role: string;
-  action: string;
-  entity_type: string;
-  description: string;
-  ip_address: string;
-  created_at: string;
-}
-
-interface CashReconciliationItem {
-  id: number;
-  cashier_name: string;
-  opened_at: string;
-  closed_at: string | null;
-  status: string;
-  start_cash: number;
-  cash_sales_total: number;
-  expected_ending_cash: number;
-  actual_ending_cash: number | null;
-  difference: number;
-  difference_status: 'BALANCED' | 'OVER' | 'SHORT';
-}
-
 const getAvailableRollingMonths = () => {
   const list = [];
   const now = new Date();
@@ -96,35 +65,6 @@ const getAvailableRollingMonths = () => {
 };
 
 export const OwnerDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const isAuditFromUrl = location.search.includes('tab=audit');
-  // Top Level Navigation: Laporan Penjualan & Pemeriksaan Kasir
-  const [activeOwnerTab, setActiveOwnerTab] = useState<'FINANCIAL' | 'AUDIT'>(
-    isAuditFromUrl ? 'AUDIT' : 'FINANCIAL'
-  );
-
-  useEffect(() => {
-    if (location.search.includes('tab=audit')) {
-      setActiveOwnerTab('AUDIT');
-    } else {
-      setActiveOwnerTab('FINANCIAL');
-    }
-  }, [location.search]);
-
-  const handleTabChange = (tab: 'FINANCIAL' | 'AUDIT') => {
-    setActiveOwnerTab(tab);
-    if (tab === 'AUDIT') {
-      navigate('/admin?tab=audit', { replace: true });
-    } else {
-      navigate('/admin', { replace: true });
-    }
-  };
-
-  // Audit Subtab
-  const [auditSubTab, setAuditSubTab] = useState<'LOGS' | 'RECONCILIATION' | 'VOID'>('LOGS');
-
   // Financial Tab State
   const [sourceFilter, setSourceFilter] = useState<'ALL' | 'POS' | 'QR_TABLE'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,11 +74,6 @@ export const OwnerDashboard: React.FC = () => {
 
   // Business Intelligence & Sales Analytics State
   const [biStats, setBiStats] = useState<any>(null);
-
-  // Audit Data State
-  const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
-  const [cashReconciliations, setCashReconciliations] = useState<CashReconciliationItem[]>([]);
-  const [voidOrders, setVoidOrders] = useState<any[]>([]);
 
   // 12 Rolling Months Generator (Bulan Berjalan s/d 12 Bulan Terakhir)
   const availableMonths = useMemo(() => getAvailableRollingMonths(), []);
@@ -159,13 +94,11 @@ export const OwnerDashboard: React.FC = () => {
   const isFetchingRef = useRef(false);
 
   const fetchStatsAndOrders = async (
-    forceTab?: 'FINANCIAL' | 'AUDIT',
     periodOverride?: { month: number; year: number }
   ) => {
-    if (document.hidden && !forceTab) return;
+    if (document.hidden) return;
     if (isFetchingRef.current) return;
 
-    const currentTab = forceTab || activeOwnerTab;
     const period = periodOverride || selectedPeriod;
     const qParams = `?month=${period.month}&year=${period.year}`;
 
@@ -173,59 +106,41 @@ export const OwnerDashboard: React.FC = () => {
       isFetchingRef.current = true;
       setLoading(true);
 
-      if (currentTab === 'FINANCIAL') {
-        // Fetch orders + BI stats secara bersamaan dengan filter periode
-        const [resOrders, resBIStats] = await Promise.allSettled([
-          api.get(`/pos/orders/recent${qParams}`),
-          api.get(`/dashboard/stats${qParams}`),
-        ]);
-        if (resBIStats.status === 'fulfilled' && resBIStats.value.data?.data) {
-          setBiStats(resBIStats.value.data.data);
-        }
-        const ordersRes = resOrders.status === 'fulfilled' ? resOrders.value : null;
-        if (ordersRes?.data?.data?.data) {
-          const mapped = ordersRes.data.data.data.map((o: any) => ({
-            id: o.id,
-            order_number: o.order_number,
-            created_at: o.created_at?.replace('T', ' ').substring(0, 19),
-            order_source: o.order_source,
-            order_type: o.order_type,
-            dining_table: o.dining_table,
-            customer_name: o.customer_name || 'Walk-in Guest',
-            payment_method: o.payment_method || 'QRIS',
-            payment_status: o.payment_status || 'PAID',
-            order_status: o.order_status || 'COMPLETED',
-            subtotal: Number(o.subtotal),
-            tax_amount: Number(o.tax_amount),
-            service_charge: Number(o.service_charge),
-            grand_total: Number(o.grand_total),
-            items_summary: o.items?.map((i: any) => `${i.qty}x ${i.product?.name || 'Menu'}`).join(', ') || 'Menu Order',
-            items_detail: o.items?.map((i: any) => ({
-              name: i.product?.name || 'Item',
-              qty: i.qty,
-              price: Number(i.unit_price),
-              subtotal: Number(i.subtotal),
-              notes: i.notes
-            }))
-          }));
-          setTransactions(mapped);
-        }
-      } else if (currentTab === 'AUDIT') {
-        const [resLogs, resCash, resVoid] = await Promise.allSettled([
-          api.get('/audit/logs'),
-          api.get('/audit/cash-reconciliation'),
-          api.get('/audit/void-orders'),
-        ]);
-
-        if (resLogs.status === 'fulfilled' && resLogs.value.data?.data?.data) {
-          setAuditLogs(resLogs.value.data.data.data);
-        }
-        if (resCash.status === 'fulfilled' && resCash.value.data?.data) {
-          setCashReconciliations(resCash.value.data.data);
-        }
-        if (resVoid.status === 'fulfilled' && resVoid.value.data?.data) {
-          setVoidOrders(resVoid.value.data.data);
-        }
+      // Fetch orders + BI stats secara bersamaan dengan filter periode
+      const [resOrders, resBIStats] = await Promise.allSettled([
+        api.get(`/pos/orders/recent${qParams}`),
+        api.get(`/dashboard/stats${qParams}`),
+      ]);
+      if (resBIStats.status === 'fulfilled' && resBIStats.value.data?.data) {
+        setBiStats(resBIStats.value.data.data);
+      }
+      const ordersRes = resOrders.status === 'fulfilled' ? resOrders.value : null;
+      if (ordersRes?.data?.data?.data) {
+        const mapped = ordersRes.data.data.data.map((o: any) => ({
+          id: o.id,
+          order_number: o.order_number,
+          created_at: o.created_at?.replace('T', ' ').substring(0, 19),
+          order_source: o.order_source,
+          order_type: o.order_type,
+          dining_table: o.dining_table,
+          customer_name: o.customer_name || 'Walk-in Guest',
+          payment_method: o.payment_method || 'QRIS',
+          payment_status: o.payment_status || 'PAID',
+          order_status: o.order_status || 'COMPLETED',
+          subtotal: Number(o.subtotal),
+          tax_amount: Number(o.tax_amount),
+          service_charge: Number(o.service_charge),
+          grand_total: Number(o.grand_total),
+          items_summary: o.items?.map((i: any) => `${i.qty}x ${i.product?.name || 'Menu'}`).join(', ') || 'Menu Order',
+          items_detail: o.items?.map((i: any) => ({
+            name: i.product?.name || 'Item',
+            qty: i.qty,
+            price: Number(i.unit_price),
+            subtotal: Number(i.subtotal),
+            notes: i.notes
+          }))
+        }));
+        setTransactions(mapped);
       }
     } catch {
       // Keep offline
@@ -236,12 +151,12 @@ export const OwnerDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchStatsAndOrders(activeOwnerTab);
+    fetchStatsAndOrders();
     const interval = setInterval(() => {
       fetchStatsAndOrders();
     }, 15000);
     return () => clearInterval(interval);
-  }, [activeOwnerTab, selectedPeriod]);
+  }, [selectedPeriod]);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
@@ -274,103 +189,52 @@ export const OwnerDashboard: React.FC = () => {
   const handleExportCurrentReport = () => {
     const today = new Date().toISOString().slice(0, 10);
 
-    if (activeOwnerTab === 'FINANCIAL') {
-      const headers = [
-        'Nomor Struk',
-        'Waktu Pesanan',
-        'Sumber Pesanan',
-        'Penyajian',
-        'Nomor Meja',
-        'Nama Pelanggan',
-        'Metode Pembayaran',
-        'Status Bayar',
-        'Status Pesanan',
-        'Daftar Menu Dipesan',
-        'Harga Menu (Rp)',
-        'Pajak Restoran (10%) (Rp)',
-        'Biaya Layanan Toko (5%) (Rp)',
-        'Total Pembayaran (Rp)',
-      ];
-      const rows = filteredTransactions.map((t) => [
-        t.order_number,
-        t.created_at,
-        t.order_source === 'QR_TABLE' ? 'Pesanan Meja (QR)' : 'Kasir Langsung',
-        t.order_type === 'DINE_IN' ? 'Minum di Tempat' : 'Bungkus / Bawa Pulang',
-        t.dining_table?.table_number || '-',
-        t.customer_name,
-        t.payment_method === 'QRIS' ? 'QRIS' : 'Uang Tunai',
-        t.payment_status === 'PAID' ? 'Sudah Lunas' : t.payment_status === 'REFUNDED' ? 'Dibatalkan' : 'Belum Bayar',
-        t.order_status,
-        t.items_summary,
-        t.subtotal,
-        t.tax_amount,
-        t.service_charge,
-        t.grand_total,
-      ]);
-      exportStyledExcel({
-        filename: `Laporan_Penjualan_Owner_${today}`,
-        title: 'LAPORAN TRANSAKSI PENJUALAN KEDAI KOPI',
-        subtitle: `Filter: ${sourceFilter === 'ALL' ? 'Semua Sumber Pesanan (Kasir & Meja QR)' : sourceFilter} | Total ${filteredTransactions.length} Pesanan`,
-        author: 'Pemilik Kedai (Owner)',
-        summaryItems: [
-          { label: 'TOTAL UANG MASUK PENJUALAN', value: formatIDR(totalRevenue) },
-          { label: 'TOTAL PESANAN SELESAI', value: `${paidTransactions.length} Pesanan` },
-          { label: 'TITIPAN PAJAK RESTORAN PB1 (10%)', value: formatIDR(totalPB1Tax) },
-          { label: 'RATA-RATA NILAI BELANJA (AOV)', value: formatIDR(avgOrderValue) },
-        ],
-        headers,
-        rows,
-      });
-    } else if (activeOwnerTab === 'AUDIT') {
-      if (auditSubTab === 'RECONCILIATION') {
-        const headers = ['Nama Kasir', 'Jam Buka Shift', 'Jam Tutup Shift', 'Status Shift', 'Modal Awal Kasir (Rp)', 'Total Uang Tunai Masuk (Rp)', 'Uang yang Seharusnya Ada (Rp)', 'Uang Fisik Dihitung Kasir (Rp)', 'Selisih Uang (Rp)', 'Kesesuaian Uang'];
-        const rows = cashReconciliations.map((c) => [
-          c.cashier_name,
-          c.opened_at,
-          c.closed_at || 'Sedang Aktif',
-          c.status === 'CLOSED' ? 'Shift Selesai' : 'Sedang Bertugas',
-          c.start_cash,
-          c.cash_sales_total,
-          c.expected_ending_cash,
-          c.actual_ending_cash ?? '-',
-          c.difference,
-          c.difference_status === 'BALANCED' ? 'Uang Pas (Sesuai)' : c.difference_status === 'OVER' ? 'Uang Berlebih' : 'Uang Kurang',
-        ]);
-        exportStyledExcel({
-          filename: `Laporan_Pemeriksaan_Kas_Kasir_${today}`,
-          title: 'LAPORAN PENGECEKAN UANG KASIR SAAT TUTUP SHIFT',
-          subtitle: 'Pengecekan fisik uang di laci kasir vs catatan penjualan di sistem kasir',
-          author: 'Pemilik Kedai (Owner)',
-          summaryItems: [
-            { label: 'TOTAL SESI KASIR', value: `${cashReconciliations.length} Sesi Tutup Kas` },
-          ],
-          headers,
-          rows,
-        });
-      } else {
-        const headers = ['Waktu', 'Nama Karyawan', 'Posisi Kerja', 'Aksi', 'Tipe Data', 'Penjelasan Aktivitas', 'Alamat Jaringan (IP)'];
-        const rows = auditLogs.map((l) => [
-          l.created_at,
-          l.user_name,
-          l.user_role,
-          l.action,
-          l.entity_type,
-          l.description,
-          l.ip_address,
-        ]);
-        exportStyledExcel({
-          filename: `Laporan_Audit_Forensik_${today}`,
-          title: 'LAPORAN AUDIT TRAIL AKTIVITAS & FORENSIK STAF',
-          subtitle: 'Rekam jejak forensik keamanan sistem (login, approval, pembatalan pesanan, dsb.)',
-          author: 'Faiz Rifki Syuhada (Owner)',
-          summaryItems: [
-            { label: 'TOTAL LOG TEREKAM', value: `${auditLogs.length} Aktivitas` },
-          ],
-          headers,
-          rows,
-        });
-      }
-    }
+    const headers = [
+      'Nomor Struk',
+      'Waktu Pesanan',
+      'Sumber Pesanan',
+      'Penyajian',
+      'Nomor Meja',
+      'Nama Pelanggan',
+      'Metode Pembayaran',
+      'Status Bayar',
+      'Status Pesanan',
+      'Daftar Menu Dipesan',
+      'Harga Menu (Rp)',
+      'Pajak Restoran (10%) (Rp)',
+      'Biaya Layanan Toko (5%) (Rp)',
+      'Total Pembayaran (Rp)',
+    ];
+    const rows = filteredTransactions.map((t) => [
+      t.order_number,
+      t.created_at,
+      t.order_source === 'QR_TABLE' ? 'Pesanan Meja (QR)' : 'Kasir Langsung',
+      t.order_type === 'DINE_IN' ? 'Minum di Tempat' : 'Bungkus / Bawa Pulang',
+      t.dining_table?.table_number || '-',
+      t.customer_name,
+      t.payment_method === 'QRIS' ? 'QRIS' : 'Uang Tunai',
+      t.payment_status === 'PAID' ? 'Sudah Lunas' : t.payment_status === 'REFUNDED' ? 'Dibatalkan' : 'Belum Bayar',
+      t.order_status,
+      t.items_summary,
+      t.subtotal,
+      t.tax_amount,
+      t.service_charge,
+      t.grand_total,
+    ]);
+    exportStyledExcel({
+      filename: `Laporan_Penjualan_Owner_${today}`,
+      title: 'LAPORAN TRANSAKSI PENJUALAN KEDAI KOPI',
+      subtitle: `Filter: ${sourceFilter === 'ALL' ? 'Semua Sumber Pesanan (Kasir & Meja QR)' : sourceFilter} | Total ${filteredTransactions.length} Pesanan`,
+      author: 'Pemilik Kedai (Owner)',
+      summaryItems: [
+        { label: 'TOTAL UANG MASUK PENJUALAN', value: formatIDR(totalRevenue) },
+        { label: 'TOTAL PESANAN SELESAI', value: `${paidTransactions.length} Pesanan` },
+        { label: 'TITIPAN PAJAK RESTORAN PB1 (10%)', value: formatIDR(totalPB1Tax) },
+        { label: 'RATA-RATA NILAI BELANJA (AOV)', value: formatIDR(avgOrderValue) },
+      ],
+      headers,
+      rows,
+    });
   };
 
   // 1. Export Laporan Penjualan Bulanan Lengkap
@@ -545,7 +409,7 @@ export const OwnerDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      {/* Top Banner & Tab Navigation */}
+      {/* Top Banner */}
       <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -555,31 +419,12 @@ export const OwnerDashboard: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Pantau omzet penjualan harian, performa menu terlaris, dan audit pemeriksaan kasir secara otomatis.
+            Pantau omzet penjualan harian, performa menu terlaris, dan riwayat transaksi penjualan kedai secara otomatis.
           </p>
         </div>
 
-        {/* Master Navigation Tabs */}
+        {/* Master Navigation & Filter */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60 text-xs font-semibold">
-            <button
-              onClick={() => handleTabChange('FINANCIAL')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer font-bold ${
-                activeOwnerTab === 'FINANCIAL' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5 text-blue-600" /> Laporan Penjualan
-            </button>
-            <button
-              onClick={() => handleTabChange('AUDIT')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer font-bold ${
-                activeOwnerTab === 'AUDIT' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-purple-600" /> Pemeriksaan Kasir & Kas
-            </button>
-          </div>
-
           {/* Filter Periode 12 Bulan Terakhir */}
           <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200/80 px-3 py-1.5 rounded-2xl text-xs">
             <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
@@ -630,10 +475,9 @@ export const OwnerDashboard: React.FC = () => {
       </div>
 
       {/* ============================================================== */}
-      {/* VIEW 1: FINANCIAL OVERVIEW & AUDIT STRUK (EXISTING) */}
+      {/* EXECUTIVE SALES & PERFORMANCE OVERVIEW */}
       {/* ============================================================== */}
-      {activeOwnerTab === 'FINANCIAL' && (
-        <div className="space-y-6">
+      <div className="space-y-6">
           {/* KPI Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Omset */}
@@ -1225,231 +1069,6 @@ export const OwnerDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* ============================================================== */}
-      {/* VIEW 2: PUSAT AUDIT TRAIL & PEMERIKSAAN KASIR */}
-      {/* ============================================================== */}
-
-      {/* ============================================================== */}
-      {/* VIEW 3: PUSAT AUDIT TRAIL & ANTI-FRAUD */}
-      {/* ============================================================== */}
-      {activeOwnerTab === 'AUDIT' && (
-        <div className="space-y-6">
-          {/* Sub Navigation Bar for Audit */}
-          <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit border border-slate-200/60 text-xs font-bold">
-            <button
-              onClick={() => setAuditSubTab('LOGS')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition cursor-pointer ${
-                auditSubTab === 'LOGS' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5 text-blue-600" /> Riwayat Kerja Karyawan
-            </button>
-            <button
-              onClick={() => setAuditSubTab('RECONCILIATION')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition cursor-pointer ${
-                auditSubTab === 'RECONCILIATION' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <Scale className="w-3.5 h-3.5 text-emerald-600" /> Pengecekan Uang Kasir (Tutup Shift)
-            </button>
-            <button
-              onClick={() => setAuditSubTab('VOID')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition cursor-pointer ${
-                auditSubTab === 'VOID' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-600" /> Pemeriksaan Pembatalan Struk
-            </button>
-          </div>
-
-          {/* SUB-VIEW 1: SYSTEM ACTION AUDIT LOGS */}
-          {auditSubTab === 'LOGS' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 flex-wrap gap-2">
-                <div>
-                  <h2 className="font-bold text-slate-900 text-base">Catatan Riwayat Kerja Karyawan</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Mencatat nama karyawan, waktu pengerjaan, dan rincian perubahan yang dilakukan di sistem.</p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
-                  {auditLogs.length} Aktivitas Terbaru
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold bg-slate-50/50">
-                      <th className="py-3 px-3 w-40">Waktu & Tanggal</th>
-                      <th className="py-3 px-3 w-40">Nama Karyawan & Bagian</th>
-                      <th className="py-3 px-3 w-36 text-center">Aksi yang Dilakukan</th>
-                      <th className="py-3 px-3">Rincian yang Dikerjakan</th>
-                      <th className="py-3 px-3 w-32 font-mono text-right">Alamat Jaringan (IP)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {auditLogs.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-12 text-center text-slate-400">
-                          Belum ada catatan aktivitas staf.
-                        </td>
-                      </tr>
-                    ) : (
-                      auditLogs.map((log) => (
-                        <tr key={log.id} className="hover:bg-slate-50/60 transition">
-                          <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap">
-                            {log.created_at?.replace('T', ' ').substring(0, 19)}
-                          </td>
-                          <td className="py-3 px-3">
-                            <span className="font-bold text-slate-900 block">{log.user_name}</span>
-                            <span className="text-[10px] text-slate-400 font-medium">{log.user_role}</span>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              log.action.includes('ORDER') ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
-                              log.action.includes('SHIFT') ? 'bg-blue-50 text-blue-800 border border-blue-200' :
-                              log.action.includes('WASTE') ? 'bg-rose-50 text-rose-800 border border-rose-200' :
-                              'bg-amber-50 text-amber-800 border border-amber-200'
-                            }`}>
-                              {log.action}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 text-slate-700 font-medium">{log.description}</td>
-                          <td className="py-3 px-3 font-mono text-slate-400 text-right">{log.ip_address}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* SUB-VIEW 2: CASH DRAWER RECONCILIATION */}
-          {auditSubTab === 'RECONCILIATION' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <h2 className="font-bold text-slate-900 text-base">Pengecekan Uang Kasir (Tutup Shift)</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Mencocokkan jumlah uang fisik di laci kasir dengan total penjualan tunai di sistem.</p>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold bg-slate-50/50">
-                      <th className="py-3 px-3">Nama Kasir</th>
-                      <th className="py-3 px-3">Jam Buka / Tutup</th>
-                      <th className="py-3 px-3 text-right">Modal Awal di Laci</th>
-                      <th className="py-3 px-3 text-right">Penjualan Tunai</th>
-                      <th className="py-3 px-3 text-right font-bold text-slate-700">Uang Seharusnya Ada</th>
-                      <th className="py-3 px-3 text-right font-bold text-slate-900">Uang Fisik Dihitung Kasir</th>
-                      <th className="py-3 px-3 text-right">Selisih Uang</th>
-                      <th className="py-3 px-3 text-center">Hasil Pengecekan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {cashReconciliations.map((c) => (
-                      <tr key={c.id} className="hover:bg-slate-50/60 transition">
-                        <td className="py-3 px-3 font-bold text-slate-900">{c.cashier_name}</td>
-                        <td className="py-3 px-3 font-mono text-slate-500">
-                          <div>Buka: {c.opened_at?.substring(11, 19)}</div>
-                          <div className="text-[10px] text-slate-400">{c.closed_at ? `Tutup: ${c.closed_at.substring(11, 19)}` : 'Sedang Aktif'}</div>
-                        </td>
-                        <td className="py-3 px-3 text-right font-mono text-slate-600">{formatIDR(c.start_cash)}</td>
-                        <td className="py-3 px-3 text-right font-mono text-emerald-600 font-semibold">{formatIDR(c.cash_sales_total)}</td>
-                        <td className="py-3 px-3 text-right font-mono font-bold text-slate-700">{formatIDR(c.expected_ending_cash)}</td>
-                        <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
-                          {c.actual_ending_cash !== null ? formatIDR(c.actual_ending_cash) : 'Belum Tutup'}
-                        </td>
-                        <td className="py-3 px-3 text-right font-mono font-bold">
-                          {c.difference === 0 ? (
-                            <span className="text-emerald-600">Rp 0 (Pas)</span>
-                          ) : c.difference > 0 ? (
-                            <span className="text-blue-600 font-bold flex items-center justify-end gap-1">
-                              <ArrowUpRight className="w-3.5 h-3.5" /> +{formatIDR(c.difference)}
-                            </span>
-                          ) : (
-                            <span className="text-rose-600 font-bold flex items-center justify-end gap-1">
-                              <ArrowDownRight className="w-3.5 h-3.5" /> {formatIDR(c.difference)}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            c.difference_status === 'BALANCED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            c.difference_status === 'OVER' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                            'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}>
-                            {c.difference_status === 'BALANCED' ? 'Uang Pas (Sesuai)' : c.difference_status === 'OVER' ? 'Uang Berlebih' : 'Uang Kurang'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* SUB-VIEW 3: AUDIT VOID & DISKON */}
-          {auditSubTab === 'VOID' && (
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <h2 className="font-bold text-slate-900 text-base">Pemeriksaan Pembatalan Struk & Diskon</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Memantau apakah ada struk yang dibatalkan kasir setelah uang diterima.</p>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold bg-slate-50/50">
-                      <th className="py-3 px-3">Nomor Struk</th>
-                      <th className="py-3 px-3">Pelanggan & Meja</th>
-                      <th className="py-3 px-3 text-right">Nilai Pesanan</th>
-                      <th className="py-3 px-3 text-right">Potongan Diskon</th>
-                      <th className="py-3 px-3 text-center">Status Pesanan</th>
-                      <th className="py-3 px-4">Catatan Pemeriksaan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {voidOrders.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
-                          <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                          Tidak ada pembatalan pesanan yang mencurigakan. Operasional kasir berjalan aman.
-                        </td>
-                      </tr>
-                    ) : (
-                      voidOrders.map((vo) => (
-                        <tr key={vo.id} className="hover:bg-slate-50/60 transition">
-                          <td className="py-3 px-3 font-mono font-bold text-slate-900">{vo.order_number}</td>
-                          <td className="py-3 px-3">
-                            <span className="font-medium text-slate-800">{vo.customer_name}</span>
-                            <span className="text-[10px] text-slate-400 block">{vo.dining_table ? `Meja ${vo.dining_table.table_number}` : 'Bungkus'}</span>
-                          </td>
-                          <td className="py-3 px-3 text-right font-mono font-bold text-slate-800">{formatIDR(vo.grand_total)}</td>
-                          <td className="py-3 px-3 text-right font-mono text-rose-600 font-semibold">
-                            {vo.discount_amount > 0 ? `-${formatIDR(vo.discount_amount)}` : '-'}
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                              {vo.order_status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-slate-500">
-                            Tercatat aman di sistem
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* RECEIPT INSPECTION MODAL */}
       {selectedReceipt && (

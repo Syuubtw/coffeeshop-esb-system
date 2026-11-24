@@ -25,7 +25,11 @@ import {
   UserPlus,
   Pencil,
   QrCode,
-  X
+  X,
+  Scale,
+  ArrowUpRight,
+  ArrowDownRight,
+  ShieldAlert
 } from 'lucide-react';
 import api from '../services/api';
 import { exportStyledExcel } from '../utils/exportCsv';
@@ -138,8 +142,25 @@ const getPackagingSpec = (m: RawMaterialStock): string => {
   return m.unit === 'gram' ? 'Pack (1 kg)' : m.unit === 'ml' ? 'Botol (1 Liter)' : 'Pack Standar';
 };
 
+interface CashReconciliationItem {
+  id: number;
+  cashier_name: string;
+  opened_at: string;
+  closed_at: string | null;
+  status: string;
+  start_cash: number;
+  cash_sales_total: number;
+  expected_ending_cash: number;
+  actual_ending_cash: number | null;
+  difference: number;
+  difference_status: 'BALANCED' | 'OVER' | 'SHORT';
+}
+
 export const ManagerDashboard: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'approvals' | 'menu_bom' | 'asset_valuation' | 'employees' | 'shifts' | 'tables'>('approvals');
+  const [activeSubTab, setActiveSubTab] = useState<'approvals' | 'menu_bom' | 'asset_valuation' | 'employees' | 'shifts' | 'tables' | 'cashier_reconciliation'>('approvals');
+  const [cashReconciliations, setCashReconciliations] = useState<CashReconciliationItem[]>([]);
+  const [voidOrders, setVoidOrders] = useState<any[]>([]);
+  const [cashierAuditSubTab, setCashierAuditSubTab] = useState<'RECONCILIATION' | 'VOID'>('RECONCILIATION');
   const [materials, setMaterials] = useState<RawMaterialStock[]>(FALLBACK_MATERIALS);
   const [searchMaterial, setSearchMaterial] = useState('');
   const [assetFilter, setAssetFilter] = useState<'ALL' | 'LOW' | 'OUT' | 'SAFE'>('ALL');
@@ -426,6 +447,17 @@ export const ManagerDashboard: React.FC = () => {
         const resProd = await api.get('/menu/products');
         if (resProd.data?.data) {
           setProducts(resProd.data.data);
+        }
+      } else if (currentTab === 'cashier_reconciliation') {
+        const [resCash, resVoid] = await Promise.allSettled([
+          api.get('/audit/cash-reconciliation'),
+          api.get('/audit/void-orders'),
+        ]);
+        if (resCash.status === 'fulfilled' && resCash.value.data?.data) {
+          setCashReconciliations(resCash.value.data.data);
+        }
+        if (resVoid.status === 'fulfilled' && resVoid.value.data?.data) {
+          setVoidOrders(resVoid.value.data.data);
         }
       }
     } catch {
@@ -765,6 +797,17 @@ export const ManagerDashboard: React.FC = () => {
               }`}
             >
               <QrCode className="w-3.5 h-3.5 text-amber-600" /> Stiker & QR Meja
+            </button>
+            <button
+              onClick={() => {
+                setActiveSubTab('cashier_reconciliation');
+                fetchLiveStock('cashier_reconciliation');
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
+                activeSubTab === 'cashier_reconciliation' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Scale className="w-3.5 h-3.5 text-purple-600" /> Pemeriksaan Kasir & Kas
             </button>
           </div>
 
@@ -1857,6 +1900,198 @@ export const ManagerDashboard: React.FC = () => {
       {/* SUBTAB 5: PUSAT QR CODE & STIKER MEJA PELANGGAN */}
       {activeSubTab === 'tables' && (
         <TableQrGenerator />
+      )}
+
+      {/* SUBTAB 6: PEMERIKSAAN KASIR & KAS (REKONSILIASI KAS & VOID AUDIT) */}
+      {activeSubTab === 'cashier_reconciliation' && (
+        <div className="space-y-6">
+          {/* Header Card */}
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 shadow-2xs">
+                  <Scale className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 text-lg tracking-tight">Pemeriksaan Kasir & Rekonsiliasi Kas</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Cocokkan fisik uang laci kasir saat tutup shift dan awasi pembatalan struk (void) untuk mencegah fraud.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60 text-xs font-bold">
+                <button
+                  onClick={() => setCashierAuditSubTab('RECONCILIATION')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition cursor-pointer ${
+                    cashierAuditSubTab === 'RECONCILIATION' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Scale className="w-3.5 h-3.5 text-emerald-600" /> Tutup Shift Kasir
+                </button>
+                <button
+                  onClick={() => setCashierAuditSubTab('VOID')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition cursor-pointer ${
+                    cashierAuditSubTab === 'VOID' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-600" /> Audit Pembatalan (Void)
+                </button>
+              </div>
+
+              <button
+                onClick={() => fetchLiveStock('cashier_reconciliation')}
+                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition cursor-pointer"
+                title="Segarkan Data"
+              >
+                <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* VIEW: RECONCILIATION */}
+          {cashierAuditSubTab === 'RECONCILIATION' && (
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center flex-wrap gap-2">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Pengecekan Uang Kasir (Tutup Shift)</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Mencocokkan jumlah uang fisik di laci kasir dengan total penjualan tunai di sistem POS.</p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
+                  {cashReconciliations.length} Sesi Kasir Tercatat
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold bg-slate-50/50">
+                      <th className="py-3 px-3">Nama Kasir</th>
+                      <th className="py-3 px-3">Jam Buka / Tutup</th>
+                      <th className="py-3 px-3 text-right">Modal Awal di Laci</th>
+                      <th className="py-3 px-3 text-right">Penjualan Tunai</th>
+                      <th className="py-3 px-3 text-right font-bold text-slate-700">Uang Seharusnya Ada</th>
+                      <th className="py-3 px-3 text-right font-bold text-slate-900">Uang Fisik Dihitung Kasir</th>
+                      <th className="py-3 px-3 text-right">Selisih Uang</th>
+                      <th className="py-3 px-3 text-center">Hasil Pengecekan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {cashReconciliations.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-slate-400">
+                          Belum ada data rekonsiliasi tutup kasir.
+                        </td>
+                      </tr>
+                    ) : (
+                      cashReconciliations.map((c) => (
+                        <tr key={c.id} className="hover:bg-slate-50/60 transition">
+                          <td className="py-3 px-3 font-bold text-slate-900">{c.cashier_name}</td>
+                          <td className="py-3 px-3 font-mono text-slate-500">
+                            <div>Buka: {c.opened_at?.substring(11, 19)}</div>
+                            <div className="text-[10px] text-slate-400">{c.closed_at ? `Tutup: ${c.closed_at.substring(11, 19)}` : 'Sedang Aktif'}</div>
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono text-slate-600">{formatIDR(c.start_cash)}</td>
+                          <td className="py-3 px-3 text-right font-mono text-emerald-600 font-semibold">{formatIDR(c.cash_sales_total)}</td>
+                          <td className="py-3 px-3 text-right font-mono font-bold text-slate-700">{formatIDR(c.expected_ending_cash)}</td>
+                          <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
+                            {c.actual_ending_cash !== null ? formatIDR(c.actual_ending_cash) : 'Belum Tutup'}
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono font-bold">
+                            {c.difference === 0 ? (
+                              <span className="text-emerald-600">Rp 0 (Pas)</span>
+                            ) : c.difference > 0 ? (
+                              <span className="text-blue-600 font-bold flex items-center justify-end gap-1">
+                                <ArrowUpRight className="w-3.5 h-3.5" /> +{formatIDR(c.difference)}
+                              </span>
+                            ) : (
+                              <span className="text-rose-600 font-bold flex items-center justify-end gap-1">
+                                <ArrowDownRight className="w-3.5 h-3.5" /> {formatIDR(c.difference)}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              c.difference_status === 'BALANCED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                              c.difference_status === 'OVER' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                              'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}>
+                              {c.difference_status === 'BALANCED' ? 'Uang Pas (Sesuai)' : c.difference_status === 'OVER' ? 'Uang Berlebih' : 'Uang Kurang'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: VOID ORDERS */}
+          {cashierAuditSubTab === 'VOID' && (
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center flex-wrap gap-2">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Pemeriksaan Pembatalan Struk & Diskon</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Memantau apakah ada struk yang dibatalkan kasir setelah pesanan dibuat atau uang diterima.</p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+                  {voidOrders.length} Catatan Void
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold bg-slate-50/50">
+                      <th className="py-3 px-3">Nomor Struk</th>
+                      <th className="py-3 px-3">Pelanggan & Meja</th>
+                      <th className="py-3 px-3 text-right">Nilai Pesanan</th>
+                      <th className="py-3 px-3 text-right">Potongan Diskon</th>
+                      <th className="py-3 px-3 text-center">Status Pesanan</th>
+                      <th className="py-3 px-4">Catatan Pemeriksaan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {voidOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                          <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                          Tidak ada pembatalan pesanan yang mencurigakan. Operasional kasir berjalan aman.
+                        </td>
+                      </tr>
+                    ) : (
+                      voidOrders.map((vo) => (
+                        <tr key={vo.id} className="hover:bg-slate-50/60 transition">
+                          <td className="py-3 px-3 font-mono font-bold text-slate-900">{vo.order_number}</td>
+                          <td className="py-3 px-3">
+                            <span className="font-medium text-slate-800">{vo.customer_name}</span>
+                            <span className="text-[10px] text-slate-400 block">{vo.dining_table ? `Meja ${vo.dining_table.table_number}` : 'Bungkus'}</span>
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono font-bold text-slate-800">{formatIDR(vo.grand_total)}</td>
+                          <td className="py-3 px-3 text-right font-mono text-rose-600 font-semibold">
+                            {vo.discount_amount > 0 ? `-${formatIDR(vo.discount_amount)}` : '-'}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                              {vo.order_status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-500">
+                            Tercatat aman di sistem
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* MODAL TAMBAH MENU BARU DENGAN RESEP BOM (BACK OFFICE) */}

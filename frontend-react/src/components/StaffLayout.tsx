@@ -57,22 +57,13 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
             </div>
           </div>
 
-          {/* NAV: Owner (super_admin) — HANYA LAPORAN BISNIS & AUDIT KAS */}
+          {/* NAV: Owner (super_admin) — MURNI HANYA LAPORAN PENJUALAN */}
           {isSuperAdmin && (
             <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
               <NavButton 
                 path="/admin" 
                 label="Laporan Penjualan" 
                 icon={<TrendingUp className="w-3.5 h-3.5 text-blue-600" />} 
-                isActive={location.pathname === '/admin' && !location.search.includes('tab=audit')}
-                location={location} 
-                navigate={navigate} 
-              />
-              <NavButton 
-                path="/admin?tab=audit" 
-                label="Pemeriksaan Kasir & Kas" 
-                icon={<ShieldCheck className="w-3.5 h-3.5 text-purple-600" />} 
-                isActive={location.pathname === '/admin' && location.search.includes('tab=audit')}
                 location={location} 
                 navigate={navigate} 
               />
@@ -82,7 +73,7 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
           {/* NAV: Store Manager */}
           {isStoreManager && (
             <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
-              <NavButton path="/manager" label="Menu & Resep" icon={<ShieldCheck className="w-3.5 h-3.5 text-blue-600" />} location={location} navigate={navigate} />
+              <NavButton path="/manager" label="Operasional & SDM" icon={<ShieldCheck className="w-3.5 h-3.5 text-blue-600" />} location={location} navigate={navigate} />
               <NavButton path="/table-qr" label="QR Meja" icon={<QrCode className="w-3.5 h-3.5 text-amber-600" />} location={location} navigate={navigate} />
               <NavButton path="/attendance" label="Absensi Karyawan" icon={<Clock className="w-3.5 h-3.5 text-emerald-600" />} location={location} navigate={navigate} />
             </nav>
