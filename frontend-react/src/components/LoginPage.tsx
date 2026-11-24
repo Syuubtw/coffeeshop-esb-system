@@ -21,10 +21,6 @@ export const LoginPage: React.FC = () => {
   const handleRedirectByRole = (user: any) => {
     if (user.roles?.includes('super_admin')) {
       navigate('/admin');
-    } else if (user.roles?.includes('store_manager')) {
-      navigate('/manager');
-    } else if (user.roles?.includes('warehouse_admin')) {
-      navigate('/warehouse');
     } else if (user.roles?.includes('barista')) {
       navigate('/kds');
     } else {
@@ -50,16 +46,6 @@ export const LoginPage: React.FC = () => {
         localStorage.setItem('token', 'offline-token-super_admin');
         localStorage.setItem('user', JSON.stringify(dummyUser));
         handleRedirectByRole(dummyUser);
-      } else if (email === 'manager@coffeeshop.test' && password === 'password') {
-        const dummyUser = { name: 'Store Manager', email, roles: ['store_manager'] };
-        localStorage.setItem('token', 'offline-token-store_manager');
-        localStorage.setItem('user', JSON.stringify(dummyUser));
-        handleRedirectByRole(dummyUser);
-      } else if (email === 'warehouse@coffeeshop.test' && password === 'password') {
-        const dummyUser = { name: 'Budi Santoso (Admin Gudang & Purchasing)', email, roles: ['warehouse_admin'] };
-        localStorage.setItem('token', 'offline-token-warehouse');
-        localStorage.setItem('user', JSON.stringify(dummyUser));
-        handleRedirectByRole(dummyUser);
       } else if (email === 'cashier@coffeeshop.test' && password === 'password') {
         const dummyUser = { name: 'Kasir Frontline', email, roles: ['cashier'] };
         localStorage.setItem('token', 'offline-token-cashier');
@@ -75,13 +61,8 @@ export const LoginPage: React.FC = () => {
         localStorage.setItem('token', 'offline-token-barista2');
         localStorage.setItem('user', JSON.stringify(dummyUser));
         handleRedirectByRole(dummyUser);
-      } else if (email === 'barista3@coffeeshop.test' && password === 'password') {
-        const dummyUser = { name: 'Sarah Amelia (Barista Manual Brew)', email, roles: ['barista'] };
-        localStorage.setItem('token', 'offline-token-barista3');
-        localStorage.setItem('user', JSON.stringify(dummyUser));
-        handleRedirectByRole(dummyUser);
       } else {
-        setErrorMsg('Email atau password salah. Silakan periksa kembali!');
+        setErrorMsg('Login gagal. Pastikan email dan password terdaftar.');
       }
     } finally {
       setLoading(false);
@@ -178,61 +159,48 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Quick Demo Role Fillers — 5 Staff Roles */}
+        {/* Quick Demo Role Fillers — 3 Active Stations */}
         <div className="mt-8 pt-6 border-t border-slate-100">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center mb-3">
-            Pintasan Login 5 Role Staf:
+            Pintasan Login 3 Stasiun Sistem:
           </span>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
             <button
               type="button"
               onClick={() => fillCredential('admin@coffeeshop.test')}
-              className="p-2.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-left transition cursor-pointer"
+              className="w-full p-2.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-left transition cursor-pointer flex items-center justify-between"
             >
-              <div className="flex items-center gap-1.5 text-purple-700 font-bold text-xs">
-                <ShieldCheck className="w-3.5 h-3.5" /> 1. Owner
+              <div>
+                <div className="flex items-center gap-1.5 text-purple-700 font-bold text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5" /> 1. Pemilik Kedai (Owner)
+                </div>
+                <div className="text-[10px] text-purple-600/80 mt-0.5">Pemantauan Laporan Penjualan & QR Meja (/admin)</div>
               </div>
-              <div className="text-[9px] text-purple-600/80 mt-0.5">Finansial & Laba Rugi (/admin)</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => fillCredential('manager@coffeeshop.test')}
-              className="p-2.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-left transition cursor-pointer"
-            >
-              <div className="flex items-center gap-1.5 text-blue-700 font-bold text-xs">
-                <ShieldCheck className="w-3.5 h-3.5" /> 2. Store Manager
-              </div>
-              <div className="text-[9px] text-blue-600/80 mt-0.5">Back Office & Menu (/manager)</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => fillCredential('warehouse@coffeeshop.test')}
-              className="p-2.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-left transition cursor-pointer"
-            >
-              <div className="flex items-center gap-1.5 text-indigo-700 font-bold text-xs">
-                <ShieldCheck className="w-3.5 h-3.5" /> 3. Admin Gudang
-              </div>
-              <div className="text-[9px] text-indigo-600/80 mt-0.5">Logistik & Inbound (/warehouse)</div>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-purple-200/60 text-purple-800 rounded">Owner</span>
             </button>
 
             <button
               type="button"
               onClick={() => fillCredential('cashier@coffeeshop.test')}
-              className="p-2.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-left transition cursor-pointer"
+              className="w-full p-2.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-left transition cursor-pointer flex items-center justify-between"
             >
-              <div className="flex items-center gap-1.5 text-amber-700 font-bold text-xs">
-                <Coffee className="w-3.5 h-3.5" /> 4. Kasir
+              <div>
+                <div className="flex items-center gap-1.5 text-amber-700 font-bold text-xs">
+                  <Coffee className="w-3.5 h-3.5" /> 2. Kasir Frontline (POS)
+                </div>
+                <div className="text-[10px] text-amber-600/80 mt-0.5">Transaksi Kasir, Pembayaran Tunai & QRIS (/pos)</div>
               </div>
-              <div className="text-[9px] text-amber-600/80 mt-0.5">Front Office POS (/pos)</div>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-amber-200/60 text-amber-800 rounded">Kasir</span>
             </button>
 
-            <div className="col-span-2 p-2.5 rounded-xl border border-teal-200 bg-teal-50 text-left flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-teal-700 font-bold text-xs">
-                <Coffee className="w-3.5 h-3.5" /> 5. Barista (3 Staf):
+            <div className="p-2.5 rounded-xl border border-teal-200 bg-teal-50 text-left flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 text-teal-700 font-bold text-xs">
+                  <Coffee className="w-3.5 h-3.5" /> 3. Barista Dapur (KDS)
+                </div>
+                <div className="text-[10px] text-teal-600/80 mt-0.5">Layar Antrean Pesanan Masuk (/kds)</div>
               </div>
-              <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => fillCredential('barista@coffeeshop.test')}
@@ -249,54 +217,21 @@ export const LoginPage: React.FC = () => {
                 >
                   Dimas
                 </button>
-                <button
-                  type="button"
-                  onClick={() => fillCredential('barista3@coffeeshop.test')}
-                  className="px-2 py-0.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[10px] font-bold border border-teal-300 transition cursor-pointer"
-                  title="Sarah Amelia (Barista Manual Brew)"
-                >
-                  Sarah
-                </button>
               </div>
             </div>
           </div>
 
-          {/* Public Access Link: Pelanggan & Presensi HP */}
-          <div className="mt-4 pt-3 border-t border-dashed border-slate-200 flex flex-col gap-2 text-[11px]">
-            <div className="flex items-center justify-between">
-              <a
-                href="/order/table/TB-01"
-                target="_blank"
-                rel="noreferrer"
-                className="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1 hover:underline"
-                title="Buka Self-Ordering Pelanggan Meja TB-01"
-              >
-                📱 5. Pelanggan (QR Meja) ↗
-              </a>
-              <a
-                href="/absen"
-                target="_blank"
-                rel="noreferrer"
-                className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 hover:underline"
-                title="Buka poster QR Code Outlet untuk ditempel di toko & di-scan karyawan"
-              >
-                📷 Poster QR Absen Toko ↗
-              </a>
-            </div>
-            <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-2 text-center">
-              <span className="text-[10px] text-slate-500">
-                Alur Absen: Buka <b>Poster QR</b> ➔ Karyawan Scan pakai Kamera HP ➔ Terbuka{' '}
-                <a
-                  href="/presensi"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-600 hover:underline font-bold"
-                  title="Klik untuk simulasi tampilan di Chrome HP karyawan"
-                >
-                  Chrome HP (/presensi) ↗
-                </a>
-              </span>
-            </div>
+          {/* Public Access Link: Pelanggan Pesan Mandiri */}
+          <div className="mt-4 pt-3 border-t border-dashed border-slate-200 flex items-center justify-between text-[11px]">
+            <a
+              href="/order/table/TB-01"
+              target="_blank"
+              rel="noreferrer"
+              className="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1 hover:underline"
+              title="Buka Self-Ordering Pelanggan Meja TB-01"
+            >
+              📱 Pelanggan Scan QR Meja 01 (Pesan Mandiri) ↗
+            </a>
           </div>
         </div>
       </div>

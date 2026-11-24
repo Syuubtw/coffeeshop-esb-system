@@ -24,7 +24,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import api from '../services/api';
-import { exportStyledExcel } from '../utils/exportCsv';
+import { exportStyledExcel, formatDateTimeWIB } from '../utils/exportCsv';
 
 interface Transaction {
   id: number;
@@ -119,7 +119,7 @@ export const OwnerDashboard: React.FC = () => {
         const mapped = ordersRes.data.data.data.map((o: any) => ({
           id: o.id,
           order_number: o.order_number,
-          created_at: o.created_at?.replace('T', ' ').substring(0, 19),
+          created_at: formatDateTimeWIB(o.created_at),
           order_source: o.order_source,
           order_type: o.order_type,
           dining_table: o.dining_table,
@@ -243,10 +243,10 @@ export const OwnerDashboard: React.FC = () => {
       setExportingType('sales');
       const res = await api.get(`/pos/orders/recent?month=${selectedPeriod.month}&year=${selectedPeriod.year}&per_page=1000`);
       const orders = res.data.data?.data || res.data.data || transactions;
-      const headers = ['No. Faktur', 'Tanggal & Waktu', 'Nama Tamu', 'Tipe / Meja', 'Subtotal', 'Diskon', 'Pajak PB1', 'Service Charge', 'Total Bayar', 'Metode Bayar', 'Status'];
+      const headers = ['No. Faktur', 'Tanggal & Waktu (WIB)', 'Nama Tamu', 'Tipe / Meja', 'Subtotal', 'Diskon', 'Pajak PB1', 'Service Charge', 'Total Bayar', 'Metode Bayar', 'Status'];
       const rows = orders.map((o: any) => [
         o.order_number,
-        o.created_at,
+        formatDateTimeWIB(o.created_at),
         o.customer_name || 'Pelanggan Umum',
         o.dining_table ? `Meja ${o.dining_table.table_number}` : 'Bungkus / Takeaway',
         Number(o.subtotal || 0),
@@ -276,132 +276,6 @@ export const OwnerDashboard: React.FC = () => {
       });
     } catch (err) {
       console.error('Failed to export sales:', err);
-    } finally {
-      setExportingType(null);
-    }
-  };
-
-  // 2. Export Laporan Kehadiran & Gaji Karyawan
-  const handleExportMonthlyAttendance = async () => {
-    try {
-      setExportingType('attendance');
-      const res = await api.get(`/hr/attendance/monthly?month=${selectedPeriod.month}&year=${selectedPeriod.year}`);
-      const recap = res.data.data?.recap || [];
-      const details = res.data.data?.details || [];
-
-      let headers: string[] = [];
-      let rows: (string | number)[][] = [];
-
-      if (details.length > 0) {
-        headers = ['Nama Karyawan', 'Role / Divisi', 'Tanggal', 'Jam Masuk', 'Jam Pulang', 'Terlambat (Menit)', 'Alasan Keterlambatan', 'Status Presensi'];
-        rows = details.map((d: any) => [
-          d.user?.name || d.user_name || '-',
-          d.user?.role || d.user_role || 'Staff Outlet',
-          d.date || (d.clock_in ? d.clock_in.substring(0, 10) : '-'),
-          d.clock_in ? d.clock_in.substring(11, 16) : '-',
-          d.clock_out ? d.clock_out.substring(11, 16) : '-',
-          d.late_minutes || 0,
-          d.late_reason || '-',
-          d.status || 'HADIR',
-        ]);
-      } else {
-        headers = ['Nama Karyawan', 'Role / Divisi', 'Hari Kerja Hadir', 'Terlambat', 'Izin / Sakit', 'Alpha / Bolos', 'Estimasi Gaji'];
-        rows = recap.map((r: any) => [
-          r.name || '-',
-          r.role || 'Staff',
-          r.present_days || 0,
-          r.late_days || 0,
-          r.leave_days || 0,
-          r.absent_days || 0,
-          Number(r.estimated_salary || 0),
-        ]);
-      }
-
-      exportStyledExcel({
-        filename: `Laporan_Presensi_Gaji_${selectedPeriod.month}_${selectedPeriod.year}`,
-        title: `LAPORAN KEHADIRAN & GAJI STAF - PERIODE ${selectedPeriodLabel.toUpperCase()}`,
-        subtitle: 'Rekapitulasi jam kerja, keterlambatan, dan gaji karyawan outlet',
-        author: 'Faiz Rifki Syuhada (Owner)',
-        themeColor: '#7c3aed',
-        summaryItems: [
-          { label: 'PERIODE LAPORAN', value: selectedPeriodLabel },
-          { label: 'TOTAL STAF TERDAFTAR', value: `${recap.length || details.length} Karyawan` },
-        ],
-        headers,
-        rows,
-      });
-    } catch (err) {
-      console.error('Failed to export attendance:', err);
-    } finally {
-      setExportingType(null);
-    }
-  };
-
-  // 3. Export Laporan Mutasi Stok Bahan Baku
-  const handleExportMonthlyInventory = async () => {
-    try {
-      setExportingType('inventory');
-      const res = await api.get(`/inventory/stock-card-summary?month=${selectedPeriod.month}&year=${selectedPeriod.year}`);
-      const items = res.data.data || [];
-      const headers = [
-        'Nama Bahan Baku',
-        'Satuan',
-        'Bahan Masuk / Pembelian',
-        'Pemakaian Menu (Resep)',
-        'Bahan Rusak / Basi',
-        'Total Pemakaian',
-        'Sisa Stok Akhir',
-        'Keterangan Kemasan & Porsi',
-      ];
-      const rows = items.map((i: any) => {
-        const isGram = i.unit === 'gram';
-        const isMl = i.unit === 'ml';
-        const divisor = (isGram || isMl) ? 1000 : 1;
-        const displayUnit = isGram ? 'kg' : isMl ? 'Liter' : (i.unit || 'pcs');
-
-        const formatQty = (qty: number) => {
-          if (!qty) return 0;
-          const val = qty / divisor;
-          return Number(val.toFixed(3));
-        };
-
-        let note = '';
-        const nameLower = (i.name || '').toLowerCase();
-        if (nameLower.includes('kopi')) note = '1 kg ≈ 55 cup espresso';
-        else if (nameLower.includes('susu')) note = '1 Liter = 1 Kotak (≈ 5 cup latte)';
-        else if (nameLower.includes('air') || nameLower.includes('galon')) note = '1 Galon = 19 Liter (≈ 95 cup)';
-        else if (nameLower.includes('cup')) note = '1 Slop = 50 pcs';
-        else if (nameLower.includes('sirup')) note = '1 Botol = 750 ml';
-        else if (nameLower.includes('aren')) note = '1 Liter = 1 Botol';
-        else if (nameLower.includes('pastry')) note = '1 Pack = 1 kg (10 pcs)';
-
-        return [
-          i.name || i.material_name || '-',
-          displayUnit,
-          formatQty(Number(i.total_in || 0)),
-          formatQty(Number(i.total_used_sale || i.total_out_sale || 0)),
-          formatQty(Number(i.total_used_waste || i.total_out_waste || 0)),
-          formatQty(Number(i.total_used || 0)),
-          formatQty(Number(i.current_stock || 0)),
-          note || '-',
-        ];
-      });
-
-      exportStyledExcel({
-        filename: `Laporan_Mutasi_Stok_${selectedPeriod.month}_${selectedPeriod.year}`,
-        title: `LAPORAN MUTASI & STOK BAHAN BAKU - PERIODE ${selectedPeriodLabel.toUpperCase()}`,
-        subtitle: 'Riwayat pembelian masuk, pemakaian resep minuman, dan bahan rusak/basi',
-        author: 'Faiz Rifki Syuhada (Owner)',
-        themeColor: '#d97706',
-        summaryItems: [
-          { label: 'PERIODE LAPORAN', value: selectedPeriodLabel },
-          { label: 'TOTAL BAHAN BAKU', value: `${items.length} Item` },
-        ],
-        headers,
-        rows,
-      });
-    } catch (err) {
-      console.error('Failed to export inventory:', err);
     } finally {
       setExportingType(null);
     }
@@ -1149,77 +1023,29 @@ export const OwnerDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 4 Report Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Single Official Sales Report Card */}
+            <div className="max-w-xl mx-auto w-full">
               {/* 1. Laporan Penjualan */}
-              <div className="p-4 rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xs transition bg-white flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
+              <div className="p-5 rounded-2xl border border-blue-200 bg-blue-50/30 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
+                    <span className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200">
                       Penjualan & Kasir
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">.xlsx</span>
+                    <span className="text-xs text-slate-500 font-mono font-bold">.xlsx (Excel)</span>
                   </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Laporan Penjualan Lengkap</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Daftar seluruh faktur pesanan (POS & QR meja), omset, potongan diskon, pajak PB1, dan metode bayar (QRIS & Tunai).
+                  <h4 className="font-bold text-slate-900 text-base">Laporan Penjualan & Transaksi Meja Lengkap</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Daftar seluruh faktur pesanan (POS Kasir & Pemesanan Mandiri Meja QR), tanggal & waktu transaksi sinkron (WIB), omzet riil, potongan diskon, titipan pajak PB1 10%, dan metode bayar (QRIS & Tunai).
                   </p>
                 </div>
                 <button
                   onClick={handleExportMonthlySales}
                   disabled={exportingType === 'sales'}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-xs"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{exportingType === 'sales' ? 'Membuat File...' : 'Unduh Laporan Penjualan'}</span>
-                </button>
-              </div>
-
-              {/* 2. Laporan Kehadiran & Gaji */}
-              <div className="p-4 rounded-2xl border border-slate-200 hover:border-purple-300 hover:shadow-xs transition bg-white flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-bold border border-purple-200">
-                      SDM & Presensi
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">.xlsx</span>
-                  </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Laporan Kehadiran & Gaji</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Rekapitulasi jam kerja staf outlet (barista, kasir, gudang), riwayat keterlambatan + alasan, serta estimasi gaji.
-                  </p>
-                </div>
-                <button
-                  onClick={handleExportMonthlyAttendance}
-                  disabled={exportingType === 'attendance'}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{exportingType === 'attendance' ? 'Membuat File...' : 'Unduh Laporan Presensi'}</span>
-                </button>
-              </div>
-
-              {/* 3. Laporan Mutasi Stok */}
-              <div className="p-4 rounded-2xl border border-slate-200 hover:border-amber-300 hover:shadow-xs transition bg-white flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
-                      Gudang & Bahan
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">.xlsx</span>
-                  </div>
-                  <h4 className="font-bold text-slate-900 text-sm">Laporan Mutasi Stok Bahan</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Rekam jejak pembelian masuk, pemakaian resep otomatis, bahan rusak/tumpah/basi (waste), dan sisa stok fisik gudang.
-                  </p>
-                </div>
-                <button
-                  onClick={handleExportMonthlyInventory}
-                  disabled={exportingType === 'inventory'}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{exportingType === 'inventory' ? 'Membuat File...' : 'Unduh Laporan Stok'}</span>
+                  <Download className="w-4 h-4" />
+                  <span>{exportingType === 'sales' ? 'Membuat File Excel...' : 'Unduh Laporan Penjualan (Excel)'}</span>
                 </button>
               </div>
             </div>

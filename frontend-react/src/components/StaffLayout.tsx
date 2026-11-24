@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Coffee, Bell, LogOut, ShieldCheck, Package, Clock, QrCode, TrendingUp } from 'lucide-react';
+import { ShoppingBag, Coffee, Bell, LogOut, QrCode, TrendingUp } from 'lucide-react';
 
 interface StaffLayoutProps {
   children: React.ReactNode;
@@ -14,8 +14,6 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
   const isLoggedIn = Boolean(token && user.email);
 
   const isSuperAdmin = user.roles?.includes('super_admin');
-  const isStoreManager = user.roles?.includes('store_manager');
-  const isWarehouse = user.roles?.includes('warehouse_admin');
   const isCashier = user.roles?.includes('cashier');
   const isBarista = user.roles?.includes('barista');
 
@@ -27,17 +25,13 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
 
   // Role label for sub-header
   const roleLabel = isSuperAdmin ? 'Pemilik Kedai (Owner)'
-    : isStoreManager ? 'Manajer Kedai'
-    : isWarehouse ? 'Staf Gudang & Bahan Baku'
-    : isCashier ? 'Kasir'
+    : isCashier ? 'Kasir Outlet'
     : isBarista ? 'Barista (Pembuat Kopi)'
-    : 'Karyawan Kedai';
+    : 'Staf Kedai Kopi';
 
   // Avatar label
-  const avatarLabel = isSuperAdmin ? 'OW' : isStoreManager ? 'SM' : isWarehouse ? 'GD' : isCashier ? 'KS' : 'BR';
+  const avatarLabel = isSuperAdmin ? 'OW' : isCashier ? 'KS' : isBarista ? 'BR' : 'ST';
   const avatarClass = isSuperAdmin ? 'bg-purple-100 text-purple-800'
-    : isStoreManager ? 'bg-blue-100 text-blue-800'
-    : isWarehouse ? 'bg-indigo-100 text-indigo-800'
     : isCashier ? 'bg-amber-100 text-amber-800'
     : 'bg-teal-100 text-teal-800';
 
@@ -57,7 +51,7 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
             </div>
           </div>
 
-          {/* NAV: Owner (super_admin) — MURNI HANYA LAPORAN PENJUALAN */}
+          {/* NAV: Owner (super_admin) — LAPORAN PENJUALAN & GENERATOR QR MEJA */}
           {isSuperAdmin && (
             <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
               <NavButton 
@@ -67,22 +61,13 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
                 location={location} 
                 navigate={navigate} 
               />
-            </nav>
-          )}
-
-          {/* NAV: Store Manager */}
-          {isStoreManager && (
-            <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
-              <NavButton path="/manager" label="Operasional & SDM" icon={<ShieldCheck className="w-3.5 h-3.5 text-blue-600" />} location={location} navigate={navigate} />
-              <NavButton path="/table-qr" label="QR Meja" icon={<QrCode className="w-3.5 h-3.5 text-amber-600" />} location={location} navigate={navigate} />
-              <NavButton path="/attendance" label="Absensi Karyawan" icon={<Clock className="w-3.5 h-3.5 text-emerald-600" />} location={location} navigate={navigate} />
-            </nav>
-          )}
-
-          {/* NAV: Admin Gudang (warehouse_admin) */}
-          {isWarehouse && (
-            <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
-              <NavButton path="/warehouse" label="Gudang Bahan Baku" icon={<Package className="w-3.5 h-3.5 text-indigo-600" />} location={location} navigate={navigate} />
+              <NavButton 
+                path="/table-qr" 
+                label="QR Meja Pelanggan" 
+                icon={<QrCode className="w-3.5 h-3.5 text-amber-600" />} 
+                location={location} 
+                navigate={navigate} 
+              />
             </nav>
           )}
 

@@ -25,6 +25,26 @@ export interface ExportStyledExcelOptions {
   themeColor?: string; // Header background color
 }
 
+export function formatDateTimeWIB(dateStr?: string | null): string {
+  if (!dateStr) return '-';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return String(dateStr);
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).format(d).replace(/\./g, ':');
+  } catch {
+    return String(dateStr);
+  }
+}
+
 export function exportStyledExcel({
   filename,
   title,
@@ -158,7 +178,7 @@ export function exportStyledExcel({
         <!-- Header Banner -->
         <tr>
           <td colspan="${colCount}" style="background-color: ${themeColor}; color: #ffffff; font-size: 15pt; font-weight: bold; padding: 12px 14px; text-align: left; border: 1px solid ${themeColor};">
-            ☕ ESB COFFEE &amp; EATERY — COFFEESHOP ERP SYSTEM
+            ☕ KEDAI KOPI KITA — SISTEM PEMESANAN MANDIRI QR CODE
           </td>
         </tr>
         <tr>

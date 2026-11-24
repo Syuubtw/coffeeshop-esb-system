@@ -4,9 +4,6 @@ import { LoginPage } from './components/LoginPage';
 import { CashierPos } from './components/CashierPos';
 import { BaristaKds } from './components/BaristaKds';
 import { OwnerDashboard } from './components/OwnerDashboard';
-import { ManagerDashboard } from './components/ManagerDashboard';
-import { WarehouseDashboard } from './components/WarehouseDashboard';
-import { AttendanceKiosk } from './components/AttendanceKiosk';
 import { OutletQrPoster } from './components/OutletQrPoster';
 import { StaffMobileAttendance } from './components/StaffMobileAttendance';
 import { TableQrGenerator } from './components/TableQrGenerator';
@@ -85,30 +82,6 @@ export function App() {
           }
         />
 
-        {/* Store Manager Back Office — Khusus Store Manager */}
-        <Route
-          path="/manager"
-          element={
-            <ProtectedRoute allowedRoles={['store_manager']}>
-              <StaffLayout>
-                <ManagerDashboard />
-              </StaffLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Admin Gudang & Logistik — Khusus Warehouse Admin & Store Manager */}
-        <Route
-          path="/warehouse"
-          element={
-            <ProtectedRoute allowedRoles={['warehouse_admin', 'store_manager']}>
-              <StaffLayout>
-                <WarehouseDashboard />
-              </StaffLayout>
-            </ProtectedRoute>
-          }
-        />
-
         {/* Owner Executive Dashboard — Khusus Pemilik Kedai (Owner ONLY) */}
         <Route
           path="/admin"
@@ -121,23 +94,11 @@ export function App() {
           }
         />
 
-        {/* Presensi QR Kiosk — Khusus Store Manager */}
-        <Route
-          path="/attendance"
-          element={
-            <ProtectedRoute allowedRoles={['store_manager']}>
-              <StaffLayout>
-                <AttendanceKiosk />
-              </StaffLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* QR Meja Pelanggan Studio — Khusus Store Manager */}
+        {/* QR Meja Pelanggan Studio — Khusus Pemilik Kedai (Owner) */}
         <Route
           path="/table-qr"
           element={
-            <ProtectedRoute allowedRoles={['store_manager']}>
+            <ProtectedRoute allowedRoles={['super_admin']}>
               <StaffLayout>
                 <TableQrGenerator />
               </StaffLayout>
@@ -145,6 +106,9 @@ export function App() {
           }
         />
         <Route path="/tables" element={<Navigate to="/table-qr" replace />} />
+        <Route path="/manager" element={<Navigate to="/admin" replace />} />
+        <Route path="/warehouse" element={<Navigate to="/admin" replace />} />
+        <Route path="/attendance" element={<Navigate to="/admin" replace />} />
 
         {/* Default Redirect */}
         <Route path="/" element={<Navigate to="/order/table/TB-01" replace />} />
