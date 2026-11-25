@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Coffee, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Coffee, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Package } from 'lucide-react';
 import api from '../services/api';
 
 export const LoginPage: React.FC = () => {
@@ -21,6 +21,10 @@ export const LoginPage: React.FC = () => {
   const handleRedirectByRole = (user: any) => {
     if (user.roles?.includes('super_admin')) {
       navigate('/admin');
+    } else if (user.roles?.includes('store_manager')) {
+      navigate('/manager');
+    } else if (user.roles?.includes('warehouse_admin')) {
+      navigate('/warehouse');
     } else if (user.roles?.includes('barista')) {
       navigate('/kds');
     } else {
@@ -44,6 +48,16 @@ export const LoginPage: React.FC = () => {
       if (email === 'admin@coffeeshop.test' && password === 'password') {
         const dummyUser = { name: 'Faiz Rifki Syuhada (Owner)', email, roles: ['super_admin'] };
         localStorage.setItem('token', 'offline-token-super_admin');
+        localStorage.setItem('user', JSON.stringify(dummyUser));
+        handleRedirectByRole(dummyUser);
+      } else if (email === 'manager@coffeeshop.test' && password === 'password') {
+        const dummyUser = { name: 'Raka Pratama (Store Manager)', email, roles: ['store_manager'] };
+        localStorage.setItem('token', 'offline-token-store_manager');
+        localStorage.setItem('user', JSON.stringify(dummyUser));
+        handleRedirectByRole(dummyUser);
+      } else if (email === 'warehouse@coffeeshop.test' && password === 'password') {
+        const dummyUser = { name: 'Budi Santoso (Admin Gudang & Purchasing)', email, roles: ['warehouse_admin'] };
+        localStorage.setItem('token', 'offline-token-warehouse');
         localStorage.setItem('user', JSON.stringify(dummyUser));
         handleRedirectByRole(dummyUser);
       } else if (email === 'cashier@coffeeshop.test' && password === 'password') {
@@ -159,10 +173,10 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Quick Demo Role Fillers — 3 Active Stations */}
+        {/* Quick Demo Role Fillers — 5 Staff Roles */}
         <div className="mt-8 pt-6 border-t border-slate-100">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center mb-3">
-            Pintasan Login 3 Stasiun Sistem:
+            Pintasan Login 5 Role Staf:
           </span>
           <div className="space-y-2">
             <button
@@ -181,12 +195,40 @@ export const LoginPage: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => fillCredential('manager@coffeeshop.test')}
+              className="w-full p-2.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-left transition cursor-pointer flex items-center justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-1.5 text-blue-700 font-bold text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5" /> 2. Manajer Kedai (Store Manager)
+                </div>
+                <div className="text-[10px] text-blue-600/80 mt-0.5">Operasional, Menu, SDM & Audit Kasir (/manager)</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-blue-200/60 text-blue-800 rounded">Manager</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fillCredential('warehouse@coffeeshop.test')}
+              className="w-full p-2.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-left transition cursor-pointer flex items-center justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-1.5 text-indigo-700 font-bold text-xs">
+                  <Package className="w-3.5 h-3.5" /> 3. Staf Gudang & Bahan Baku
+                </div>
+                <div className="text-[10px] text-indigo-600/80 mt-0.5">Pengadaan Stok, PO, Pemasok & Opname (/warehouse)</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-indigo-200/60 text-indigo-800 rounded">Gudang</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => fillCredential('cashier@coffeeshop.test')}
               className="w-full p-2.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-left transition cursor-pointer flex items-center justify-between"
             >
               <div>
                 <div className="flex items-center gap-1.5 text-amber-700 font-bold text-xs">
-                  <Coffee className="w-3.5 h-3.5" /> 2. Kasir Frontline (POS)
+                  <Coffee className="w-3.5 h-3.5" /> 4. Kasir Frontline (POS)
                 </div>
                 <div className="text-[10px] text-amber-600/80 mt-0.5">Transaksi Kasir, Pembayaran Tunai & QRIS (/pos)</div>
               </div>
@@ -196,7 +238,7 @@ export const LoginPage: React.FC = () => {
             <div className="p-2.5 rounded-xl border border-teal-200 bg-teal-50 text-left flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5 text-teal-700 font-bold text-xs">
-                  <Coffee className="w-3.5 h-3.5" /> 3. Barista Dapur (KDS)
+                  <Coffee className="w-3.5 h-3.5" /> 5. Barista Dapur (KDS)
                 </div>
                 <div className="text-[10px] text-teal-600/80 mt-0.5">Layar Antrean Pesanan Masuk (/kds)</div>
               </div>
@@ -221,17 +263,42 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Public Access Link: Pelanggan Pesan Mandiri */}
-          <div className="mt-4 pt-3 border-t border-dashed border-slate-200 flex items-center justify-between text-[11px]">
-            <a
-              href="/order/table/TB-01"
-              target="_blank"
-              rel="noreferrer"
-              className="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1 hover:underline"
-              title="Buka Self-Ordering Pelanggan Meja TB-01"
-            >
-              📱 Pelanggan Scan QR Meja 01 (Pesan Mandiri) ↗
-            </a>
+          {/* Public Access Link: Pelanggan & Presensi HP */}
+          <div className="mt-4 pt-3 border-t border-dashed border-slate-200 flex flex-col gap-2 text-[11px]">
+            <div className="flex items-center justify-between">
+              <a
+                href="/order/table/TB-01"
+                target="_blank"
+                rel="noreferrer"
+                className="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1 hover:underline"
+                title="Buka Self-Ordering Pelanggan Meja TB-01"
+              >
+                📱 Pelanggan Scan QR Meja 01 ↗
+              </a>
+              <a
+                href="/absen"
+                target="_blank"
+                rel="noreferrer"
+                className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 hover:underline"
+                title="Buka poster QR Code Outlet untuk ditempel di toko & di-scan karyawan"
+              >
+                📷 Poster QR Absen Toko ↗
+              </a>
+            </div>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-2 text-center">
+              <span className="text-[10px] text-slate-500">
+                Alur Absen: Buka <b>Poster QR</b> ➔ Karyawan Scan pakai Kamera HP ➔ Terbuka{' '}
+                <a
+                  href="/presensi"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:underline font-bold"
+                  title="Klik untuk simulasi tampilan di Chrome HP karyawan"
+                >
+                  Chrome HP (/presensi) ↗
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       </div>

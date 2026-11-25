@@ -4,6 +4,9 @@ import { LoginPage } from './components/LoginPage';
 import { CashierPos } from './components/CashierPos';
 import { BaristaKds } from './components/BaristaKds';
 import { OwnerDashboard } from './components/OwnerDashboard';
+import { ManagerDashboard } from './components/ManagerDashboard';
+import { WarehouseDashboard } from './components/WarehouseDashboard';
+import { AttendanceKiosk } from './components/AttendanceKiosk';
 import { OutletQrPoster } from './components/OutletQrPoster';
 import { StaffMobileAttendance } from './components/StaffMobileAttendance';
 import { TableQrGenerator } from './components/TableQrGenerator';
@@ -11,7 +14,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { StaffLayout } from './components/StaffLayout';
 
 /**
- * Role-Based Route Access Matrix (Strict Dedicated Station):
+ * Role-Based Route Access Matrix:
  * ─────────────────────────────────────────────────────────────
  * Route         │ Component            │ Hak Akses Role
  * ─────────────────────────────────────────────────────────────
@@ -58,7 +61,7 @@ export function App() {
         {/* 3. PROTECTED ROUTES — ROLE-BASED ACCESS                  */}
         {/* ======================================================== */}
 
-        {/* POS Kasir — Khusus Kasir (1 Peran = 1 Stasiun) */}
+        {/* POS Kasir — Khusus Kasir */}
         <Route
           path="/pos"
           element={
@@ -70,13 +73,37 @@ export function App() {
           }
         />
 
-        {/* KDS Dapur — Khusus Barista (1 Peran = 1 Stasiun) */}
+        {/* KDS Dapur — Khusus Barista */}
         <Route
           path="/kds"
           element={
             <ProtectedRoute allowedRoles={['barista']}>
               <StaffLayout>
                 <BaristaKds />
+              </StaffLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Store Manager Back Office — Khusus Store Manager & Owner */}
+        <Route
+          path="/manager"
+          element={
+            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
+              <StaffLayout>
+                <ManagerDashboard />
+              </StaffLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Gudang & Logistik — Khusus Warehouse Admin & Store Manager */}
+        <Route
+          path="/warehouse"
+          element={
+            <ProtectedRoute allowedRoles={['warehouse_admin', 'store_manager', 'super_admin']}>
+              <StaffLayout>
+                <WarehouseDashboard />
               </StaffLayout>
             </ProtectedRoute>
           }
@@ -94,11 +121,23 @@ export function App() {
           }
         />
 
-        {/* QR Meja Pelanggan Studio — Khusus Pemilik Kedai (Owner) */}
+        {/* Presensi QR Kiosk — Khusus Store Manager & Owner */}
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
+              <StaffLayout>
+                <AttendanceKiosk />
+              </StaffLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* QR Meja Pelanggan Studio — Khusus Store Manager & Owner */}
         <Route
           path="/table-qr"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute allowedRoles={['store_manager', 'super_admin']}>
               <StaffLayout>
                 <TableQrGenerator />
               </StaffLayout>
@@ -106,9 +145,6 @@ export function App() {
           }
         />
         <Route path="/tables" element={<Navigate to="/table-qr" replace />} />
-        <Route path="/manager" element={<Navigate to="/admin" replace />} />
-        <Route path="/warehouse" element={<Navigate to="/admin" replace />} />
-        <Route path="/attendance" element={<Navigate to="/admin" replace />} />
 
         {/* Default Redirect */}
         <Route path="/" element={<Navigate to="/order/table/TB-01" replace />} />
