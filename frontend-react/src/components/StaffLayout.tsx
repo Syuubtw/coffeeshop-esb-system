@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Coffee, Bell, LogOut, QrCode, TrendingUp } from 'lucide-react';
+import { ShoppingBag, Coffee, Bell, LogOut, TrendingUp } from 'lucide-react';
 
 interface StaffLayoutProps {
   children: React.ReactNode;
@@ -51,20 +51,13 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
             </div>
           </div>
 
-          {/* NAV: Owner (super_admin) — LAPORAN PENJUALAN & GENERATOR QR MEJA */}
+          {/* NAV: Owner (super_admin) — HANYA LAPORAN PENJUALAN */}
           {isSuperAdmin && (
             <nav className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
               <NavButton 
                 path="/admin" 
                 label="Laporan Penjualan" 
                 icon={<TrendingUp className="w-3.5 h-3.5 text-blue-600" />} 
-                location={location} 
-                navigate={navigate} 
-              />
-              <NavButton 
-                path="/table-qr" 
-                label="QR Meja Pelanggan" 
-                icon={<QrCode className="w-3.5 h-3.5 text-amber-600" />} 
                 location={location} 
                 navigate={navigate} 
               />

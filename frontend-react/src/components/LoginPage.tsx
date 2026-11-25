@@ -174,7 +174,7 @@ export const LoginPage: React.FC = () => {
                 <div className="flex items-center gap-1.5 text-purple-700 font-bold text-xs">
                   <ShieldCheck className="w-3.5 h-3.5" /> 1. Pemilik Kedai (Owner)
                 </div>
-                <div className="text-[10px] text-purple-600/80 mt-0.5">Pemantauan Laporan Penjualan & QR Meja (/admin)</div>
+                <div className="text-[10px] text-purple-600/80 mt-0.5">Pemantauan Laporan Penjualan (/admin)</div>
               </div>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-purple-200/60 text-purple-800 rounded">Owner</span>
             </button>
