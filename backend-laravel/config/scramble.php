@@ -101,7 +101,7 @@ Seluruh endpoint telah dikelompokkan berdasarkan **Fungsi Operasional & Hak Akse
             'hideTryIt' => false,
             'hideSchemas' => false,
             'logo' => '',
-            'tryItCredentialsPolicy' => 'include',
+            'tryItCredentialsPolicy' => 'same-origin',
             'layout' => 'responsive',
             'router' => 'hash',
         ],
@@ -121,20 +121,12 @@ Seluruh endpoint telah dikelompokkan berdasarkan **Fungsi Operasional & Hak Akse
     ],
 
     /*
-     * The list of servers of the API. By default, when `null`, server URL will be created from
-     * `scramble.api_path` and `scramble.api_domain` config variables. When providing an array, you
-     * will need to specify the local server URL manually (if needed).
-     *
-     * Example of non-default config (final URLs are generated using Laravel `url` helper):
-     *
-     * ```php
-     * 'servers' => [
-     *     'Live' => 'api',
-     *     'Prod' => 'https://scramble.dedoc.co/api',
-     * ],
-     * ```
+     * The list of servers of the API.
      */
-    'servers' => null,
+    'servers' => [
+        'Live Production (HTTPS)' => 'https://coffeeshop-esb-system.vercel.app/api',
+        'Current Host (Relative)' => '/api',
+    ],
 
     /**
      * Determines how Scramble stores the descriptions of enum cases.

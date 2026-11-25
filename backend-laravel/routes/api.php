@@ -27,6 +27,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ==========================================
+// 0. GLOBAL OPTIONS PREFLIGHT (CORS)
+// ==========================================
+Route::options('/{any}', function () {
+    return response('', 204)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With, Origin');
+})->where('any', '.*');
+
+// ==========================================
 // 0. HEALTH CHECK & ROOT API INFO
 // ==========================================
 Route::get('/', function () {
