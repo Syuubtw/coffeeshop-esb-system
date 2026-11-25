@@ -6,7 +6,6 @@ import {
   Receipt, 
   Eye, 
   Search,
-  TrendingUp,
   ShieldCheck,
   Clock,
   Download,
@@ -161,8 +160,6 @@ export const OwnerDashboard: React.FC = () => {
   const paidTransactions = useMemo(() => filteredTransactions.filter((t) => t.payment_status === 'PAID'), [filteredTransactions]);
   const unpaidTransactionsCount = useMemo(() => filteredTransactions.filter((t) => t.payment_status === 'UNPAID').length, [filteredTransactions]);
   const totalRevenue = useMemo(() => paidTransactions.reduce((acc, curr) => acc + curr.grand_total, 0), [paidTransactions]);
-  const totalPB1Tax = useMemo(() => paidTransactions.reduce((acc, curr) => acc + curr.tax_amount, 0), [paidTransactions]);
-  const avgOrderValue = useMemo(() => (paidTransactions.length > 0 ? Math.round(totalRevenue / paidTransactions.length) : 0), [paidTransactions, totalRevenue]);
 
   const weeklyTrend = biStats?.weekly_trend;
   const maxWeeklySales = useMemo(() => {
@@ -218,8 +215,6 @@ export const OwnerDashboard: React.FC = () => {
       summaryItems: [
         { label: 'TOTAL UANG MASUK PENJUALAN', value: formatIDR(totalRevenue) },
         { label: 'TOTAL PESANAN SELESAI', value: `${paidTransactions.length} Pesanan` },
-        { label: 'TITIPAN PAJAK RESTORAN PB1 (10%)', value: formatIDR(totalPB1Tax) },
-        { label: 'RATA-RATA NILAI BELANJA (AOV)', value: formatIDR(avgOrderValue) },
       ],
       headers,
       rows,
@@ -288,7 +283,7 @@ export const OwnerDashboard: React.FC = () => {
       {/* ============================================================== */}
       <div className="space-y-6">
           {/* KPI Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Total Omset */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
               <div className="flex justify-between items-center text-slate-400">
@@ -310,22 +305,6 @@ export const OwnerDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Total Pajak Resto PB1 */}
-            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
-              <div className="flex justify-between items-center text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pajak Restoran (PB1 10%)</span>
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                  <Receipt className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <h3 className="text-2xl font-bold text-blue-700 font-mono tracking-tight">{formatIDR(totalPB1Tax)}</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Titipan uang pajak daerah
-                </p>
-              </div>
-            </div>
-
             {/* Total Transaksi Selesai */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
               <div className="flex justify-between items-center text-slate-400">
@@ -338,22 +317,6 @@ export const OwnerDashboard: React.FC = () => {
                 <h3 className="text-2xl font-bold text-amber-700 font-mono tracking-tight">{paidTransactions.length} Pesanan</h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Transaksi pesanan lunas di outlet
-                </p>
-              </div>
-            </div>
-
-            {/* Rata-Rata Belanja Tamu (AOV) */}
-            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
-              <div className="flex justify-between items-center text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Rata-Rata Belanja Tamu</span>
-                <div className="p-2 bg-purple-50 text-purple-600 rounded-xl">
-                  <TrendingUp className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="mt-3">
-                <h3 className="text-2xl font-bold text-purple-700 font-mono tracking-tight">{formatIDR(avgOrderValue)}</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Rata-rata belanja per struk kasir
                 </p>
               </div>
             </div>
