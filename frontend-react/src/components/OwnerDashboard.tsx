@@ -18,10 +18,7 @@ import {
   Sparkles,
   CreditCard,
   BarChart3,
-  Calendar,
-  FileSpreadsheet,
-  X,
-  CheckCircle
+  Calendar
 } from 'lucide-react';
 import api from '../services/api';
 import { exportStyledExcel, formatDateTimeWIB } from '../utils/exportCsv';
@@ -82,14 +79,6 @@ export const OwnerDashboard: React.FC = () => {
     const now = new Date();
     return { month: now.getMonth() + 1, year: now.getFullYear() };
   });
-
-  const selectedPeriodLabel = useMemo(() => {
-    const match = availableMonths.find(m => m.month === selectedPeriod.month && m.year === selectedPeriod.year);
-    return match ? match.label : `${selectedPeriod.month}/${selectedPeriod.year}`;
-  }, [availableMonths, selectedPeriod]);
-
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [exportingType, setExportingType] = useState<string | null>(null);
 
   const isFetchingRef = useRef(false);
 
@@ -237,50 +226,6 @@ export const OwnerDashboard: React.FC = () => {
     });
   };
 
-  // 1. Export Laporan Penjualan Bulanan Lengkap
-  const handleExportMonthlySales = async () => {
-    try {
-      setExportingType('sales');
-      const res = await api.get(`/pos/orders/recent?month=${selectedPeriod.month}&year=${selectedPeriod.year}&per_page=1000`);
-      const orders = res.data.data?.data || res.data.data || transactions;
-      const headers = ['No. Faktur', 'Tanggal & Waktu (WIB)', 'Nama Tamu', 'Tipe / Meja', 'Subtotal', 'Diskon', 'Pajak PB1', 'Service Charge', 'Total Bayar', 'Metode Bayar', 'Status'];
-      const rows = orders.map((o: any) => [
-        o.order_number,
-        formatDateTimeWIB(o.created_at),
-        o.customer_name || 'Pelanggan Umum',
-        o.dining_table ? `Meja ${o.dining_table.table_number}` : 'Bungkus / Takeaway',
-        Number(o.subtotal || 0),
-        Number(o.discount_amount || 0),
-        Number(o.tax_amount || 0),
-        Number(o.service_charge || 0),
-        Number(o.grand_total || 0),
-        o.payment_method === 'CASH' ? 'Uang Tunai (Cash)' : (o.payment_method || 'QRIS'),
-        o.payment_status || o.order_status,
-      ]);
-
-      const totalOmset = orders.reduce((sum: number, o: any) => sum + Number(o.grand_total || 0), 0);
-
-      exportStyledExcel({
-        filename: `Laporan_Penjualan_${selectedPeriod.month}_${selectedPeriod.year}`,
-        title: `LAPORAN PENJUALAN KEDAI - PERIODE ${selectedPeriodLabel.toUpperCase()}`,
-        subtitle: 'Rincian transaksi penjualan kasir & pesanan QR meja',
-        author: 'Faiz Rifki Syuhada (Owner)',
-        themeColor: '#1d4ed8',
-        summaryItems: [
-          { label: 'PERIODE LAPORAN', value: selectedPeriodLabel },
-          { label: 'TOTAL TRANSAKSI', value: `${orders.length} Pesanan` },
-          { label: 'TOTAL OMSET PENJUALAN', value: formatIDR(totalOmset) },
-        ],
-        headers,
-        rows,
-      });
-    } catch (err) {
-      console.error('Failed to export sales:', err);
-    } finally {
-      setExportingType(null);
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       {/* Top Banner */}
@@ -317,16 +262,6 @@ export const OwnerDashboard: React.FC = () => {
               ))}
             </select>
           </div>
-
-          {/* Tombol Buka Pusat Laporan Bulanan (.xlsx) */}
-          <button
-            onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-bold transition shadow-xs cursor-pointer"
-            title="Buka Pusat Rekap Laporan Bulanan (Excel .xlsx)"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>Pusat Laporan Bulanan (Excel)</span>
-          </button>
 
           {/* Ekspor Cepat Tabel Aktif */}
           <button
@@ -981,84 +916,6 @@ export const OwnerDashboard: React.FC = () => {
             >
               Tutup Rincian
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* MONTHLY RECAP EXPORT MODAL */}
-      {showExportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex justify-between items-start pb-4 border-b border-slate-100">
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                    <FileSpreadsheet className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg leading-tight">Pusat Rekap Laporan Bulanan (.xlsx)</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Pilihan file unduhan untuk periode <span className="font-bold text-emerald-700">{selectedPeriodLabel}</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowExportModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Notice info */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs text-slate-600 flex items-start gap-2.5">
-              <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-slate-800">Format Microsoft Excel Profesional & Otomatis</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Setiap dokumen diekspor dengan judul resmi, ringkasan angka penting, header warna, dan kolom angka yang langsung dapat diolah atau dicetak.
-                </p>
-              </div>
-            </div>
-
-            {/* Single Official Sales Report Card */}
-            <div className="max-w-xl mx-auto w-full">
-              {/* 1. Laporan Penjualan */}
-              <div className="p-5 rounded-2xl border border-blue-200 bg-blue-50/30 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200">
-                      Penjualan & Kasir
-                    </span>
-                    <span className="text-xs text-slate-500 font-mono font-bold">.xlsx (Excel)</span>
-                  </div>
-                  <h4 className="font-bold text-slate-900 text-base">Laporan Penjualan & Transaksi Meja Lengkap</h4>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Daftar seluruh faktur pesanan (POS Kasir & Pemesanan Mandiri Meja QR), tanggal & waktu transaksi sinkron (WIB), omzet riil, potongan diskon, titipan pajak PB1 10%, dan metode bayar (QRIS & Tunai).
-                  </p>
-                </div>
-                <button
-                  onClick={handleExportMonthlySales}
-                  disabled={exportingType === 'sales'}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-xs"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>{exportingType === 'sales' ? 'Membuat File Excel...' : 'Unduh Laporan Penjualan (Excel)'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="pt-3 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setShowExportModal(false)}
-                className="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
-              >
-                Tutup
-              </button>
-            </div>
           </div>
         </div>
       )}
