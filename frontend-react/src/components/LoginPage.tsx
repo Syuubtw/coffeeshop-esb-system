@@ -75,6 +75,11 @@ export const LoginPage: React.FC = () => {
         localStorage.setItem('token', 'offline-token-barista2');
         localStorage.setItem('user', JSON.stringify(dummyUser));
         handleRedirectByRole(dummyUser);
+      } else if (email === 'barista3@coffeeshop.test' && password === 'password') {
+        const dummyUser = { name: 'Sarah Amelia (Barista Manual Brew)', email, roles: ['barista'] };
+        localStorage.setItem('token', 'offline-token-barista3');
+        localStorage.setItem('user', JSON.stringify(dummyUser));
+        handleRedirectByRole(dummyUser);
       } else {
         setErrorMsg('Login gagal. Pastikan email dan password terdaftar.');
       }
@@ -258,6 +263,14 @@ export const LoginPage: React.FC = () => {
                   title="Dimas Pratama (Barista Espresso)"
                 >
                   Dimas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillCredential('barista3@coffeeshop.test')}
+                  className="px-2 py-0.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[10px] font-bold border border-teal-300 transition cursor-pointer"
+                  title="Sarah Amelia (Barista Manual Brew)"
+                >
+                  Sarah
                 </button>
               </div>
             </div>

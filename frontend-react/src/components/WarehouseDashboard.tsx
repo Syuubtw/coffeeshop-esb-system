@@ -15,11 +15,7 @@ import {
   Clock,
   Trash2,
   History,
-  X,
-  Building2,
-  Phone,
-  Mail,
-  MapPin
+  X
 } from 'lucide-react';
 import api from '../services/api';
 import { exportStyledExcel } from '../utils/exportCsv';
@@ -408,20 +404,19 @@ const getPackagingUnit = (m: RawMaterialStock): PackagingUnitInfo => {
 };
 
 export const WarehouseDashboard: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'po' | 'suppliers' | 'inventory' | 'opname' | 'movements'>('po');
+  const [activeSubTab, setActiveSubTab] = useState<'po' | 'inventory' | 'opname' | 'movements'>('po');
   const [materials, setMaterials] = useState<RawMaterialStock[]>([]);
   const [searchMaterial, setSearchMaterial] = useState('');
   const [movements, setMovements] = useState<StockMovementLog[]>([]);
   const [movementFilter, setMovementFilter] = useState<'ALL' | 'IN' | 'OUT_SALE' | 'WASTE_OPNAME'>('ALL');
   const [searchMovement, setSearchMovement] = useState('');
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [poStats, setPoStats] = useState({ total: 0, pending: 0, approved: 0, received: 0 });
   const [loading, setLoading] = useState(false);
 
   // Modal Create PO State
   const [showCreatePoModal, setShowCreatePoModal] = useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = useState<number | ''>('');
+  const [manualVendorName, setManualVendorName] = useState('');
   const [poNotes, setPoNotes] = useState('');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
   const [poItems, setPoItems] = useState<Array<{ raw_material_id: number; qty_ordered: string; unit_cost: string }>>([]);
@@ -511,21 +506,12 @@ export const WarehouseDashboard: React.FC = () => {
         })));
       }
 
-      if (currentTab === 'po' || currentTab === 'suppliers') {
-        const [resPo, resSup] = await Promise.allSettled([
-          api.get('/procurement/orders'),
-          api.get('/procurement/suppliers'),
-        ]);
-        if (resPo.status === 'fulfilled' && resPo.value.data?.data) {
-          setPurchaseOrders(resPo.value.data.data.orders || []);
-          if (resPo.value.data.data.stats) {
-            setPoStats(resPo.value.data.data.stats);
-          }
-        }
-        if (resSup.status === 'fulfilled' && resSup.value.data?.data) {
-          setSuppliers(resSup.value.data.data);
-          if (resSup.value.data.data.length > 0 && selectedSupplierId === '') {
-            setSelectedSupplierId(resSup.value.data.data[0].id);
+      if (currentTab === 'po') {
+        const resPo = await api.get('/procurement/orders');
+        if (resPo.data?.data) {
+          setPurchaseOrders(resPo.data.data.orders || []);
+          if (resPo.data.data.stats) {
+            setPoStats(resPo.data.data.stats);
           }
         }
       } else if (currentTab === 'opname') {
@@ -557,7 +543,7 @@ export const WarehouseDashboard: React.FC = () => {
 
   // Open modal pre-filled for a specific material in packaging units (kg, Liter, Pack, etc.)
   const handleQuickPoForMaterial = (mat: RawMaterialStock) => {
-    setSelectedSupplierId(suppliers.length > 0 ? suppliers[0].id : '');
+    setManualVendorName('');
     setPoNotes(`Pengadaan restock: ${mat.name} menipis/habis.`);
     setPoItems([
       {
@@ -605,10 +591,6 @@ export const WarehouseDashboard: React.FC = () => {
 
   const handleSubmitPo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSupplierId) {
-      alert('Pilih vendor supplier terlebih dahulu.');
-      return;
-    }
     if (!expectedDeliveryDate) {
       alert('Estimasi Tanggal Kirim wajib diisi.');
       return;
@@ -631,7 +613,9 @@ export const WarehouseDashboard: React.FC = () => {
     try {
       setIsSubmittingPo(true);
       const res = await api.post('/procurement/orders', {
-        supplier_id: Number(selectedSupplierId),
+        supplier_id: null,
+        supplier_name: manualVendorName.trim() || 'Pembelian Langsung / Vendor Bebas',
+        vendor_name: manualVendorName.trim() || 'Pembelian Langsung / Vendor Bebas',
         expected_delivery_date: expectedDeliveryDate,
         notes: poNotes,
         items: poItems.map(it => {
@@ -653,6 +637,7 @@ export const WarehouseDashboard: React.FC = () => {
       setShowCreatePoModal(false);
       setPoItems([]);
       setPoNotes('');
+      setManualVendorName('');
       setExpectedDeliveryDate('');
       await fetchDashboardData('po');
     } catch (err: any) {
@@ -790,14 +775,6 @@ export const WarehouseDashboard: React.FC = () => {
                   {poStats.pending}
                 </span>
               )}
-            </button>
-            <button
-              onClick={() => setActiveSubTab('suppliers')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
-                activeSubTab === 'suppliers' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5 text-blue-600" /> Daftar Pemasok ({suppliers.length})
             </button>
             <button
               onClick={() => setActiveSubTab('inventory')}
@@ -1011,65 +988,7 @@ export const WarehouseDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: VENDOR SUPPLIER */}
-      {activeSubTab === 'suppliers' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">Katalog Supplier & Vendor Resmi</h2>
-              <p className="text-xs text-slate-500">Mitra distributor bahan baku terpercaya untuk susu segar, biji kopi specialty, sirup, gula aren, dan packaging.</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {suppliers.map((sup) => (
-              <div key={sup.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold text-[10px] uppercase">
-                      {sup.category}
-                    </span>
-                    <h3 className="font-bold text-sm text-slate-900 mt-1">{sup.name}</h3>
-                  </div>
-                  <Building2 className="w-5 h-5 text-slate-400 shrink-0" />
-                </div>
-
-                <div className="space-y-1.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{sup.phone} ({sup.contact_person})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{sup.email}</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span className="text-[11px] leading-tight text-slate-500">{sup.address}</span>
-                  </div>
-                  <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-slate-700">
-                    <Clock className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Estimasi Pengiriman: {sup.lead_time_days} Hari Kerja</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSelectedSupplierId(sup.id);
-                    if (poItems.length === 0) handleAddPoItemRow();
-                    setShowCreatePoModal(true);
-                  }}
-                  className="w-full py-2 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition cursor-pointer"
-                >
-                  + Buat PO ke Vendor Ini
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: STOK RAK GUDANG */}
+      {/* TAB 2: STOK RAK GUDANG */}
       {activeSubTab === 'inventory' && (
         <div className="space-y-4">
           {/* Quick Inventory Summary Cards */}
@@ -1602,26 +1521,21 @@ export const WarehouseDashboard: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
-                    Pilih Vendor Supplier: <span className="text-rose-500 font-black">*</span>
+                    Vendor / Supplier (Tulis Manual):
                   </label>
-                  <select
-                    required
-                    value={selectedSupplierId}
-                    onChange={(e) => setSelectedSupplierId(Number(e.target.value))}
+                  <input
+                    type="text"
+                    value={manualVendorName}
+                    onChange={(e) => setManualVendorName(e.target.value)}
+                    placeholder="Tulis nama vendor / pemasok manual..."
                     className="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-indigo-500"
-                  >
-                    <option value="">-- Pilih Vendor Supplier --</option>
-                    {suppliers.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({s.category})
-                      </option>
-                    ))}
-                  </select>
+                  />
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Dapat ditulis bebas nama toko / supplier</span>
                 </div>
 
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
-                    Estimasi Tanggal Kirim: <span className="text-rose-500 font-black">*</span>
+                    Estimasi Tanggal Kirim: <span className="text-rose-500 font-black">* (Wajib Diisi)</span>
                   </label>
                   <input
                     type="date"
@@ -1629,9 +1543,13 @@ export const WarehouseDashboard: React.FC = () => {
                     min={new Date().toISOString().split('T')[0]}
                     value={expectedDeliveryDate}
                     onChange={(e) => setExpectedDeliveryDate(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-indigo-500"
+                    className={`w-full bg-slate-50 border px-3 py-2 rounded-xl text-slate-900 font-semibold focus:outline-none focus:bg-white transition ${
+                      !expectedDeliveryDate ? 'border-amber-400 bg-amber-50/30' : 'border-slate-200 focus:border-indigo-500'
+                    }`}
                   />
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Wajib diisi (minimal hari ini)</span>
+                  <span className="text-[10px] text-rose-500 font-semibold block mt-0.5">
+                    * Wajib diisi agar tombol ajukan PO aktif
+                  </span>
                 </div>
               </div>
 
@@ -1780,12 +1698,22 @@ export const WarehouseDashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmittingPo}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition cursor-pointer"
+                  disabled={isSubmittingPo || !expectedDeliveryDate}
+                  className={`flex-1 py-2.5 font-bold rounded-xl transition ${
+                    !expectedDeliveryDate
+                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 cursor-pointer'
+                  }`}
+                  title={!expectedDeliveryDate ? 'Estimasi tanggal kirim wajib diisi untuk mengajukan PO' : ''}
                 >
                   {isSubmittingPo ? 'Mengajukan...' : 'Ajukan PO ke Store Manager'}
                 </button>
               </div>
+              {!expectedDeliveryDate && (
+                <p className="text-[10px] text-rose-500 font-bold text-center">
+                  * Estimasi Tanggal Kirim wajib diisi agar pengajuan PO dapat diproses.
+                </p>
+              )}
             </form>
           </div>
         </div>
